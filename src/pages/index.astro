@@ -1,7 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
 ---
-
 <Layout>
   <div class="op1-drum-machine">
     <h1>Drum Machine</h1>
@@ -200,7 +199,7 @@ import Layout from "../layouts/Layout.astro";
 </Layout>
 
 <style>
-/* Same CSS as your existing version */
+/* Basic reset */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -215,6 +214,7 @@ body {
   min-height: 100vh;
 }
 
+/* Container for the drum machine */
 .op1-drum-machine {
   width: 100%;
   margin: 0;
@@ -230,6 +230,7 @@ body {
   margin: 0.5rem 0;
 }
 
+/* BPM / Play Controls */
 .bpm-control {
   display: flex;
   justify-content: center;
@@ -250,6 +251,7 @@ body {
   color: #fff;
   border: 1px solid #888;
   border-radius: 4px;
+  font-size: 16px; /* Prevent zoom on iOS */
 }
 
 #playBtn {
@@ -271,12 +273,14 @@ body {
   margin-left: 8px;
 }
 
+/* Warning Message */
 .warning {
   padding: 10px;
   margin-top: 40px;
   text-align: center;
 }
 
+/* Sequencer container just stacks the rows */
 .sequencer {
   display: flex;
   flex-direction: column;
@@ -285,6 +289,11 @@ body {
   margin: 0 auto;
 }
 
+/*
+  Each row is a 2-column grid:
+  - 1st col: small area for vertical label
+  - 2nd col: .all-steps (the 16 steps)
+*/
 .sequence-row {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -293,6 +302,7 @@ body {
   max-height: 100px;
 }
 
+/* The label is rotated to save space. */
 .instrument-label {
   width: 30px;
   display: flex;
@@ -308,10 +318,12 @@ body {
   text-align: center;
 }
 
+/* The steps container gets all available space */
 .all-steps {
   width: 100%;
 }
 
+/* 16 columns in one row by default */
 .steps {
   display: grid;
   grid-template-columns: repeat(16, 1fr);
@@ -324,7 +336,10 @@ body {
   border: 2px solid #666;
   cursor: pointer;
   aspect-ratio: 1 / 1;
-  transition: background-color 0.1s ease, border-color 0.1s ease, outline 0.1s ease;
+  transition:
+    background-color 0.1s ease,
+    border-color 0.1s ease,
+    outline 0.1s ease;
 }
 
 .step:nth-child(4n+1) {
@@ -360,8 +375,8 @@ body {
 
 <script>
 /************************************************
- * script.js — stopping playback if tab is hidden
- * plus base64 share logic
+ * script.js — Stopping playback if tab is hidden
+ * plus base64 share logic with clipboard copy
  ************************************************/
 let audioCtx;
 try {
@@ -372,10 +387,10 @@ try {
 
 // 7 instruments in a known order (for base64 encoding)
 const instrumentsOrder = [
-  'kick','snare','hi_hat','clap','gunCocked','gunShot','churchBell'
+  'kick', 'snare', 'hi_hat', 'clap', 'gunCocked', 'gunShot', 'churchBell'
 ];
 
-// sample URLs
+// Sample URLs (adjust your actual filenames)
 const sampleURLs = {
   kick:      'kick.wav',
   snare:     'snare.wav',
@@ -406,6 +421,7 @@ const scheduleAheadTime = 0.1; // schedule 100ms ahead
 window.addEventListener('load', async () => {
   playBtn.disabled = true;
   shareBtn.disabled = true;
+  
   await loadAllSamples();
   playBtn.disabled = false;
   shareBtn.disabled = false;
@@ -433,8 +449,12 @@ document.addEventListener('visibilitychange', () => {
 async function loadAllSamples() {
   for (let instr of instrumentsOrder) {
     const url = sampleURLs[instr];
-    const audioData = await fetch(url).then(r => r.arrayBuffer());
-    audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
+    try {
+      const audioData = await fetch(url).then(r => r.arrayBuffer());
+      audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
+    } catch (error) {
+      console.error(`Error loading sample for ${instr}:`, error);
+    }
   }
   console.log('All samples loaded.');
 }
@@ -483,9 +503,9 @@ function schedulerLoop() {
 
 function nextNote() {
   const bpmVal = parseInt(bpmInput.value) || 120;
-  const spb = 60.0 / bpmVal;      // seconds per beat
-  const sp16 = spb / 4;           // seconds per 16th
-  nextNoteTime += sp16;
+  const secPerBeat = 60.0 / bpmVal;
+  const secPer16th = secPerBeat / 4;
+  nextNoteTime += secPer16th;
   current16th = (current16th + 1) % 16;
 }
 
@@ -510,6 +530,9 @@ function playSound(instrument, when) {
   source.start(when);
 }
 
+/*******************************
+ * Visual Highlight
+ *******************************/
 function highlightStep(stepIndex) {
   clearPlayingHighlight();
   document.querySelectorAll('[data-step="' + stepIndex + '"]').forEach(el => {
@@ -524,7 +547,7 @@ function clearPlayingHighlight() {
 }
 
 /*******************************
- * Base64 Share Logic
+ * Base64 Share Logic with Clipboard Copy
  *******************************/
 
 // 2 bytes (16 bits) => pattern
@@ -535,6 +558,7 @@ function patternToBytes(patternStr) {
   const lo  = dec & 0xFF;
   return [hi, lo];
 }
+
 function bytesToPattern(hi, lo) {
   const dec = (hi << 8) | lo;
   let bin = dec.toString(2);
@@ -549,6 +573,7 @@ function arrayBufferToBase64(ab) {
   }
   return btoa(str);
 }
+
 function base64ToArrayBuffer(b64) {
   const bin = atob(b64);
   const len = bin.length;
@@ -559,83 +584,108 @@ function base64ToArrayBuffer(b64) {
   return bytes.buffer;
 }
 
-shareBtn.addEventListener('click', () => {
-  // 1) gather BPM
-  const bpmVal = parseInt(bpmInput.value) || 120;
-
-  // we have 7 instruments => each 2 bytes => total 14
-  const data = new Uint8Array(14);
-  let offset = 0;
-
-  instrumentsOrder.forEach(instr => {
-    const container = document.querySelector('.steps[data-instrument="'+instr+'"]');
-    if (!container) {
-      // skip
-      offset += 2;
-      return;
+// SHARE BUTTON FUNCTIONALITY
+shareBtn.addEventListener('click', async () => {
+  try {
+    // 1) If currently playing, stop the sequencer
+    if (isPlaying) {
+      stopSequencer();
     }
-    // build 16-bit pattern
-    let patternStr = '';
-    for (let i=0; i<16; i++){
-      const stepDiv = container.querySelector('[data-step="' + i + '"]');
-      patternStr += stepDiv.classList.contains('active') ? '1' : '0';
+
+    // 2) Gather BPM
+    const bpmVal = parseInt(bpmInput.value) || 120;
+
+    // 3) Gather patterns for each instrument
+    const data = new Uint8Array(instrumentsOrder.length * 2); // 2 bytes per instrument
+    let offset = 0;
+
+    for (let instr of instrumentsOrder) {
+      const container = document.querySelector(`.steps[data-instrument="${instr}"]`);
+      if (!container) {
+        // If instrument row doesn't exist, skip
+        offset += 2;
+        continue;
+      }
+
+      // Build 16-bit pattern string
+      let patternStr = '';
+      for (let i = 0; i < 16; i++) {
+        const stepDiv = container.querySelector('[data-step="' + i + '"]');
+        patternStr += stepDiv.classList.contains('active') ? '1' : '0';
+      }
+
+      // Convert pattern to two bytes
+      const [hi, lo] = patternToBytes(patternStr);
+      data[offset++] = hi;
+      data[offset++] = lo;
     }
-    const [hi, lo] = patternToBytes(patternStr);
-    data[offset++] = hi;
-    data[offset++] = lo;
-  });
 
-  const b64 = arrayBufferToBase64(data.buffer);
+    // 4) Convert data to Base64
+    const b64 = arrayBufferToBase64(data.buffer);
 
-  // build final URL
-  // adjust to your domain or use window.location.origin
-  const domain = "https://drumkit-black-kappa.vercel.app";
-  const params = new URLSearchParams();
-  params.set('bpm', bpmVal.toString());
-  params.set('b', b64);
+    // 5) Build share URL
+    const domain = window.location.origin; // Use current domain
+    const params = new URLSearchParams();
+    params.set('bpm', bpmVal.toString());
+    params.set('b', b64);
 
-  const newUrl = domain + window.location.pathname + '?' + params.toString();
-  prompt("Copy your shareable link:", newUrl);
+    const shareUrl = `${domain}${window.location.pathname}?${params.toString()}`;
+
+    // 6) Copy to clipboard
+    await navigator.clipboard.writeText(shareUrl);
+
+    // 7) Alert the user
+    alert("Link to shared track was copied to your clipboard.");
+  } catch (err) {
+    console.error('Failed to copy: ', err);
+    alert("Failed to copy the link. Please try manually.");
+  }
 });
 
 /*******************************
- * loadFromURLParams
+ * Load from URL Params
  *******************************/
 function loadFromURLParams() {
   const query = new URLSearchParams(window.location.search);
+  
+  // Load BPM
   if (query.has('bpm')) {
     bpmInput.value = query.get('bpm');
   }
-  if (!query.has('b')) return;
 
-  // decode base64 => 14 bytes => sets each instrument
-  const b64 = query.get('b');
-  const ab  = base64ToArrayBuffer(b64);
-  const data = new Uint8Array(ab);
-  if (data.length !== 14) {
-    console.warn('Unexpected data length, skipping load');
-    return;
-  }
-  let offset = 0;
-  instrumentsOrder.forEach(instr => {
-    const container = document.querySelector('.steps[data-instrument="'+instr+'"]');
-    if (!container) {
-      offset += 2;
+  // Load patterns from Base64
+  if (query.has('b')) {
+    const b64 = query.get('b');
+    const ab  = base64ToArrayBuffer(b64);
+    const data = new Uint8Array(ab);
+    
+    if (data.length !== instrumentsOrder.length * 2) {
+      console.warn('Unexpected data length, skipping load');
       return;
     }
-    const hi = data[offset++];
-    const lo = data[offset++];
-    const patternStr = bytesToPattern(hi, lo);
 
-    for (let i=0; i<16; i++){
-      const stepDiv = container.querySelector('[data-step="' + i + '"]');
-      if (!stepDiv) continue;
-      if (patternStr[i] === '1') {
-        stepDiv.classList.add('active');
-      } else {
-        stepDiv.classList.remove('active');
+    let offset = 0;
+    for (let instr of instrumentsOrder) {
+      const container = document.querySelector(`.steps[data-instrument="${instr}"]`);
+      if (!container) {
+        offset += 2;
+        continue;
+      }
+
+      const hi = data[offset++];
+      const lo = data[offset++];
+      const patternStr = bytesToPattern(hi, lo);
+
+      for (let i = 0; i < 16; i++) {
+        const stepDiv = container.querySelector('[data-step="' + i + '"]');
+        if (!stepDiv) continue;
+        if (patternStr[i] === '1') {
+          stepDiv.classList.add('active');
+        } else {
+          stepDiv.classList.remove('active');
+        }
       }
     }
-  });
+  }
 }
 </script>
