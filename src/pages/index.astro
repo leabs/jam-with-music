@@ -357,316 +357,171 @@ body {
   }
 }
 </style>
+
 <script>
-  /************************************************
-   * script.js — Using Base64 for a shorter share URL
-   ************************************************/
+/************************************************
+ * script.js — Stopping playback if tab is hidden
+ ************************************************/
+
+let audioCtx;
+try {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+} catch (e) {
+  alert('Web Audio API not supported in this browser');
+}
+
+// Sample URLs (adjust your actual filenames)
+const sampleURLs = {
+  kick:      'kick.wav',
+  snare:     'snare.wav',
+  hi_hat:    'hi_hat.wav',
+  clap:      'clap.wav',
+  gunCocked: 'gun_cocked.wav',
+  gunShot:   'gun_shot.wav',
+  churchBell:'church_bell.wav'
+};
+
+const audioBuffers = {};
+const bpmInput   = document.getElementById('bpm');
+const playBtn    = document.getElementById('playBtn');
+const shareBtn   = document.getElementById('shareBtn');
+const stepContainers = document.querySelectorAll('.steps');
+
+let isPlaying    = false;
+let current16th  = 0;
+let nextNoteTime = 0;
+let rafID        = 0;
+
+const scheduleAheadTime = 0.1; // schedule 100ms ahead
+
+/*******************************
+ * Load audio on window load
+ *******************************/
+window.addEventListener('load', async () => {
+  playBtn.disabled = true;
+  shareBtn.disabled = true;
   
-  let audioCtx;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  } catch (e) {
-    alert('Web Audio API not supported in this browser');
-  }
-  
-  /** 
-   * 1) Sample URLs for 7 instruments 
-   * (Adjust to your actual filenames)
-   */
-  const sampleURLs = {
-    kick:      'kick.wav',
-    snare:     'snare.wav',
-    hi_hat:     'hi_hat.wav',
-    clap:      'clap.wav',
-    gunCocked: 'gun_cocked.wav',
-    gunShot:   'gun_shot.wav',
-    churchBell:'church_bell.wav'
-  };
-  
-  /** 
-   * 2) We'll decode each sample into an AudioBuffer
-   */
-  const audioBuffers = {};
-  
-  async function loadAllSamples() {
-    const instruments = Object.keys(sampleURLs);
-    for (let instr of instruments) {
-      const url = sampleURLs[instr];
-      const audioData = await fetch(url).then(r => r.arrayBuffer());
-      audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
-    }
-  }
-  
-  /** 
-   * 3) DOM Elements 
-   */
-  const bpmInput   = document.getElementById('bpm');
-  const playBtn    = document.getElementById('playBtn');
-  const shareBtn   = document.getElementById('shareBtn');
-  const stepContainers = document.querySelectorAll('.steps');
-  
-  /** 
-   * 4) Sequencer State 
-   */
-  let isPlaying    = false;
-  let current16th  = 0;      // which step [0..15]
-  let nextNoteTime = 0;      // when to schedule next note in audioCtx time
-  let rafID        = 0;      // for requestAnimationFrame
-  const scheduleAheadTime = 0.1; // schedule 100ms ahead
-  
-  /**
-   * 5) On Page Load
-   *    - Load samples
-   *    - Parse any URL param => set .active steps
-   */
-  window.addEventListener('load', async () => {
-    playBtn.disabled = true;
-    shareBtn.disabled = true;
-    await loadAllSamples();
-    console.log('All samples loaded.');
-    playBtn.disabled = false;
-    shareBtn.disabled = false;
-  
-    loadFromURLParams(); // parse 'bpm' + 'b' param => restore pattern
-  });
-  
-  /**
-   * 6) Web Audio Sequencer
-   */
-  playBtn.addEventListener('click', () => {
-    if (!isPlaying) {
-      startSequencer();
-    } else {
-      stopSequencer();
-    }
-  });
-  
-  function startSequencer() {
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-    isPlaying = true;
-    playBtn.textContent = 'Stop';
-    current16th = 0;
-    nextNoteTime = audioCtx.currentTime;
-    schedulerLoop();
-  }
-  
-  function stopSequencer() {
-    isPlaying = false;
-    playBtn.textContent = 'Play';
-    cancelAnimationFrame(rafID);
-    clearPlayingHighlight();
-  }
-  
-  function schedulerLoop() {
-    while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
-      scheduleStep(current16th, nextNoteTime);
-      nextNote();
-    }
-    if (isPlaying) {
-      rafID = requestAnimationFrame(schedulerLoop);
-    }
-  }
-  
-  function nextNote() {
-    const bpm = parseFloat(bpmInput.value) || 120;
-    const secPerBeat = 60.0 / bpm;
-    const secPer16th = secPerBeat / 4;
-    nextNoteTime += secPer16th;
-    current16th = (current16th + 1) % 16;
-  }
-  
-  function scheduleStep(stepIndex, time) {
-    stepContainers.forEach(container => {
-      const instrument = container.getAttribute('data-instrument');
-      const stepDiv    = container.querySelector(`[data-step="${stepIndex}"]`);
-      if (stepDiv && stepDiv.classList.contains('active')) {
-        playBuffer(instrument, time);
-      }
-    });
-  
-    const delayMs = (time - audioCtx.currentTime) * 1000;
-    setTimeout(() => highlightStep(stepIndex), delayMs);
-  }
-  
-  function playBuffer(instrument, when) {
-    const buffer = audioBuffers[instrument];
-    if (!buffer) return;
-  
-    const source = audioCtx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(audioCtx.destination);
-    source.start(when);
-  }
-  
-  function highlightStep(stepIndex) {
-    clearPlayingHighlight();
-    document.querySelectorAll(`[data-step="${stepIndex}"]`).forEach(el => {
-      el.classList.add('playing');
-    });
-  }
-  
-  function clearPlayingHighlight() {
-    document.querySelectorAll('.step.playing').forEach(el => {
-      el.classList.remove('playing');
-    });
-  }
-  
-  /** 
-   * 7) Step Click => Toggle .active
-   */
+  await loadAllSamples();
+  playBtn.disabled = false;
+  shareBtn.disabled = false;
+
+  // Toggle .active on step click
   document.querySelectorAll('.step').forEach(step => {
     step.addEventListener('click', () => {
       step.classList.toggle('active');
     });
   });
-  
-  /************************************************
-   * 8) Base64-Sharing Logic
-   ************************************************/
-  
-  /**
-   * Utility: patternToBytes() 
-   *   e.g. "1010000010100001" => 2 bytes (hi, lo)
-   */
-  function patternToBytes(patternStr) {
-    const dec = parseInt(patternStr, 2); // parse binary
-    const hi  = (dec >> 8) & 0xFF;       // top 8 bits
-    const lo  = dec & 0xFF;             // bottom 8 bits
-    return [hi, lo];
+});
+
+// If the document becomes hidden => stop playback
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && isPlaying) {
+    stopSequencer();
   }
-  
-  /**
-   * Utility: bytesToPattern(hi, lo) 
-   *   e.g. (160, 161) => "1010000010100001"
-   */
-  function bytesToPattern(hi, lo) {
-    const dec = (hi << 8) | lo;
-    let bin = dec.toString(2);
-    return bin.padStart(16, '0');
+});
+
+/*******************************
+ * Loading Samples
+ *******************************/
+async function loadAllSamples() {
+  const keys = Object.keys(sampleURLs);
+  for (let k of keys) {
+    const url = sampleURLs[k];
+    const arrayBuf = await fetch(url).then(r => r.arrayBuffer());
+    audioBuffers[k] = await audioCtx.decodeAudioData(arrayBuf);
   }
-  
-  /**
-   * Utility: arrayBufferToBase64(arrayBuffer)
-   */
-  function arrayBufferToBase64(ab) {
-    let binary = '';
-    const bytes = new Uint8Array(ab);
-    for (let i = 0; i < bytes.length; i++) {
-      binary += String.fromCharCode(bytes[i]);
+  console.log('All samples loaded.');
+}
+
+/*******************************
+ * Play / Stop
+ *******************************/
+playBtn.addEventListener('click', () => {
+  if (!isPlaying) {
+    startSequencer();
+  } else {
+    stopSequencer();
+  }
+});
+
+function startSequencer() {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  isPlaying = true;
+  playBtn.textContent = 'Stop';
+  current16th = 0;
+  nextNoteTime = audioCtx.currentTime;
+  schedulerLoop();
+}
+
+function stopSequencer() {
+  isPlaying = false;
+  playBtn.textContent = 'Play';
+  cancelAnimationFrame(rafID);
+  clearPlayingHighlight();
+}
+
+/*******************************
+ * Scheduling
+ *******************************/
+function schedulerLoop() {
+  while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+    scheduleStep(current16th, nextNoteTime);
+    nextNote();
+  }
+  if (isPlaying) {
+    rafID = requestAnimationFrame(schedulerLoop);
+  }
+}
+
+function nextNote() {
+  const bpm = parseInt(bpmInput.value) || 120;
+  const secPerBeat = 60.0 / bpm;
+  const secPer16th = secPerBeat / 4;
+  nextNoteTime += secPer16th;
+  current16th = (current16th + 1) % 16;
+}
+
+function scheduleStep(stepIndex, time) {
+  stepContainers.forEach(container => {
+    const instrument = container.getAttribute('data-instrument');
+    const stepDiv = container.querySelector('[data-step="' + stepIndex + '"]');
+    if (stepDiv && stepDiv.classList.contains('active')) {
+      playSound(instrument, time);
     }
-    return btoa(binary);
-  }
-  
-  /**
-   * Utility: base64ToArrayBuffer(base64)
-   */
-  function base64ToArrayBuffer(b64) {
-    const binary = atob(b64);
-    const len = binary.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes.buffer;
-  }
-  
-  /**
-   * Our 7 instruments in a known order
-   */
-  const instrumentsOrder = [
-    'kick','snare','hi_hat','clap','gunCocked','gunShot','churchBell'
-  ];
-  
-  /**
-   * SHARE:
-   *  - Gather BPM
-   *  - For each instrument, build 16-bit pattern => 2 bytes
-   *  - Put them all in a single byte array => Base64 => param b=
-   *  - e.g. ?bpm=120&b=ABCD123...
-   */
-  shareBtn.addEventListener('click', () => {
-    const bpmVal = parseInt(bpmInput.value) || 120;
-  
-    // 7 instruments => 14 bytes total
-    // (2 bytes per instrument pattern)
-    const data = new Uint8Array(14);
-    let offset = 0;
-  
-    instrumentsOrder.forEach(instr => {
-      // build 16-char '0/1' pattern
-      const container = document.querySelector(`.steps[data-instrument="${instr}"]`);
-      let patternStr = '';
-      for (let i = 0; i < 16; i++) {
-        const stepDiv = container.querySelector(`[data-step="${i}"]`);
-        patternStr += stepDiv.classList.contains('active') ? '1' : '0';
-      }
-      const [hi, lo] = patternToBytes(patternStr);
-      data[offset++] = hi;
-      data[offset++] = lo;
-    });
-  
-    // Base64-encode the 14-byte array
-    const b64 = arrayBufferToBase64(data.buffer);
-  
-    // Build final URL
-    const domain = "https://drumkit-black-kappa.vercel.app";
-    const params = new URLSearchParams();
-    params.set('bpm', bpmVal.toString());
-    params.set('b', b64);
-  
-    const newUrl = domain + window.location.pathname + "?" + params.toString();
-    prompt("Copy your shareable link:", newUrl);
   });
-  
-  /************************************************
-   * loadFromURLParams():
-   *  - read ?bpm=... 
-   *  - read ?b=Base64 => decode => set .active
-   ************************************************/
-  function loadFromURLParams() {
-    const params = new URLSearchParams(window.location.search);
-  
-    // BPM
-    if (params.has('bpm')) {
-      bpmInput.value = params.get('bpm');
-    }
-  
-    // Base64 pattern param
-    if (params.has('b')) {
-      const b64 = params.get('b');
-      // decode => ArrayBuffer => 14 bytes => each instrument
-      const ab = base64ToArrayBuffer(b64);
-      const data = new Uint8Array(ab);
-      if (data.length !== 14) {
-        console.warn('Unexpected data length, skipping load');
-        return;
-      }
-  
-      let offset = 0;
-      instrumentsOrder.forEach(instr => {
-        const container = document.querySelector(`.steps[data-instrument="${instr}"]`);
-        if (!container) {
-          // doesn't exist in DOM
-          offset += 2;
-          return;
-        }
-        // read 2 bytes => 16-bit pattern
-        const hi = data[offset++];
-        const lo = data[offset++];
-        const patternStr = bytesToPattern(hi, lo);
-  
-        for (let i = 0; i < 16; i++) {
-          const stepDiv = container.querySelector(`[data-step="${i}"]`);
-          if (!stepDiv) continue;
-          if (patternStr[i] === '1') {
-            stepDiv.classList.add('active');
-          } else {
-            stepDiv.classList.remove('active');
-          }
-        }
-      });
-    }
-  }
-  </script>
+  const delayMs = (time - audioCtx.currentTime) * 1000;
+  setTimeout(() => highlightStep(stepIndex), delayMs);
+}
+
+function playSound(instrument, when) {
+  const buf = audioBuffers[instrument];
+  if (!buf) return;
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.connect(audioCtx.destination);
+  src.start(when);
+}
+
+function highlightStep(stepIndex) {
+  clearPlayingHighlight();
+  document.querySelectorAll('[data-step="' + stepIndex + '"]').forEach(el => {
+    el.classList.add('playing');
+  });
+}
+
+function clearPlayingHighlight() {
+  document.querySelectorAll('.step.playing').forEach(el => {
+    el.classList.remove('playing');
+  });
+}
+
+/*******************************
+ * Share button (placeholder)
+ *******************************/
+shareBtn.addEventListener('click', () => {
+  // Just an example placeholder
+  alert("TODO: Implement share logic here!");
+});
+</script>
