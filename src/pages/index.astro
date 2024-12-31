@@ -3,205 +3,204 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
-	<div class="op1-drum-machine">
-		<h1>Drum Machine</h1>
-		
-		<!-- BPM Control -->
-		<div class="bpm-control">
-		  <label for="bpm">BPM:</label>
-		  <input type="number" id="bpm" value="120" min="40" max="300" />
-		  <button id="playBtn">Play</button>
-		</div>
-		
-		<!-- Sequencer (7 rows) -->
-		<div class="sequencer">
-		  
-		  <!-- 1) Kick Row -->
-		  <div class="sequence-row">
-			<div class="instrument-label">Kick</div>
-			<div class="all-steps">
-			  <div class="steps" data-instrument="kick">
-				<!-- 16 steps -->
-				<div class="step" data-step="0"></div>
-				<div class="step" data-step="1"></div>
-				<div class="step" data-step="2"></div>
-				<div class="step" data-step="3"></div>
-				<div class="step" data-step="4"></div>
-				<div class="step" data-step="5"></div>
-				<div class="step" data-step="6"></div>
-				<div class="step" data-step="7"></div>
-				<div class="step" data-step="8"></div>
-				<div class="step" data-step="9"></div>
-				<div class="step" data-step="10"></div>
-				<div class="step" data-step="11"></div>
-				<div class="step" data-step="12"></div>
-				<div class="step" data-step="13"></div>
-				<div class="step" data-step="14"></div>
-				<div class="step" data-step="15"></div>
-			  </div>
-			</div>
-		  </div>
-	
-		  <!-- 2) Snare -->
-		  <div class="sequence-row">
-			<div class="instrument-label">Snare</div>
-			<div class="all-steps">
-			  <div class="steps" data-instrument="snare">
-				<div class="step" data-step="0"></div>
-				<div class="step" data-step="1"></div>
-				<div class="step" data-step="2"></div>
-				<div class="step" data-step="3"></div>
-				<div class="step" data-step="4"></div>
-				<div class="step" data-step="5"></div>
-				<div class="step" data-step="6"></div>
-				<div class="step" data-step="7"></div>
-				<div class="step" data-step="8"></div>
-				<div class="step" data-step="9"></div>
-				<div class="step" data-step="10"></div>
-				<div class="step" data-step="11"></div>
-				<div class="step" data-step="12"></div>
-				<div class="step" data-step="13"></div>
-				<div class="step" data-step="14"></div>
-				<div class="step" data-step="15"></div>
-			  </div>
-			</div>
-		  </div>
-	
-		  <!-- 3) Hi-Hat -->
-		  <div class="sequence-row">
-			<div class="instrument-label">Hi-Hat</div>
-			<div class="all-steps">
-			  <div class="steps" data-instrument="hihat">
-				<div class="step" data-step="0"></div>
-				<div class="step" data-step="1"></div>
-				<div class="step" data-step="2"></div>
-				<div class="step" data-step="3"></div>
-				<div class="step" data-step="4"></div>
-				<div class="step" data-step="5"></div>
-				<div class="step" data-step="6"></div>
-				<div class="step" data-step="7"></div>
-				<div class="step" data-step="8"></div>
-				<div class="step" data-step="9"></div>
-				<div class="step" data-step="10"></div>
-				<div class="step" data-step="11"></div>
-				<div class="step" data-step="12"></div>
-				<div class="step" data-step="13"></div>
-				<div class="step" data-step="14"></div>
-				<div class="step" data-step="15"></div>
-			  </div>
-			</div>
-		  </div>
-	
-		  <!-- 4) Clap -->
-		  <div class="sequence-row">
-			<div class="instrument-label">Clap</div>
-			<div class="all-steps">
-			  <div class="steps" data-instrument="clap">
-				<div class="step" data-step="0"></div>
-				<div class="step" data-step="1"></div>
-				<div class="step" data-step="2"></div>
-				<div class="step" data-step="3"></div>
-				<div class="step" data-step="4"></div>
-				<div class="step" data-step="5"></div>
-				<div class="step" data-step="6"></div>
-				<div class="step" data-step="7"></div>
-				<div class="step" data-step="8"></div>
-				<div class="step" data-step="9"></div>
-				<div class="step" data-step="10"></div>
-				<div class="step" data-step="11"></div>
-				<div class="step" data-step="12"></div>
-				<div class="step" data-step="13"></div>
-				<div class="step" data-step="14"></div>
-				<div class="step" data-step="15"></div>
-			  </div>
-			</div>
-		  </div>
-	
-		  <!-- 5) Gun Cocked -->
-		  <div class="sequence-row">
-			<div class="instrument-label">Gun Cocked</div>
-			<div class="all-steps">
-			  <div class="steps" data-instrument="gunCocked">
-				<div class="step" data-step="0"></div>
-				<div class="step" data-step="1"></div>
-				<div class="step" data-step="2"></div>
-				<div class="step" data-step="3"></div>
-				<div class="step" data-step="4"></div>
-				<div class="step" data-step="5"></div>
-				<div class="step" data-step="6"></div>
-				<div class="step" data-step="7"></div>
-				<div class="step" data-step="8"></div>
-				<div class="step" data-step="9"></div>
-				<div class="step" data-step="10"></div>
-				<div class="step" data-step="11"></div>
-				<div class="step" data-step="12"></div>
-				<div class="step" data-step="13"></div>
-				<div class="step" data-step="14"></div>
-				<div class="step" data-step="15"></div>
-			  </div>
-			</div>
-		  </div>
-	
-		  <!-- 6) Gun Shot -->
-		  <div class="sequence-row">
-			<div class="instrument-label">Shot</div>
-			<div class="all-steps">
-			  <div class="steps" data-instrument="gunShot">
-				<div class="step" data-step="0"></div>
-				<div class="step" data-step="1"></div>
-				<div class="step" data-step="2"></div>
-				<div class="step" data-step="3"></div>
-				<div class="step" data-step="4"></div>
-				<div class="step" data-step="5"></div>
-				<div class="step" data-step="6"></div>
-				<div class="step" data-step="7"></div>
-				<div class="step" data-step="8"></div>
-				<div class="step" data-step="9"></div>
-				<div class="step" data-step="10"></div>
-				<div class="step" data-step="11"></div>
-				<div class="step" data-step="12"></div>
-				<div class="step" data-step="13"></div>
-				<div class="step" data-step="14"></div>
-				<div class="step" data-step="15"></div>
-			  </div>
-			</div>
-		  </div>
-	
-		  <!-- 7) Church Bell -->
-		  <div class="sequence-row">
-			<div class="instrument-label">Church Bell</div>
-			<div class="all-steps">
-			  <div class="steps" data-instrument="churchBell">
-				<div class="step" data-step="0"></div>
-				<div class="step" data-step="1"></div>
-				<div class="step" data-step="2"></div>
-				<div class="step" data-step="3"></div>
-				<div class="step" data-step="4"></div>
-				<div class="step" data-step="5"></div>
-				<div class="step" data-step="6"></div>
-				<div class="step" data-step="7"></div>
-				<div class="step" data-step="8"></div>
-				<div class="step" data-step="9"></div>
-				<div class="step" data-step="10"></div>
-				<div class="step" data-step="11"></div>
-				<div class="step" data-step="12"></div>
-				<div class="step" data-step="13"></div>
-				<div class="step" data-step="14"></div>
-				<div class="step" data-step="15"></div>
-			  </div>
-			</div>
-      
+  <div class="op1-drum-machine">
+    <h1>Drum Machine</h1>
     
+    <!-- BPM Control -->
+    <div class="bpm-control">
+      <label for="bpm">BPM:</label>
+      <input type="number" id="bpm" value="120" min="40" max="300" />
+      <button id="playBtn">Play</button>
+      <!-- NEW Share Button -->
+      <button id="shareBtn">Share</button>
+    </div>
+    
+    <!-- Sequencer (7 rows) -->
+    <div class="sequencer">
+      
+      <!-- 1) Kick Row -->
+      <div class="sequence-row">
+        <div class="instrument-label">Kick</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="kick">
+            <!-- 16 steps -->
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) Snare -->
+      <div class="sequence-row">
+        <div class="instrument-label">Snare</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="snare">
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) Hi-Hat -->
+      <div class="sequence-row">
+        <div class="instrument-label">Hi-Hat</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="hihat">
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4) Clap -->
+      <div class="sequence-row">
+        <div class="instrument-label">Clap</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="clap">
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5) Gun Cocked -->
+      <div class="sequence-row">
+        <div class="instrument-label">Gun Cocked</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="gunCocked">
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6) Gun Shot -->
+      <div class="sequence-row">
+        <div class="instrument-label">Shot</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="gunShot">
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7) Church Bell -->
+      <div class="sequence-row">
+        <div class="instrument-label">Church Bell</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="churchBell">
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="warning">This is buggy, refresh the page if the drum machine stops playing.</p>
   </div>
-  <p class="warning">This is buggy, refresh the page if the drum machine stops playing.</p>
-		</div>
-   
-  </div>
-  
 </Layout>
 
 <style>
-/* Basic reset */
+/* Same CSS as your existing version */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -216,7 +215,6 @@ body {
   min-height: 100vh;
 }
 
-/* Container for the drum machine */
 .op1-drum-machine {
   width: 100%;
   margin: 0;
@@ -232,7 +230,6 @@ body {
   margin: 0.5rem 0;
 }
 
-/* BPM / Play Controls */
 .bpm-control {
   display: flex;
   justify-content: center;
@@ -264,64 +261,56 @@ body {
   padding: 6px 12px;
 }
 
-.warning{
-  padding:10px;
-  margin-top:40px;
+#shareBtn {
+  background-color: #8bbcf5;
+  border: 2px solid #5490e0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+  padding: 6px 12px;
+  margin-left: 8px;
 }
 
-/* Sequencer container just stacks the rows */
+.warning {
+  padding: 10px;
+  margin-top: 40px;
+}
+
 .sequencer {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-width:1100px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
-/*
-  Each row is a 2-column grid:
-  - 1st col: small area for vertical label
-  - 2nd col: .all-steps (the 16 steps)
-*/
 .sequence-row {
   display: grid;
   grid-template-columns: auto 1fr;
-  /* Minimally small column for label, rest for steps */
   align-items: center;
   gap: 0;
-  max-height:100px;
+  max-height: 100px;
 }
 
-/* The label is rotated to save space. 
-   Option 1: writing-mode 
-   Option 2: transform 
-   We'll demonstrate transform here. */
-/* ===== ROTATED LABEL ===== */
 .instrument-label {
-      /* small fixed width for the column */
-      width: 30px;
-      /* center text horizontally & vertically before rotation */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      /* rotate -90 degrees */
-      transform: rotate(-90deg);
-      transform-origin: center;
-      white-space: nowrap; /* keep text on one line */
-      font-weight: bold;
-      background-color: transparent;
-      min-height: 50px;  /* fill the row's height */
-      padding: 0.5rem 0;  /* avoid clipping text */
-      text-align: center;
-    }
+  width: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  white-space: nowrap;
+  font-weight: bold;
+  background-color: transparent;
+  min-height: 50px;
+  padding: 0.5rem 0;
+  text-align: center;
+}
 
-/* The steps container gets all available space */
 .all-steps {
   width: 100%;
 }
 
-/* The .steps grid: 16 columns in one row by default.
-   gap: small spacing between squares. */
 .steps {
   display: grid;
   grid-template-columns: repeat(16, 1fr);
@@ -329,19 +318,14 @@ body {
   width: 100%;
 }
 
-/* Each step is a square, no rounding. */
 .step {
   background-color: #444;
   border: 2px solid #666;
   cursor: pointer;
   aspect-ratio: 1 / 1;
-  transition:
-    background-color 0.1s ease,
-    border-color 0.1s ease,
-    outline 0.1s ease;
+  transition: background-color 0.1s ease, border-color 0.1s ease, outline 0.1s ease;
 }
 
-/* Subtle color variation for beats #1, 5, 9, 13 */
 .step:nth-child(4n+1) {
   background-color: #3a3a3a;
 }
@@ -360,19 +344,14 @@ body {
   outline-offset: -2px;
 }
 
-/* MOBILE: 2 rows of 8 steps => label still on left
-   We want the label to be tall enough to span 2 squares in height. */
 @media (max-width: 600px) {
   .steps {
     grid-template-columns: repeat(8, 1fr);
-    gap: 0; /* flush squares if you want maximum size */
+    gap: 0;
   }
 
-  /* Increase .instrument-label height 
-     so it roughly spans those 2 rows. 
-     Each row is about the height of 8 squares side by side. */
   .instrument-label {
-    width: 40px;         /* slightly bigger if needed */
+    width: 40px;
     min-height: 50px;
   }
 }
@@ -383,7 +362,6 @@ body {
  * script.js — 16-step sequencer using Web Audio
  ************************************************/
 
-// 1) Setup an AudioContext
 let audioCtx;
 try {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -391,7 +369,6 @@ try {
   alert('Web Audio API not supported in this browser');
 }
 
-// 2) Define your instrument sample URLs (change as needed)
 const sampleURLs = {
   kick:      'kick.wav',
   snare:     'snare.wav',
@@ -402,10 +379,8 @@ const sampleURLs = {
   churchBell:'church_bell.wav'
 };
 
-// A dictionary to hold loaded AudioBuffers
 const audioBuffers = {};
 
-// 3) Load (fetch + decode) each sample
 async function loadAllSamples() {
   const names = Object.keys(sampleURLs);
   for (let i = 0; i < names.length; i++) {
@@ -416,38 +391,26 @@ async function loadAllSamples() {
   }
 }
 
-// Sequencer references
 const bpmInput  = document.getElementById('bpm');
 const playBtn   = document.getElementById('playBtn');
-
-// We'll assume your HTML has multiple instrument rows, 
-// each with .steps and data-instrument="kick" etc.
+const shareBtn  = document.getElementById('shareBtn');
 const stepContainers = document.querySelectorAll('.steps'); 
 
-// State for scheduling
 let isPlaying = false;
-let current16th = 0;           // Which 16th note index [0..15]
-let nextNoteTime = 0;          // Next time (in audioCtx time) to schedule a note
-let timerID = 0;               // requestAnimationFrame ID
-const scheduleAheadTime = 0.1; // How many seconds ahead we schedule
+let current16th = 0;
+let nextNoteTime = 0;
+let timerID = 0;
+const scheduleAheadTime = 0.1;
 
-// A quarter note at 120 BPM is 0.5s. A 16th is 0.125s at 120 BPM.
-// We'll compute this dynamically from the BPM input.
-
-// 4) Once everything is loaded, we enable the interface
 window.addEventListener('load', async () => {
-  // Optionally disable the play button until loaded
   playBtn.disabled = true;
-
-  // Load samples
+  shareBtn.disabled = true;
   await loadAllSamples();
-
-  // After loading
   console.log('All samples loaded.');
   playBtn.disabled = false;
+  shareBtn.disabled = false;
 });
 
-// 5) Play/Stop button
 playBtn.addEventListener('click', () => {
   if (!isPlaying) {
     startSequencer();
@@ -456,24 +419,17 @@ playBtn.addEventListener('click', () => {
   }
 });
 
-// 6) Start Sequencer
 function startSequencer() {
   if (audioCtx.state === 'suspended') {
-    // Some browsers won't play audio until user gesture / resume
     audioCtx.resume();
   }
   isPlaying = true;
   playBtn.textContent = 'Stop';
-
-  // Reset measure
   current16th = 0;
   nextNoteTime = audioCtx.currentTime;
-
-  // Kick off the scheduling loop
   scheduleLoop();
 }
 
-// 7) Stop Sequencer
 function stopSequencer() {
   isPlaying = false;
   playBtn.textContent = 'Play';
@@ -481,85 +437,96 @@ function stopSequencer() {
   clearPlayingHighlight();
 }
 
-// 8) The "main loop" that schedules notes ahead of time
 function scheduleLoop() {
-  // While there's time in the schedule window, schedule the next note
   while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
     scheduleStep(current16th, nextNoteTime);
     nextNote();
   }
-  // Keep looping if playing
   if (isPlaying) {
     timerID = requestAnimationFrame(scheduleLoop);
   }
 }
 
-// 9) Move to the next 16th note, update nextNoteTime
 function nextNote() {
-  // BPM -> quarter note duration
   const bpm = parseFloat(bpmInput.value) || 120;
-  const secondsPerBeat = 60.0 / bpm;
-  const secondsPer16th = secondsPerBeat / 4;
-
-  nextNoteTime += secondsPer16th;
+  const secPerBeat = 60.0 / bpm;
+  const secPer16th = secPerBeat / 4;
+  nextNoteTime += secPer16th;
   current16th = (current16th + 1) % 16;
 }
 
-// 10) Schedule a single step (play + animation) at a specific time
 function scheduleStep(stepIndex, time) {
-  // For each instrument row
   stepContainers.forEach(container => {
     const instrument = container.getAttribute('data-instrument');
-    // Grab the step div for stepIndex
     const stepDiv = container.querySelector(`[data-step="${stepIndex}"]`);
     if (stepDiv && stepDiv.classList.contains('active')) {
-      // If active, schedule the sound
       playBuffer(instrument, time);
     }
   });
-
-  // Also schedule the highlight to happen at "time"
-  // We'll do the highlight slightly earlier than "time"
-  // because setTimeout has a bit of overhead. 
-  // But for simplicity, let's do it exactly at "time".
-  const delayMs = (time - audioCtx.currentTime) * 1000; 
+  const delayMs = (time - audioCtx.currentTime) * 1000;
   setTimeout(() => highlightStep(stepIndex), delayMs);
 }
 
-// 11) Actually play the AudioBuffer at a precise time
 function playBuffer(instrument, when) {
   const buffer = audioBuffers[instrument];
   if (!buffer) return;
-
   const source = audioCtx.createBufferSource();
   source.buffer = buffer;
   source.connect(audioCtx.destination);
   source.start(when);
 }
 
-// 12) Visual highlight for the current step
 function highlightStep(stepIndex) {
   clearPlayingHighlight();
-  // Add .playing to all step divs with data-step=stepIndex
   document.querySelectorAll(`[data-step="${stepIndex}"]`).forEach(el => {
     el.classList.add('playing');
   });
 }
 
-// Clear highlight from old steps
 function clearPlayingHighlight() {
   document.querySelectorAll('.step.playing').forEach(el => {
     el.classList.remove('playing');
   });
 }
 
-/*********************************
- * Toggle .active on step click
- * (same as your old code)
- *********************************/
+// Toggle .active on step click
 document.querySelectorAll('.step').forEach(step => {
   step.addEventListener('click', () => {
     step.classList.toggle('active');
   });
 });
-</script> 
+
+/************************************************
+ * SHARE BUTTON LOGIC
+ ************************************************/
+shareBtn.addEventListener('click', () => {
+  // 1) Get BPM
+  const bpmVal = parseInt(bpmInput.value) || 120;
+
+  // 2) Build pattern data for each instrument
+  const patternData = {};
+  stepContainers.forEach(container => {
+    const instrument = container.getAttribute('data-instrument');
+    let patternString = '';
+    for (let stepIndex = 0; stepIndex < 16; stepIndex++) {
+      const sDiv = container.querySelector(`[data-step="${stepIndex}"]`);
+      patternString += sDiv.classList.contains('active') ? '1' : '0';
+    }
+    patternData[instrument] = patternString;
+  });
+
+  // 3) Construct the URLSearchParams
+  const params = new URLSearchParams();
+  params.set('bpm', bpmVal.toString());
+  for (let [instr, pattern] of Object.entries(patternData)) {
+    params.set(instr, pattern);
+  }
+
+  // 4) Hard-code domain to "https://drumkit-black-kappa.vercel.app"
+  const domain = "https://drumkit-black-kappa.vercel.app";
+  const newUrl = domain + window.location.pathname + "?" + params.toString();
+
+  // 5) Show the share link in a prompt
+  prompt("Copy your shareable link:", newUrl);
+});
+</script>
