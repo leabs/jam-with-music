@@ -198,6 +198,31 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
       </div>
+      <!-- 8) AOL -->
+      <div class="sequence-row">
+        <div class="instrument-label">AOL</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="aol">
+            <!-- 16 steps -->
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <p class="warning">This is buggy, refresh the page if the drum machine stops playing.</p>
@@ -396,7 +421,7 @@ try {
 
 // 7 instruments in a known order (for base64 encoding)
 const instrumentsOrder = [
-  'kick', 'snare', 'hi_hat', 'clap', 'gunCocked', 'gunShot', 'churchBell'
+  'kick', 'snare', 'hi_hat', 'clap', 'gunCocked', 'gunShot', 'churchBell', 'aol'
 ];
 
 // Sample URLs (adjust your actual filenames)
@@ -407,7 +432,8 @@ const sampleURLs = {
   clap:      'clap.wav',
   gunCocked: 'gun_cocked.wav',
   gunShot:   'gun_shot.wav',
-  churchBell:'church_bell.wav'
+  churchBell:'church_bell.wav',
+  aol:'aol.wav'
 };
 
 const audioBuffers = {};
