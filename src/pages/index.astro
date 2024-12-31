@@ -356,177 +356,267 @@ body {
   }
 }
 </style>
-
 <script>
-/************************************************
- * script.js — 16-step sequencer using Web Audio
- ************************************************/
-
-let audioCtx;
-try {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-} catch (e) {
-  alert('Web Audio API not supported in this browser');
-}
-
-const sampleURLs = {
-  kick:      'kick.wav',
-  snare:     'snare.wav',
-  hihat:     'hi_hat.wav',
-  clap:      'clap.wav',
-  gunCocked: 'gun_cocked.wav',
-  gunShot:   'gun_shot.wav',
-  churchBell:'church_bell.wav'
-};
-
-const audioBuffers = {};
-
-async function loadAllSamples() {
-  const names = Object.keys(sampleURLs);
-  for (let i = 0; i < names.length; i++) {
-    const instr = names[i];
-    const url = sampleURLs[instr];
-    const audioData = await fetch(url).then(r => r.arrayBuffer());
-    audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
+  /************************************************
+   * script.js — 16-step sequencer using Web Audio
+   ************************************************/
+  
+  let audioCtx;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) {
+    alert('Web Audio API not supported in this browser');
   }
-}
-
-const bpmInput  = document.getElementById('bpm');
-const playBtn   = document.getElementById('playBtn');
-const shareBtn  = document.getElementById('shareBtn');
-const stepContainers = document.querySelectorAll('.steps'); 
-
-let isPlaying = false;
-let current16th = 0;
-let nextNoteTime = 0;
-let timerID = 0;
-const scheduleAheadTime = 0.1;
-
-window.addEventListener('load', async () => {
-  playBtn.disabled = true;
-  shareBtn.disabled = true;
-  await loadAllSamples();
-  console.log('All samples loaded.');
-  playBtn.disabled = false;
-  shareBtn.disabled = false;
-});
-
-playBtn.addEventListener('click', () => {
-  if (!isPlaying) {
-    startSequencer();
-  } else {
-    stopSequencer();
+  
+  /**
+   * 1) SAMPLE MAPPING
+   *    Adjust these file names/paths to your actual audio.
+   */
+  const sampleURLs = {
+    kick:      'kick.wav',
+    snare:     'snare.wav',
+    hihat:     'hi_hat.wav',
+    clap:      'clap.wav',
+    gunCocked: 'gun_cocked.wav',
+    gunShot:   'gun_shot.wav',
+    churchBell:'church_bell.wav'
+  };
+  
+  // We'll store each decoded AudioBuffer here
+  const audioBuffers = {};
+  
+  /**
+   * 2) LOAD SAMPLES
+   *    Using fetch + decodeAudioData to load each sample into memory.
+   */
+  async function loadAllSamples() {
+    const instruments = Object.keys(sampleURLs);
+    for (let instr of instruments) {
+      const url = sampleURLs[instr];
+      const audioData = await fetch(url).then(r => r.arrayBuffer());
+      audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
+    }
   }
-});
-
-function startSequencer() {
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-  isPlaying = true;
-  playBtn.textContent = 'Stop';
-  current16th = 0;
-  nextNoteTime = audioCtx.currentTime;
-  scheduleLoop();
-}
-
-function stopSequencer() {
-  isPlaying = false;
-  playBtn.textContent = 'Play';
-  cancelAnimationFrame(timerID);
-  clearPlayingHighlight();
-}
-
-function scheduleLoop() {
-  while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
-    scheduleStep(current16th, nextNoteTime);
-    nextNote();
-  }
-  if (isPlaying) {
-    timerID = requestAnimationFrame(scheduleLoop);
-  }
-}
-
-function nextNote() {
-  const bpm = parseFloat(bpmInput.value) || 120;
-  const secPerBeat = 60.0 / bpm;
-  const secPer16th = secPerBeat / 4;
-  nextNoteTime += secPer16th;
-  current16th = (current16th + 1) % 16;
-}
-
-function scheduleStep(stepIndex, time) {
-  stepContainers.forEach(container => {
-    const instrument = container.getAttribute('data-instrument');
-    const stepDiv = container.querySelector(`[data-step="${stepIndex}"]`);
-    if (stepDiv && stepDiv.classList.contains('active')) {
-      playBuffer(instrument, time);
+  
+  /**
+   * 3) GRAB DOM ELEMENTS
+   */
+  const bpmInput   = document.getElementById('bpm');
+  const playBtn    = document.getElementById('playBtn');
+  const shareBtn   = document.getElementById('shareBtn');
+  const stepContainers = document.querySelectorAll('.steps');
+  
+  /**
+   * 4) SEQUENCER STATE
+   */
+  let isPlaying     = false;
+  let current16th   = 0;        // Which step [0..15]
+  let nextNoteTime  = 0;        // When the next step is scheduled in audioCtx time
+  let timerID       = 0;        // RequestAnimationFrame ID
+  const scheduleAheadTime = 0.1; // Seconds ahead we schedule
+  
+  /**
+   * 5) ON PAGE LOAD
+   *    - Disable buttons until samples are loaded
+   *    - Then parse any URL params => set BPM + active steps
+   */
+  window.addEventListener('load', async () => {
+    playBtn.disabled  = true;
+    shareBtn.disabled = true;
+  
+    await loadAllSamples();
+    console.log('All samples loaded.');
+  
+    playBtn.disabled  = false;
+    shareBtn.disabled = false;
+  
+    // Load any pattern from URL params
+    loadFromURLParams();
+  });
+  
+  /**
+   * 6) START / STOP
+   */
+  playBtn.addEventListener('click', () => {
+    if (!isPlaying) {
+      startSequencer();
+    } else {
+      stopSequencer();
     }
   });
-  const delayMs = (time - audioCtx.currentTime) * 1000;
-  setTimeout(() => highlightStep(stepIndex), delayMs);
-}
-
-function playBuffer(instrument, when) {
-  const buffer = audioBuffers[instrument];
-  if (!buffer) return;
-  const source = audioCtx.createBufferSource();
-  source.buffer = buffer;
-  source.connect(audioCtx.destination);
-  source.start(when);
-}
-
-function highlightStep(stepIndex) {
-  clearPlayingHighlight();
-  document.querySelectorAll(`[data-step="${stepIndex}"]`).forEach(el => {
-    el.classList.add('playing');
-  });
-}
-
-function clearPlayingHighlight() {
-  document.querySelectorAll('.step.playing').forEach(el => {
-    el.classList.remove('playing');
-  });
-}
-
-// Toggle .active on step click
-document.querySelectorAll('.step').forEach(step => {
-  step.addEventListener('click', () => {
-    step.classList.toggle('active');
-  });
-});
-
-/************************************************
- * SHARE BUTTON LOGIC
- ************************************************/
-shareBtn.addEventListener('click', () => {
-  // 1) Get BPM
-  const bpmVal = parseInt(bpmInput.value) || 120;
-
-  // 2) Build pattern data for each instrument
-  const patternData = {};
-  stepContainers.forEach(container => {
-    const instrument = container.getAttribute('data-instrument');
-    let patternString = '';
-    for (let stepIndex = 0; stepIndex < 16; stepIndex++) {
-      const sDiv = container.querySelector(`[data-step="${stepIndex}"]`);
-      patternString += sDiv.classList.contains('active') ? '1' : '0';
+  
+  function startSequencer() {
+    // Some browsers require a resume gesture
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
     }
-    patternData[instrument] = patternString;
-  });
-
-  // 3) Construct the URLSearchParams
-  const params = new URLSearchParams();
-  params.set('bpm', bpmVal.toString());
-  for (let [instr, pattern] of Object.entries(patternData)) {
-    params.set(instr, pattern);
+  
+    isPlaying = true;
+    playBtn.textContent = 'Stop';
+  
+    current16th  = 0;
+    nextNoteTime = audioCtx.currentTime;
+  
+    scheduleLoop();
   }
-
-  // 4) Hard-code domain to "https://drumkit-black-kappa.vercel.app"
-  const domain = "https://drumkit-black-kappa.vercel.app";
-  const newUrl = domain + window.location.pathname + "?" + params.toString();
-
-  // 5) Show the share link in a prompt
-  prompt("Copy your shareable link:", newUrl);
-});
-</script>
+  
+  function stopSequencer() {
+    isPlaying = false;
+    playBtn.textContent = 'Play';
+    cancelAnimationFrame(timerID);
+    clearPlayingHighlight();
+  }
+  
+  /**
+   * 7) SCHEDULING LOOP
+   *    Repeatedly called via requestAnimationFrame to schedule a bit into the future.
+   */
+  function scheduleLoop() {
+    while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+      scheduleStep(current16th, nextNoteTime);
+      nextNote();
+    }
+    if (isPlaying) {
+      timerID = requestAnimationFrame(scheduleLoop);
+    }
+  }
+  
+  /** 
+   * Move to the next 16th note & update nextNoteTime 
+   */
+  function nextNote() {
+    const bpm = parseFloat(bpmInput.value) || 120;
+    const secPerBeat = 60.0 / bpm; 
+    const secPer16th = secPerBeat / 4;
+    
+    nextNoteTime += secPer16th;
+    current16th = (current16th + 1) % 16;
+  }
+  
+  /**
+   * Schedule a single step: 
+   *  - If active => schedule audio
+   *  - Also schedule highlight
+   */
+  function scheduleStep(stepIndex, time) {
+    stepContainers.forEach(container => {
+      const instrument = container.getAttribute('data-instrument');
+      const stepDiv    = container.querySelector(`[data-step="${stepIndex}"]`);
+  
+      if (stepDiv && stepDiv.classList.contains('active')) {
+        playBuffer(instrument, time);
+      }
+    });
+  
+    // Highlight
+    const delayMs = (time - audioCtx.currentTime) * 1000;
+    setTimeout(() => highlightStep(stepIndex), delayMs);
+  }
+  
+  /**
+   * Actually create a BufferSource and schedule it to play 
+   */
+  function playBuffer(instrument, when) {
+    const buffer = audioBuffers[instrument];
+    if (!buffer) return;
+  
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioCtx.destination);
+    source.start(when);
+  }
+  
+  /**
+   * Highlight the current step
+   */
+  function highlightStep(stepIndex) {
+    clearPlayingHighlight();
+    document.querySelectorAll(`[data-step="${stepIndex}"]`).forEach(el => {
+      el.classList.add('playing');
+    });
+  }
+  
+  function clearPlayingHighlight() {
+    document.querySelectorAll('.step.playing').forEach(el => {
+      el.classList.remove('playing');
+    });
+  }
+  
+  /**
+   * 8) STEP CLICK => TOGGLE .active
+   */
+  document.querySelectorAll('.step').forEach(step => {
+    step.addEventListener('click', () => {
+      step.classList.toggle('active');
+    });
+  });
+  
+  /************************************************
+   * 9) SHARE LOGIC
+   *    Build a URL with bpm & each instrument's 16-step pattern
+   ************************************************/
+  shareBtn.addEventListener('click', () => {
+    const bpmVal = parseInt(bpmInput.value) || 120;
+  
+    // Build pattern data
+    const patternData = {};
+    stepContainers.forEach(container => {
+      const instrument = container.getAttribute('data-instrument');
+      let patternString = '';
+  
+      for (let i = 0; i < 16; i++) {
+        const sDiv = container.querySelector(`[data-step="${i}"]`);
+        patternString += sDiv.classList.contains('active') ? '1' : '0';
+      }
+      patternData[instrument] = patternString;
+    });
+  
+    // Build URL
+    const params = new URLSearchParams();
+    params.set('bpm', bpmVal.toString());
+    for (let [instr, pattern] of Object.entries(patternData)) {
+      params.set(instr, pattern);
+    }
+  
+    // Hard-code domain or use location.origin, up to you
+    // Example domain:
+    const domain = "https://drumkit-black-kappa.vercel.app"; 
+    const newUrl = domain + window.location.pathname + "?" + params.toString();
+  
+    // Show the shareable link
+    prompt("Copy your shareable link:", newUrl);
+  });
+  
+  /************************************************
+   * 10) loadFromURLParams()
+   *     Read bpm & each instrument pattern => set .active
+   ************************************************/
+  function loadFromURLParams() {
+    const params = new URLSearchParams(window.location.search);
+  
+    // 1) BPM
+    if (params.has('bpm')) {
+      bpmInput.value = params.get('bpm');
+    }
+  
+    // 2) Each instrument pattern
+    const instruments = Object.keys(sampleURLs);
+    instruments.forEach(instrument => {
+      const pattern = params.get(instrument);
+      if (!pattern || pattern.length !== 16) return;
+  
+      const container = document.querySelector(`.steps[data-instrument="${instrument}"]`);
+      if (!container) return;
+  
+      for (let i = 0; i < 16; i++) {
+        const stepDiv = container.querySelector(`[data-step="${i}"]`);
+        if (!stepDiv) continue;
+        if (pattern[i] === '1') {
+          stepDiv.classList.add('active');
+        } else {
+          stepDiv.classList.remove('active');
+        }
+      }
+    });
+  }
+  </script>
