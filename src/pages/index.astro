@@ -11,7 +11,7 @@ import Layout from "../layouts/Layout.astro";
       <label for="bpm">BPM:</label>
       <input type="number" id="bpm" value="120" min="40" max="300" />
       <button id="playBtn">Play</button>
-      <!-- NEW Share Button -->
+      <!-- Share Button -->
       <button id="shareBtn">Share</button>
     </div>
     
@@ -360,9 +360,9 @@ body {
 
 <script>
 /************************************************
- * script.js — Stopping playback if tab is hidden
+ * script.js — stopping playback if tab is hidden
+ * plus base64 share logic
  ************************************************/
-
 let audioCtx;
 try {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -370,7 +370,12 @@ try {
   alert('Web Audio API not supported in this browser');
 }
 
-// Sample URLs (adjust your actual filenames)
+// 7 instruments in a known order (for base64 encoding)
+const instrumentsOrder = [
+  'kick','snare','hi_hat','clap','gunCocked','gunShot','churchBell'
+];
+
+// sample URLs
 const sampleURLs = {
   kick:      'kick.wav',
   snare:     'snare.wav',
@@ -382,6 +387,7 @@ const sampleURLs = {
 };
 
 const audioBuffers = {};
+
 const bpmInput   = document.getElementById('bpm');
 const playBtn    = document.getElementById('playBtn');
 const shareBtn   = document.getElementById('shareBtn');
@@ -390,17 +396,16 @@ const stepContainers = document.querySelectorAll('.steps');
 let isPlaying    = false;
 let current16th  = 0;
 let nextNoteTime = 0;
-let rafID        = 0;
+let rafId        = 0;
 
 const scheduleAheadTime = 0.1; // schedule 100ms ahead
 
 /*******************************
- * Load audio on window load
+ * On window load
  *******************************/
 window.addEventListener('load', async () => {
   playBtn.disabled = true;
   shareBtn.disabled = true;
-  
   await loadAllSamples();
   playBtn.disabled = false;
   shareBtn.disabled = false;
@@ -411,9 +416,11 @@ window.addEventListener('load', async () => {
       step.classList.toggle('active');
     });
   });
+
+  loadFromURLParams();
 });
 
-// If the document becomes hidden => stop playback
+// Stop playback if tab goes inactive
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && isPlaying) {
     stopSequencer();
@@ -421,14 +428,13 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /*******************************
- * Loading Samples
+ * Load samples
  *******************************/
 async function loadAllSamples() {
-  const keys = Object.keys(sampleURLs);
-  for (let k of keys) {
-    const url = sampleURLs[k];
-    const arrayBuf = await fetch(url).then(r => r.arrayBuffer());
-    audioBuffers[k] = await audioCtx.decodeAudioData(arrayBuf);
+  for (let instr of instrumentsOrder) {
+    const url = sampleURLs[instr];
+    const audioData = await fetch(url).then(r => r.arrayBuffer());
+    audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
   }
   console.log('All samples loaded.');
 }
@@ -458,12 +464,12 @@ function startSequencer() {
 function stopSequencer() {
   isPlaying = false;
   playBtn.textContent = 'Play';
-  cancelAnimationFrame(rafID);
+  cancelAnimationFrame(rafId);
   clearPlayingHighlight();
 }
 
 /*******************************
- * Scheduling
+ * The Scheduling Loop
  *******************************/
 function schedulerLoop() {
   while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
@@ -471,15 +477,15 @@ function schedulerLoop() {
     nextNote();
   }
   if (isPlaying) {
-    rafID = requestAnimationFrame(schedulerLoop);
+    rafId = requestAnimationFrame(schedulerLoop);
   }
 }
 
 function nextNote() {
-  const bpm = parseInt(bpmInput.value) || 120;
-  const secPerBeat = 60.0 / bpm;
-  const secPer16th = secPerBeat / 4;
-  nextNoteTime += secPer16th;
+  const bpmVal = parseInt(bpmInput.value) || 120;
+  const spb = 60.0 / bpmVal;      // seconds per beat
+  const sp16 = spb / 4;           // seconds per 16th
+  nextNoteTime += sp16;
   current16th = (current16th + 1) % 16;
 }
 
@@ -498,10 +504,10 @@ function scheduleStep(stepIndex, time) {
 function playSound(instrument, when) {
   const buf = audioBuffers[instrument];
   if (!buf) return;
-  const src = audioCtx.createBufferSource();
-  src.buffer = buf;
-  src.connect(audioCtx.destination);
-  src.start(when);
+  const source = audioCtx.createBufferSource();
+  source.buffer = buf;
+  source.connect(audioCtx.destination);
+  source.start(when);
 }
 
 function highlightStep(stepIndex) {
@@ -518,10 +524,118 @@ function clearPlayingHighlight() {
 }
 
 /*******************************
- * Share button (placeholder)
+ * Base64 Share Logic
  *******************************/
+
+// 2 bytes (16 bits) => pattern
+function patternToBytes(patternStr) {
+  // e.g. "1010000010100001" => parse binary => hi / lo
+  const dec = parseInt(patternStr, 2);
+  const hi  = (dec >> 8) & 0xFF;
+  const lo  = dec & 0xFF;
+  return [hi, lo];
+}
+function bytesToPattern(hi, lo) {
+  const dec = (hi << 8) | lo;
+  let bin = dec.toString(2);
+  return bin.padStart(16, '0');
+}
+
+function arrayBufferToBase64(ab) {
+  let str = '';
+  const bytes = new Uint8Array(ab);
+  for (let i = 0; i < bytes.length; i++) {
+    str += String.fromCharCode(bytes[i]);
+  }
+  return btoa(str);
+}
+function base64ToArrayBuffer(b64) {
+  const bin = atob(b64);
+  const len = bin.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = bin.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
 shareBtn.addEventListener('click', () => {
-  // Just an example placeholder
-  alert("TODO: Implement share logic here!");
+  // 1) gather BPM
+  const bpmVal = parseInt(bpmInput.value) || 120;
+
+  // we have 7 instruments => each 2 bytes => total 14
+  const data = new Uint8Array(14);
+  let offset = 0;
+
+  instrumentsOrder.forEach(instr => {
+    const container = document.querySelector('.steps[data-instrument="'+instr+'"]');
+    if (!container) {
+      // skip
+      offset += 2;
+      return;
+    }
+    // build 16-bit pattern
+    let patternStr = '';
+    for (let i=0; i<16; i++){
+      const stepDiv = container.querySelector('[data-step="' + i + '"]');
+      patternStr += stepDiv.classList.contains('active') ? '1' : '0';
+    }
+    const [hi, lo] = patternToBytes(patternStr);
+    data[offset++] = hi;
+    data[offset++] = lo;
+  });
+
+  const b64 = arrayBufferToBase64(data.buffer);
+
+  // build final URL
+  // adjust to your domain or use window.location.origin
+  const domain = "https://drumkit-black-kappa.vercel.app";
+  const params = new URLSearchParams();
+  params.set('bpm', bpmVal.toString());
+  params.set('b', b64);
+
+  const newUrl = domain + window.location.pathname + '?' + params.toString();
+  prompt("Copy your shareable link:", newUrl);
 });
+
+/*******************************
+ * loadFromURLParams
+ *******************************/
+function loadFromURLParams() {
+  const query = new URLSearchParams(window.location.search);
+  if (query.has('bpm')) {
+    bpmInput.value = query.get('bpm');
+  }
+  if (!query.has('b')) return;
+
+  // decode base64 => 14 bytes => sets each instrument
+  const b64 = query.get('b');
+  const ab  = base64ToArrayBuffer(b64);
+  const data = new Uint8Array(ab);
+  if (data.length !== 14) {
+    console.warn('Unexpected data length, skipping load');
+    return;
+  }
+  let offset = 0;
+  instrumentsOrder.forEach(instr => {
+    const container = document.querySelector('.steps[data-instrument="'+instr+'"]');
+    if (!container) {
+      offset += 2;
+      return;
+    }
+    const hi = data[offset++];
+    const lo = data[offset++];
+    const patternStr = bytesToPattern(hi, lo);
+
+    for (let i=0; i<16; i++){
+      const stepDiv = container.querySelector('[data-step="' + i + '"]');
+      if (!stepDiv) continue;
+      if (patternStr[i] === '1') {
+        stepDiv.classList.add('active');
+      } else {
+        stepDiv.classList.remove('active');
+      }
+    }
+  });
+}
 </script>
