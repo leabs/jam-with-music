@@ -190,9 +190,14 @@ import Layout from "../layouts/Layout.astro";
 				<div class="step" data-step="15"></div>
 			  </div>
 			</div>
-		  </div>
+      
+    
+  </div>
+  <p class="warning">This is buggy, refresh the page if the drum machine stops playing.</p>
 		</div>
-	  </div>
+   
+  </div>
+  
 </Layout>
 
 <style>
@@ -204,7 +209,7 @@ import Layout from "../layouts/Layout.astro";
 }
 
 body {
-  background-color: #222;
+  background-color: #333;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #fff;
   width: 100%;
@@ -259,11 +264,18 @@ body {
   padding: 6px 12px;
 }
 
+.warning{
+  padding:10px;
+  margin-top:40px;
+}
+
 /* Sequencer container just stacks the rows */
 .sequencer {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  max-width:1100px;
+  margin: 0 auto;
 }
 
 /*
@@ -298,7 +310,7 @@ body {
       white-space: nowrap; /* keep text on one line */
       font-weight: bold;
       background-color: transparent;
-      min-height: 100%;   /* fill the row's height */
+      min-height: 50px;  /* fill the row's height */
       padding: 0.5rem 0;  /* avoid clipping text */
       text-align: center;
     }
@@ -361,7 +373,7 @@ body {
      Each row is about the height of 8 squares side by side. */
   .instrument-label {
     width: 40px;         /* slightly bigger if needed */
-    min-height: 160px;   /* approximate to cover 2 squares stacked */
+    min-height: 50px;
   }
 }
 </style>
