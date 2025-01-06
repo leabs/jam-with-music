@@ -29,12 +29,17 @@ const sortedSongs = songs.sort((a, b) => a.artist.localeCompare(b.artist));
     .song-list-list {
         margin-top: 0;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem; /* Adjust the gap between items */
         list-style: none;
         padding: 0;
     }
     .song-list-list li {
         margin: 0; /* Optional, for consistent spacing */
+    }
+    @media (max-width: 600px) {
+        .song-list-list {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
