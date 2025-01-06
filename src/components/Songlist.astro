@@ -5,7 +5,7 @@ import songs from "../../public/songs.json";
 const sortedSongs = songs.sort((a, b) => a.artist.localeCompare(b.artist));
 ---
 <div id="songs">
-    <h2>Song List:</h2>
+    <h2 class="header2">Song List:</h2>
     <ul class="song-list-list">
         {sortedSongs.map((song) => {
             return (
@@ -18,7 +18,7 @@ const sortedSongs = songs.sort((a, b) => a.artist.localeCompare(b.artist));
 </div>
 
 <style>
-    #songs h2{
+    .header2{
         margin:8px;
         font-size:1rem;
     }
