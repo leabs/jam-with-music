@@ -1,0 +1,16 @@
+---
+import songs from "../../public/songs.json";
+
+// Sort songs alphabetically by artist name
+const sortedSongs = songs.sort((a, b) => a.artist.localeCompare(b.artist));
+---
+<h1>Song List</h1>
+<ul>
+    {sortedSongs.map((song) => {
+        return (
+            <li>
+                <a href={song.link}>{song.artist} - {song.title}</a>
+            </li>
+        );
+    })}
+</ul>

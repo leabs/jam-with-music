@@ -1,6 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Songlist from "../components/Songlist.astro";
+
+// We'll assume we have a serverless function at /api/save
+const serverlessURL = "/api/save";
 ---
+
 <Layout>
   <div class="op1-drum-machine">
     <h1>Drum Machine</h1>
@@ -14,9 +19,8 @@ import Layout from "../layouts/Layout.astro";
       <button id="shareBtn">Share</button>
     </div>
     
-    <!-- Sequencer (7 rows) -->
+    <!-- Sequencer (rows) -->
     <div class="sequencer">
-      
       <!-- 1) Kick Row -->
       <div class="sequence-row">
         <div class="instrument-label">Kick</div>
@@ -121,9 +125,113 @@ import Layout from "../layouts/Layout.astro";
         </div>
       </div>
 
-      <!-- 5) Gun Cocked -->
+      <!-- 5) Vocal -->
       <div class="sequence-row">
-        <div class="instrument-label">Gun Cocked</div>
+        <div class="instrument-label">Vocal</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="vocal_shot">
+            <!-- 16 steps -->
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6) Bass -->
+      <div class="sequence-row">
+        <div class="instrument-label">Bass</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="bass_hit">
+            <!-- 16 steps -->
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7) Rattle -->
+      <div class="sequence-row">
+        <div class="instrument-label">Rattle</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="rattle">
+            <!-- 16 steps -->
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8) Pad -->
+      <div class="sequence-row">
+        <div class="instrument-label">Hit</div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="pad">
+            <!-- 16 steps -->
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9) Gun Cocked -->
+      <div class="sequence-row">
+        <div class="instrument-label">Cocked</div>
         <div class="all-steps">
           <div class="steps" data-instrument="gunCocked">
             <!-- 16 steps -->
@@ -147,7 +255,7 @@ import Layout from "../layouts/Layout.astro";
         </div>
       </div>
 
-      <!-- 6) Gun Shot -->
+      <!-- 10) Gun Shot -->
       <div class="sequence-row">
         <div class="instrument-label">Shot</div>
         <div class="all-steps">
@@ -172,60 +280,9 @@ import Layout from "../layouts/Layout.astro";
           </div>
         </div>
       </div>
-
-      <!-- 7) Church Bell -->
-      <div class="sequence-row">
-        <div class="instrument-label">Church Bell</div>
-        <div class="all-steps">
-          <div class="steps" data-instrument="churchBell">
-            <!-- 16 steps -->
-            <div class="step" data-step="0"></div>
-            <div class="step" data-step="1"></div>
-            <div class="step" data-step="2"></div>
-            <div class="step" data-step="3"></div>
-            <div class="step" data-step="4"></div>
-            <div class="step" data-step="5"></div>
-            <div class="step" data-step="6"></div>
-            <div class="step" data-step="7"></div>
-            <div class="step" data-step="8"></div>
-            <div class="step" data-step="9"></div>
-            <div class="step" data-step="10"></div>
-            <div class="step" data-step="11"></div>
-            <div class="step" data-step="12"></div>
-            <div class="step" data-step="13"></div>
-            <div class="step" data-step="14"></div>
-            <div class="step" data-step="15"></div>
-          </div>
-        </div>
-      </div>
-      <!-- 8) AOL -->
-      <div class="sequence-row">
-        <div class="instrument-label">AOL</div>
-        <div class="all-steps">
-          <div class="steps" data-instrument="aol">
-            <!-- 16 steps -->
-            <div class="step" data-step="0"></div>
-            <div class="step" data-step="1"></div>
-            <div class="step" data-step="2"></div>
-            <div class="step" data-step="3"></div>
-            <div class="step" data-step="4"></div>
-            <div class="step" data-step="5"></div>
-            <div class="step" data-step="6"></div>
-            <div class="step" data-step="7"></div>
-            <div class="step" data-step="8"></div>
-            <div class="step" data-step="9"></div>
-            <div class="step" data-step="10"></div>
-            <div class="step" data-step="11"></div>
-            <div class="step" data-step="12"></div>
-            <div class="step" data-step="13"></div>
-            <div class="step" data-step="14"></div>
-            <div class="step" data-step="15"></div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <p class="warning">This is buggy, refresh the page if the drum machine stops playing.</p>
+    <Songlist />
   </div>
 </Layout>
 
@@ -302,13 +359,6 @@ body {
   color: #fff;
   padding: 6px 12px;
   margin-left: 8px;
-}
-
-/* Warning Message */
-.warning {
-  padding: 10px;
-  margin-top: 40px;
-  text-align: center;
 }
 
 /* Sequencer container just stacks the rows */
@@ -405,13 +455,6 @@ body {
 </style>
 
 <script>
-/************************************************
- * script.js — Enhancements:
- * 1. Stopping playback when sharing
- * 2. Switching scheduler from requestAnimationFrame to setInterval
- * 3. Refining visibilitychange listener
- * 4. Enhanced logging for debugging
- ************************************************/
 let audioCtx;
 try {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -419,28 +462,43 @@ try {
   alert('Web Audio API not supported in this browser');
 }
 
-// 7 instruments in a known order (for base64 encoding)
+/**
+ * The order used for sample loading.
+ * You can add more instruments here in the future.
+ * Old short-code links won't break
+ * because the serverless approach doesn't rely on a fixed array length in the URL.
+ */
 const instrumentsOrder = [
-  'kick', 'snare', 'hi_hat', 'clap', 'gunCocked', 'gunShot', 'churchBell', 'aol'
+  'kick',
+  'snare',
+  'hi_hat',
+  'clap',
+  'gunCocked',
+  'gunShot',
+  'rattle',
+  'vocal_shot',
+  'bass_hit',
+  'pad'
 ];
 
-// Sample URLs (adjust your actual filenames)
 const sampleURLs = {
-  kick:      'kick.wav',
-  snare:     'snare.wav',
-  hi_hat:    'hi_hat.wav',
-  clap:      'clap.wav',
-  gunCocked: 'gun_cocked.wav',
-  gunShot:   'gun_shot.wav',
-  churchBell:'church_bell.wav',
-  aol:'aol.wav'
+  kick:      'kick.mp3',
+  snare:     'snare.mp3',
+  hi_hat:    'hi_hat.mp3',
+  clap:      'clap.mp3',
+  gunCocked: 'gun_cocked.mp3',
+  gunShot:   'gun_shot.mp3',
+  rattle:    'rattle.mp3',
+  vocal_shot:'vocal_shot.mp3',
+  bass_hit:  'bass_hit.mp3',
+  pad:       'pad.mp3'
 };
 
 const audioBuffers = {};
 
-const bpmInput   = document.getElementById('bpm');
-const playBtn    = document.getElementById('playBtn');
-const shareBtn   = document.getElementById('shareBtn');
+const bpmInput       = document.getElementById('bpm');
+const playBtn        = document.getElementById('playBtn');
+const shareBtn       = document.getElementById('shareBtn');
 const stepContainers = document.querySelectorAll('.steps');
 
 let isPlaying    = false;
@@ -448,7 +506,7 @@ let current16th  = 0;
 let nextNoteTime = 0;
 let schedulerIntervalId = null;
 
-const scheduleInterval = 25; // ms, frequency for setInterval
+const scheduleInterval = 25; // ms
 
 /*******************************
  * On window load
@@ -461,25 +519,14 @@ window.addEventListener('load', async () => {
   playBtn.disabled = false;
   shareBtn.disabled = false;
 
-  // Toggle .active on step click
   document.querySelectorAll('.step').forEach(step => {
     step.addEventListener('click', () => {
       step.classList.toggle('active');
     });
   });
 
-  loadFromURLParams();
-});
-
-/*******************************
- * Visibility Change Listener
- *******************************/
-document.addEventListener('visibilitychange', () => {
-  console.log(`Visibility Change: ${document.visibilityState}`);
-  if (document.visibilityState === 'hidden' && isPlaying) {
-    console.log('Page is hidden. Stopping sequencer.');
-    stopSequencer();
-  }
+  // If there's a short code (?s=xyz) in the URL, load data from the serverless function
+  loadFromShortURL();
 });
 
 /*******************************
@@ -490,21 +537,17 @@ async function loadAllSamples() {
     const url = sampleURLs[instr];
     try {
       const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
-      }
+      if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
       const audioData = await response.arrayBuffer();
       audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
-      console.log(`Loaded sample for ${instr}`);
     } catch (error) {
       console.error(`Error loading sample for ${instr}:`, error);
     }
   }
-  console.log('All samples loaded.');
 }
 
 /*******************************
- * Play / Stop Controls
+ * Play / Stop
  *******************************/
 playBtn.addEventListener('click', () => {
   if (!isPlaying) {
@@ -523,37 +566,29 @@ function startSequencer() {
   current16th = 0;
   nextNoteTime = audioCtx.currentTime;
   schedulerLoop();
-  console.log('Sequencer started.');
 }
 
 function stopSequencer() {
   isPlaying = false;
   playBtn.textContent = 'Play';
-  if (schedulerIntervalId) {
-    clearInterval(schedulerIntervalId);
-    schedulerIntervalId = null;
-  }
+  clearInterval(schedulerIntervalId);
+  schedulerIntervalId = null;
   clearPlayingHighlight();
-  console.log('Sequencer stopped.');
 }
 
 /*******************************
- * Scheduler Loop using setInterval
+ * Scheduler Loop
  *******************************/
 function schedulerLoop() {
-  if (schedulerIntervalId) return; // Prevent multiple intervals
-
+  if (schedulerIntervalId) return;
   schedulerIntervalId = setInterval(() => {
-    while (nextNoteTime < audioCtx.currentTime + 0.1) { // 100ms ahead
+    while (nextNoteTime < audioCtx.currentTime + 0.1) {
       scheduleStep(current16th, nextNoteTime);
       nextNote();
     }
   }, scheduleInterval);
 }
 
-/*******************************
- * Scheduling Functions
- *******************************/
 function nextNote() {
   const bpmVal = parseInt(bpmInput.value) || 120;
   const secPerBeat = 60.0 / bpmVal;
@@ -570,7 +605,7 @@ function scheduleStep(stepIndex, time) {
       playSound(instrument, time);
     }
   });
-  // Schedule visual highlight slightly ahead
+  // Schedule highlight
   setTimeout(() => highlightStep(stepIndex), (time - audioCtx.currentTime) * 1000);
 }
 
@@ -581,12 +616,8 @@ function playSound(instrument, when) {
   source.buffer = buf;
   source.connect(audioCtx.destination);
   source.start(when);
-  console.log(`Playing ${instrument} at ${when.toFixed(2)}s`);
 }
 
-/*******************************
- * Visual Highlight Functions
- *******************************/
 function highlightStep(stepIndex) {
   clearPlayingHighlight();
   document.querySelectorAll(`[data-step="${stepIndex}"]`).forEach(el => {
@@ -601,165 +632,99 @@ function clearPlayingHighlight() {
 }
 
 /*******************************
- * Base64 Share Logic with Clipboard Copy
+ * Share Logic (serverless)
  *******************************/
-
-// 2 bytes (16 bits) => pattern
-function patternToBytes(patternStr) {
-  const dec = parseInt(patternStr, 2);
-  const hi  = (dec >> 8) & 0xFF;
-  const lo  = dec & 0xFF;
-  return [hi, lo];
-}
-
-function bytesToPattern(hi, lo) {
-  const dec = (hi << 8) | lo;
-  let bin = dec.toString(2);
-  return bin.padStart(16, '0');
-}
-
-function arrayBufferToBase64(ab) {
-  let str = '';
-  const bytes = new Uint8Array(ab);
-  for (let i = 0; i < bytes.length; i++) {
-    str += String.fromCharCode(bytes[i]);
-  }
-  return btoa(str);
-}
-
-function base64ToArrayBuffer(b64) {
-  const bin = atob(b64);
-  const len = bin.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = bin.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
-
-// SHARE BUTTON FUNCTIONALITY
 shareBtn.addEventListener('click', async () => {
   try {
-    console.log('Share button clicked.');
+    if (isPlaying) stopSequencer();
 
-    // 1) If currently playing, stop the sequencer
-    if (isPlaying) {
-      console.log('Sequencer is playing. Stopping before sharing.');
-      stopSequencer();
-    }
-
-    // 2) Gather BPM
-    const bpmVal = parseInt(bpmInput.value) || 120;
-
-    // 3) Gather patterns for each instrument
-    const data = new Uint8Array(instrumentsOrder.length * 2); // 2 bytes per instrument
-    let offset = 0;
-
-    for (let instr of instrumentsOrder) {
+    // Gather data
+    const dataObj = {
+      bpm: parseInt(bpmInput.value) || 120,
+      patterns: {}
+    };
+    instrumentsOrder.forEach(instr => {
       const container = document.querySelector(`.steps[data-instrument="${instr}"]`);
-      if (!container) {
-        // If instrument row doesn't exist, skip
-        offset += 2;
-        continue;
-      }
-
-      // Build 16-bit pattern string
-      let patternStr = '';
+      if (!container) return;
+      let pat = '';
       for (let i = 0; i < 16; i++) {
         const stepDiv = container.querySelector(`[data-step="${i}"]`);
-        patternStr += stepDiv.classList.contains('active') ? '1' : '0';
+        pat += (stepDiv && stepDiv.classList.contains('active')) ? '1' : '0';
       }
+      dataObj.patterns[instr] = pat;
+    });
 
-      // Convert pattern to two bytes
-      const [hi, lo] = patternToBytes(patternStr);
-      data[offset++] = hi;
-      data[offset++] = lo;
+    // Save to serverless function => returns a short code
+    const res = await fetch("${serverlessURL}", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dataObj),
+    });
+    const result = await res.json();
+
+    if (!result || !result.shortId) {
+      throw new Error("No shortId returned from server");
     }
 
-    // 4) Convert data to Base64
-    const b64 = arrayBufferToBase64(data.buffer);
-    console.log(`Encoded Base64: ${b64}`);
+    // Build short URL: e.g. ?s=ABC123
+    const domain = window.location.origin;
+    const shortURL = `${domain}${window.location.pathname}?s=${result.shortId}`;
 
-    // 5) Build share URL
-    const domain = window.location.origin; // Use current domain
-    const params = new URLSearchParams();
-    params.set('bpm', bpmVal.toString());
-    params.set('b', b64);
-
-    const shareUrl = `${domain}${window.location.pathname}?${params.toString()}`;
-    console.log(`Share URL: ${shareUrl}`);
-
-    // 6) Copy to clipboard
+    // Copy to clipboard
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(shareUrl);
-      console.log('Share URL copied to clipboard.');
+      await navigator.clipboard.writeText(shortURL);
     } else {
-      // Fallback method
       const tempInput = document.createElement('input');
-      tempInput.value = shareUrl;
+      tempInput.value = shortURL;
       document.body.appendChild(tempInput);
       tempInput.select();
-      tempInput.setSelectionRange(0, 99999); // For mobile devices
+      tempInput.setSelectionRange(0, 99999);
       document.execCommand('copy');
       document.body.removeChild(tempInput);
-      console.log('Share URL copied to clipboard via fallback.');
     }
-
-    // 7) Alert the user
-    alert("Link to shared track was copied to your clipboard.");
+    alert("Short link copied to clipboard!");
   } catch (err) {
-    console.error('Failed to copy:', err);
-    alert("Failed to copy the link. Please try manually.");
+    console.error("Share failed:", err);
+    alert("Failed to share. Check console for details.");
   }
 });
 
 /*******************************
- * Load from URL Params
+ * Load from short code
  *******************************/
-function loadFromURLParams() {
+async function loadFromShortURL() {
   const query = new URLSearchParams(window.location.search);
-  
-  // Load BPM
-  if (query.has('bpm')) {
-    bpmInput.value = query.get('bpm');
-    console.log(`Loaded BPM: ${bpmInput.value}`);
-  }
-
-  // Load patterns from Base64
-  if (query.has('b')) {
-    const b64 = query.get('b');
-    console.log(`Loading patterns from Base64: ${b64}`);
-    const ab  = base64ToArrayBuffer(b64);
-    const data = new Uint8Array(ab);
-    
-    if (data.length !== instrumentsOrder.length * 2) {
-      console.warn('Unexpected data length, skipping load');
+  if (!query.has('s')) return; // no short code
+  const shortId = query.get('s');
+  try {
+    const response = await fetch("${serverlessURL}?id=" + shortId);
+    if (!response.ok) {
+      console.warn("No data found for short code:", shortId);
       return;
     }
+    const dataObj = await response.json();
 
-    let offset = 0;
-    for (let instr of instrumentsOrder) {
-      const container = document.querySelector(`.steps[data-instrument="${instr}"]`);
-      if (!container) {
-        offset += 2;
-        continue;
-      }
+    // Set BPM
+    if (dataObj.bpm) {
+      bpmInput.value = dataObj.bpm;
+    }
 
-      const hi = data[offset++];
-      const lo = data[offset++];
-      const patternStr = bytesToPattern(hi, lo);
-      console.log(`Loaded pattern for ${instr}: ${patternStr}`);
-
-      for (let i = 0; i < 16; i++) {
-        const stepDiv = container.querySelector(`[data-step="${i}"]`);
-        if (!stepDiv) continue;
-        if (patternStr[i] === '1') {
-          stepDiv.classList.add('active');
-        } else {
-          stepDiv.classList.remove('active');
+    // Set Patterns
+    if (dataObj.patterns) {
+      for (let instr of Object.keys(dataObj.patterns)) {
+        const container = document.querySelector(`.steps[data-instrument="${instr}"]`);
+        if (!container) continue;
+        const pat = dataObj.patterns[instr];
+        for (let i = 0; i < 16; i++) {
+          const stepDiv = container.querySelector(`[data-step="${i}"]`);
+          if (!stepDiv) continue;
+          if (pat[i] === '1') stepDiv.classList.add('active');
+          else stepDiv.classList.remove('active');
         }
       }
     }
+  } catch (err) {
+    console.error("Error loading short code data:", err);
   }
 }
 </script>
