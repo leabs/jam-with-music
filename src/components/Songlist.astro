@@ -4,13 +4,31 @@ import songs from "../../public/songs.json";
 // Sort songs alphabetically by artist name
 const sortedSongs = songs.sort((a, b) => a.artist.localeCompare(b.artist));
 ---
-<h1>Song List</h1>
-<ul>
-    {sortedSongs.map((song) => {
-        return (
-            <li>
-                <a href={song.link}>{song.artist} - {song.title}</a>
-            </li>
-        );
-    })}
-</ul>
+<div id="songs">
+    <h2>Song List:</h2>
+    <ul class="song-list-list">
+        {sortedSongs.map((song) => {
+            return (
+                <li>
+                    <a href={song.link}>{song.artist} - {song.title}</a>
+                </li>
+            );
+        })}
+    </ul>
+</div>
+
+<style>
+    #songs h2{
+        margin:8px;
+        font-size:1rem;
+    }
+    #songs a{
+        color: #fff;
+    }
+    #songs a:hover{
+        color: #529a60;
+    }
+    .song-list-list{
+        margin-top:0;
+    }
+</style>
