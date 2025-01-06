@@ -184,9 +184,10 @@ import About from "../components/About.astro";
       
       
     </div>
-
-    <Songlist />
-    <About />
+    <div class="info-box">
+      <Songlist />
+      <About />
+  </div>
   </div>
 </Layout>
 
@@ -199,11 +200,12 @@ import About from "../components/About.astro";
 }
 
 body {
-  background-color: #333;
+  background-color: #000;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #fff;
   width: 100%;
   min-height: 100vh;
+  
 }
 .container{
   max-width: 1100px;
@@ -214,7 +216,7 @@ body {
 .op1-drum-machine {
   width: 100%;
   padding: 0;
-  background-color: #333;
+  background-color: #000;
   border: none;
   border-radius: 0;
   box-shadow: none;
@@ -375,7 +377,14 @@ body {
     color: #529a60;
   }
 
+  .info-box{
+    padding:6px;
+  }
+
 @media (max-width: 600px) {
+  .infp-box{
+    margin-top:10px;
+  }
   .steps {
     grid-template-columns: repeat(8, 1fr);
     gap: 0;

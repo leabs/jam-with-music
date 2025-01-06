@@ -7,28 +7,34 @@ const sortedSongs = songs.sort((a, b) => a.artist.localeCompare(b.artist));
 <div id="songs">
     <h2 class="header2">Song List:</h2>
     <ul class="song-list-list">
-        {sortedSongs.map((song) => {
-            return (
-                <li>
-                    <a href={song.link}>{song.artist} - {song.title}</a>
-                </li>
-            );
-        })}
+        {sortedSongs.map((song) => (
+            <li>
+                <a href={song.link}>{song.artist} - {song.title}</a>
+            </li>
+        ))}
     </ul>
 </div>
 
 <style>
-    .header2{
-        margin:8px;
-        font-size:1rem;
+    .header2 {
+        margin: 8px 0;
+        font-size: 1rem;
     }
-    #songs a{
+    #songs a {
         color: #fff;
     }
-    #songs a:hover{
+    #songs a:hover {
         color: #529a60;
     }
-    .song-list-list{
-        margin-top:0;
+    .song-list-list {
+        margin-top: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem; /* Adjust the gap between items */
+        list-style: none;
+        padding: 0;
+    }
+    .song-list-list li {
+        margin: 0; /* Optional, for consistent spacing */
     }
 </style>
