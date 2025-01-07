@@ -13,5 +13,15 @@
     "title": "(Sittin' On) The Dock of the Bay",
     "artist": "Otis Redding",
     "link": "https://drumkit-black-kappa.vercel.app/?bpm=104&b=gKAICAAAAAAAAAAA"
+  },
+  {
+    "title": "Mary Jane's Last Dance",
+    "artist": "Tom Petty and the Heartbreakers",
+    "link": "https://drumkit-black-kappa.vercel.app/?bpm=85&b=gKAICAAAAACAgAAA"
+  },
+  {
+    "title": "Coffee & TV",
+    "artist": "Blur",
+    "link": "https://drumkit-black-kappa.vercel.app/?bpm=122&b=gKAICKqqAAAAAAAA"
   }
 ]
