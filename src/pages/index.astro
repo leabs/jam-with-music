@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Songlist from "../components/Songlist.astro";
 import About from "../components/About.astro";
 // Supports weights 300-800
-import '@fontsource-variable/open-sans';
+import "@fontsource-variable/open-sans";
 ---
 
 <Layout>
@@ -11,7 +11,7 @@ import '@fontsource-variable/open-sans';
     <div class="header-grid">
       <h1 class="show-big">Jam With Music</h1>
       <span class="show-small">JWM</span>
-      
+
       <!-- BPM Control -->
       <div class="bpm-control">
         <label for="bpm">BPM:</label>
@@ -20,7 +20,7 @@ import '@fontsource-variable/open-sans';
         <button id="shareBtn">Share</button>
       </div>
     </div>
-    
+
     <!-- Sequencer (6 rows) -->
     <div class="sequencer">
       <!-- Kick -->
@@ -123,11 +123,11 @@ import '@fontsource-variable/open-sans';
         </div>
       </div>
 
-      <!-- Bass -->
+      <!-- scratch -->
       <div class="sequence-row">
-        <div class="instrument-label">Bass</div>
+        <div class="instrument-label">Scratch</div>
         <div class="all-steps">
-          <div class="steps" data-instrument="bass_hit">
+          <div class="steps" data-instrument="scratch">
             <div class="step" data-step="0"></div>
             <div class="step" data-step="1"></div>
             <div class="step" data-step="2"></div>
@@ -182,550 +182,569 @@ import '@fontsource-variable/open-sans';
 </Layout>
 
 <style>
-/* Basic reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: #09090b;
-  font-family: 'Open Sans Variable', sans-serif;
-  color: #fff;
-  width: 100%;
-  min-height: 100vh;
-}
-
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.op1-drum-machine {
-  width: 100%;
-  padding: 0;
-  background-color: #09090b;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-}
-h1, h2{
-  font-weight:400;
-}
-p, a, label, .instrument-label {
-  font-weight: 300;
-}
-
-.op1-drum-machine h1 {
-  text-align: left;
-  margin: 0.5rem 0;
-}
-
-.header-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 1rem;
-  padding: 0 8px;
-}
-
-/* BPM / Play Controls */
-.bpm-control {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0.5rem 0;
-  flex-wrap: wrap;
-}
-
-.bpm-control label {
-  margin-right: 8px;
-}
-
-#bpm {
-  width: 60px;
-  text-align: center;
-  margin-right: 12px;
-  background-color: #555;
-  color: #fff;
-  border: 1px solid #888;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-#playBtn,
-#shareBtn {
-  border-radius: 8px;
-  cursor: pointer;
-  color: #fff;
-  padding: 6px 12px;
-  border: none;
-  margin-left: 4px;
-  font-size: 16px;
-  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
-  transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
-}
-
-#playBtn {
-  background-color: #dc2626;
-}
-#playBtn:hover {
-  background-color: #ef4444;
-}
-#playBtn:active {
-  transform: scale(0.98);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-}
-
-#shareBtn {
-  background-color: #0369a1;
-}
-#shareBtn:hover {
-  background-color: #0ea5e9;
-}
-#shareBtn:active {
-  transform: scale(0.98);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.sequencer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.sequence-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 0;
-  max-height: 100px;
-}
-
-/* Rotated label on left */
-.instrument-label {
-  width: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transform: rotate(-90deg);
-  transform-origin: center;
-  white-space: nowrap;
-  background-color: transparent;
-  min-height: 50px;
-  padding: 0.5rem 0;
-  text-align: center;
-}
-
-.all-steps {
-  width: 100%;
-}
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(16, 1fr);
-  gap: 2px;
-  width: 100%;
-}
-
-/* Sleeker modern step design */
-.step {
-  background-color: #333;
-  border: 1px solid #555;
-  border-radius: 4px;
-  cursor: pointer;
-  aspect-ratio: 1 / 1;
-  transition:
-    background-color 0.15s ease,
-    transform 0.05s ease,
-    box-shadow 0.15s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-/* Hover effect */
-.step:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-}
-
-/* Darker color for steps #1, 5, 9, 13 */
-.step:nth-child(4n+1) {
-  background-color: #2b2b2b;
-}
-
-/* Active step => bright, OP-1-like color */
-.step.active {
-  background-color: #22c55e;
-  border-color: #bbf7d0;
-}
-
-/* Active + nth-child(4n+1) => slight variation */
-.step.active:nth-child(4n+1) {
-  background-color: #15803d;
-}
-
-/* "Playing" highlight => orange outline */
-.step.playing {
-  outline: 2px solid #fde047;
-  outline-offset: -2px;
-}
-
-/* Info box (Songlist, About, etc.) */
-.info-box {
-  padding: 6px;
-}
-
-.show-small {
-  display: none;
-}
-
-@media (max-width: 600px) {
-  .steps {
-    grid-template-columns: repeat(8, 1fr);
-    gap: 0;
+  /* Basic reset */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
+
+  body {
+    background-color: #09090b;
+    font-family: "Open Sans Variable", sans-serif;
+    color: #fff;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .op1-drum-machine {
+    width: 100%;
+    padding: 0;
+    background-color: #09090b;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  h1,
+  h2 {
+    font-weight: 400;
+  }
+  p,
+  a,
+  label,
   .instrument-label {
-    width: 40px;
-    min-height: 50px;
+    font-weight: 300;
   }
-  .show-small {
-    display: block;
+
+  .op1-drum-machine h1 {
+    text-align: left;
     margin: 0.5rem 0;
-    font-size: 1.5rem;
-    font-weight: 500;
   }
-  .show-big {
+
+  .header-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    padding: 0 8px;
+  }
+
+  /* BPM / Play Controls */
+  .bpm-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0.5rem 0;
+    flex-wrap: wrap;
+  }
+
+  .bpm-control label {
+    margin-right: 8px;
+  }
+
+  #bpm {
+    width: 60px;
+    text-align: center;
+    margin-right: 12px;
+    background-color: #555;
+    color: #fff;
+    border: 1px solid #888;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  #playBtn,
+  #shareBtn {
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+    padding: 6px 12px;
+    border: none;
+    margin-left: 4px;
+    font-size: 16px;
+    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+    transition:
+      background-color 0.2s,
+      box-shadow 0.2s,
+      transform 0.1s;
+  }
+
+  #playBtn {
+    background-color: #dc2626;
+  }
+  #playBtn:hover {
+    background-color: #ef4444;
+  }
+  #playBtn:active {
+    transform: scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  #shareBtn {
+    background-color: #0369a1;
+  }
+  #shareBtn:hover {
+    background-color: #0ea5e9;
+  }
+  #shareBtn:active {
+    transform: scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .sequencer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .sequence-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0;
+    max-height: 100px;
+  }
+
+  /* Rotated label on left */
+  .instrument-label {
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    white-space: nowrap;
+    background-color: transparent;
+    min-height: 50px;
+    padding: 0.5rem 0;
+    text-align: center;
+  }
+
+  .all-steps {
+    width: 100%;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 2px;
+    width: 100%;
+  }
+
+  /* Sleeker modern step design */
+  .step {
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+    transition:
+      background-color 0.15s ease,
+      transform 0.05s ease,
+      box-shadow 0.15s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Hover effect */
+  .step:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Darker color for steps #1, 5, 9, 13 */
+  .step:nth-child(4n + 1) {
+    background-color: #2b2b2b;
+  }
+
+  /* Active step => bright, OP-1-like color */
+  .step.active {
+    background-color: #22c55e;
+    border-color: #bbf7d0;
+  }
+
+  /* Active + nth-child(4n+1) => slight variation */
+  .step.active:nth-child(4n + 1) {
+    background-color: #15803d;
+  }
+
+  /* "Playing" highlight => orange outline */
+  .step.playing {
+    outline: 2px solid #fde047;
+    outline-offset: -2px;
+  }
+
+  /* Info box (Songlist, About, etc.) */
+  .info-box {
+    padding: 6px;
+  }
+
+  .show-small {
     display: none;
   }
-}
+
+  @media (max-width: 600px) {
+    .steps {
+      grid-template-columns: repeat(8, 1fr);
+      gap: 0;
+    }
+    .instrument-label {
+      width: 40px;
+      min-height: 50px;
+    }
+    .show-small {
+      display: block;
+      margin: 0.5rem 0;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+    .show-big {
+      display: none;
+    }
+  }
 </style>
 
 <script>
-/************************************************
- * script.js — No template literals
- ************************************************/
-let audioCtx;
-try {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-} catch (e) {
-  alert("Web Audio API not supported in this browser");
-}
-
-// 6 instruments (kick, snare, hi_hat, clap, rattle, bass_hit)
-const instrumentsOrder = [
-  "kick",
-  "snare",
-  "hi_hat",
-  "clap",
-  "rattle",
-  "bass_hit"
-];
-
-// Sample URLs
-const sampleURLs = {
-  kick:     "kick.mp3",
-  snare:    "snare.mp3",
-  hi_hat:   "hi_hat.mp3",
-  clap:     "clap.mp3",
-  rattle:   "rattle.mp3",
-  bass_hit: "bass_hit.mp3"
-};
-
-const audioBuffers = {};
-
-const bpmInput   = document.getElementById("bpm");
-const playBtn    = document.getElementById("playBtn");
-const shareBtn   = document.getElementById("shareBtn");
-const stepContainers = document.querySelectorAll(".steps");
-
-let isPlaying    = false;
-let current16th  = 0;
-let nextNoteTime = 0;
-let schedulerIntervalId = null;
-
-const scheduleInterval = 25; // ms
-
-window.addEventListener("load", async () => {
-  playBtn.disabled = true;
-  shareBtn.disabled = true;
-  
-  await loadAllSamples();
-  playBtn.disabled = false;
-  shareBtn.disabled = false;
-
-  // Toggle .active on click
-  document.querySelectorAll(".step").forEach(function(step) {
-    step.addEventListener("click", function() {
-      step.classList.toggle("active");
-    });
-  });
-
-  loadFromURLParams();
-});
-
-/************************************************
- * Visibility => stop sequencer if hidden
- ************************************************/
-document.addEventListener("visibilitychange", function() {
-  if (document.visibilityState === "hidden" && isPlaying) {
-    stopSequencer();
-  }
-});
-
-/************************************************
- * Load all samples
- ************************************************/
-async function loadAllSamples() {
-  for (let instr of instrumentsOrder) {
-    const url = sampleURLs[instr];
-    try {
-      const resp = await fetch(url);
-      if (!resp.ok) {
-        throw new Error("Failed to fetch " + url + ": " + resp.statusText);
-      }
-      const audioData = await resp.arrayBuffer();
-      audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
-      console.log("Loaded sample for " + instr);
-    } catch (error) {
-      console.error("Error loading sample for " + instr + ":", error);
-    }
-  }
-  console.log("All samples loaded.");
-}
-
-/************************************************
- * PLAY / STOP
- ************************************************/
-playBtn.addEventListener("click", function() {
-  if (!isPlaying) {
-    startSequencer();
-  } else {
-    stopSequencer();
-  }
-});
-
-function startSequencer() {
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume();
-  }
-  isPlaying = true;
-  playBtn.textContent = "Stop";
-  current16th = 0;
-  nextNoteTime = audioCtx.currentTime;
-  schedulerLoop();
-  console.log("Sequencer started.");
-}
-
-function stopSequencer() {
-  isPlaying = false;
-  playBtn.textContent = "Play";
-  if (schedulerIntervalId) {
-    clearInterval(schedulerIntervalId);
-    schedulerIntervalId = null;
-  }
-  clearPlayingHighlight();
-  console.log("Sequencer stopped.");
-}
-
-/************************************************
- * setInterval-based scheduler
- ************************************************/
-function schedulerLoop() {
-  if (schedulerIntervalId) return;
-
-  schedulerIntervalId = setInterval(function() {
-    while (nextNoteTime < audioCtx.currentTime + 0.1) {
-      scheduleStep(current16th, nextNoteTime);
-      nextNote();
-    }
-  }, scheduleInterval);
-}
-
-/************************************************
- * nextNote & scheduleStep
- ************************************************/
-function nextNote() {
-  const bpmVal = parseInt(bpmInput.value) || 120;
-  const secPerBeat = 60.0 / bpmVal;
-  const secPer16th = secPerBeat / 4;
-  nextNoteTime += secPer16th;
-  current16th = (current16th + 1) % 16;
-}
-
-function scheduleStep(stepIndex, time) {
-  // 1) If step is active => schedule the sound
-  stepContainers.forEach(function(container) {
-    const instrument = container.getAttribute("data-instrument");
-    const stepDiv = container.querySelector("[data-step='" + stepIndex + "']");
-    if (stepDiv && stepDiv.classList.contains("active")) {
-      playSound(instrument, time);
-    }
-  });
-
-  // 2) Also schedule highlight
-  const delay = (time - audioCtx.currentTime) * 1000;
-  setTimeout(function() {
-    highlightStep(stepIndex);
-  }, Math.max(0, delay));
-}
-
-function playSound(instrument, when) {
-  const buf = audioBuffers[instrument];
-  if (!buf) return;
-  const source = audioCtx.createBufferSource();
-  source.buffer = buf;
-  source.connect(audioCtx.destination);
-  source.start(when);
-  console.log("Playing " + instrument + " at " + when.toFixed(2) + "s");
-}
-
-/************************************************
- * Highlight Functions
- ************************************************/
-function highlightStep(stepIndex) {
-  clearPlayingHighlight();
-  document.querySelectorAll("[data-step='" + stepIndex + "']").forEach(function(el) {
-    el.classList.add("playing");
-  });
-}
-
-function clearPlayingHighlight() {
-  document.querySelectorAll(".step.playing").forEach(function(el) {
-    el.classList.remove("playing");
-  });
-}
-
-/************************************************
- * Base64 Share Logic
- ************************************************/
-function patternToBytes(patternStr) {
-  const dec = parseInt(patternStr, 2);
-  const hi  = (dec >> 8) & 0xFF;
-  const lo  = dec & 0xFF;
-  return [hi, lo];
-}
-
-function bytesToPattern(hi, lo) {
-  const dec = (hi << 8) | lo;
-  let bin = dec.toString(2);
-  return bin.padStart(16, "0");
-}
-
-function arrayBufferToBase64(ab) {
-  let str = "";
-  const bytes = new Uint8Array(ab);
-  for (let i = 0; i < bytes.length; i++) {
-    str += String.fromCharCode(bytes[i]);
-  }
-  return btoa(str);
-}
-
-function base64ToArrayBuffer(b64) {
-  const bin = atob(b64);
-  const len = bin.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = bin.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
-
-/************************************************
- * SHARE BUTTON
- ************************************************/
-shareBtn.addEventListener("click", async function() {
+  /************************************************
+   * script.js — No template literals
+   ************************************************/
+  let audioCtx;
   try {
-    if (isPlaying) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) {
+    alert("Web Audio API not supported in this browser");
+  }
+
+  // 6 instruments (kick, snare, hi_hat, clap, rattle, bass_hit)
+  const instrumentsOrder = [
+    "kick",
+    "snare",
+    "hi_hat",
+    "clap",
+    "rattle",
+    "scratch",
+  ];
+
+  // Sample URLs
+  const sampleURLs = {
+    kick: "kick.mp3",
+    snare: "snare.mp3",
+    hi_hat: "hi_hat.mp3",
+    clap: "clap.mp3",
+    rattle: "rattle.mp3",
+    scratch: "scratch.mp3",
+  };
+
+  const audioBuffers = {};
+
+  const bpmInput = document.getElementById("bpm");
+  const playBtn = document.getElementById("playBtn");
+  const shareBtn = document.getElementById("shareBtn");
+  const stepContainers = document.querySelectorAll(".steps");
+
+  let isPlaying = false;
+  let current16th = 0;
+  let nextNoteTime = 0;
+  let schedulerIntervalId = null;
+
+  const scheduleInterval = 25; // ms
+
+  window.addEventListener("load", async () => {
+    playBtn.disabled = true;
+    shareBtn.disabled = true;
+
+    await loadAllSamples();
+    playBtn.disabled = false;
+    shareBtn.disabled = false;
+
+    // Toggle .active on click
+    document.querySelectorAll(".step").forEach(function (step) {
+      step.addEventListener("click", function () {
+        step.classList.toggle("active");
+      });
+    });
+
+    loadFromURLParams();
+  });
+
+  /************************************************
+   * Visibility => stop sequencer if hidden
+   ************************************************/
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden" && isPlaying) {
       stopSequencer();
     }
-    const bpmVal = parseInt(bpmInput.value) || 120;
+  });
 
-    const data = new Uint8Array(instrumentsOrder.length * 2);
-    let offset = 0;
-
+  /************************************************
+   * Load all samples
+   ************************************************/
+  async function loadAllSamples() {
     for (let instr of instrumentsOrder) {
-      const container = document.querySelector(".steps[data-instrument='" + instr + "']");
-      if (!container) {
-        offset += 2;
-        continue;
+      const url = sampleURLs[instr];
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) {
+          throw new Error("Failed to fetch " + url + ": " + resp.statusText);
+        }
+        const audioData = await resp.arrayBuffer();
+        audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
+        console.log("Loaded sample for " + instr);
+      } catch (error) {
+        console.error("Error loading sample for " + instr + ":", error);
       }
-
-      let patternStr = "";
-      for (let i = 0; i < 16; i++) {
-        const stepDiv = container.querySelector("[data-step='" + i + "']");
-        patternStr += stepDiv.classList.contains("active") ? "1" : "0";
-      }
-
-      const bytes = patternToBytes(patternStr);
-      data[offset++] = bytes[0];
-      data[offset++] = bytes[1];
     }
+    console.log("All samples loaded.");
+  }
 
-    const b64 = arrayBufferToBase64(data.buffer);
-    const domain = window.location.origin;
-    const params = new URLSearchParams();
-    params.set("bpm", bpmVal.toString());
-    params.set("b", b64);
-
-    const shareUrl = domain + window.location.pathname + "?" + params.toString();
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(shareUrl);
+  /************************************************
+   * PLAY / STOP
+   ************************************************/
+  playBtn.addEventListener("click", function () {
+    if (!isPlaying) {
+      startSequencer();
     } else {
-      const tempInput = document.createElement("input");
-      tempInput.value = shareUrl;
-      document.body.appendChild(tempInput);
-      tempInput.select();
-      tempInput.setSelectionRange(0, 99999);
-      document.execCommand("copy");
-      document.body.removeChild(tempInput);
+      stopSequencer();
     }
-    alert("Link to shared track was copied to your clipboard.");
-  } catch (err) {
-    console.error("Failed to copy:", err);
-    alert("Failed to copy the link. Please try manually.");
-  }
-});
+  });
 
-/************************************************
- * LOAD FROM URL PARAMS
- ************************************************/
-function loadFromURLParams() {
-  const query = new URLSearchParams(window.location.search);
-
-  if (query.has("bpm")) {
-    bpmInput.value = query.get("bpm");
+  function startSequencer() {
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+    isPlaying = true;
+    playBtn.textContent = "Stop";
+    current16th = 0;
+    nextNoteTime = audioCtx.currentTime;
+    schedulerLoop();
+    console.log("Sequencer started.");
   }
 
-  if (query.has("b")) {
-    const b64 = query.get("b");
-    const ab = base64ToArrayBuffer(b64);
-    const data = new Uint8Array(ab);
-
-    if (data.length !== instrumentsOrder.length * 2) {
-      return;
+  function stopSequencer() {
+    isPlaying = false;
+    playBtn.textContent = "Play";
+    if (schedulerIntervalId) {
+      clearInterval(schedulerIntervalId);
+      schedulerIntervalId = null;
     }
-    let offset = 0;
-    for (let instr of instrumentsOrder) {
-      const container = document.querySelector(".steps[data-instrument='" + instr + "']");
-      if (!container) {
-        offset += 2;
-        continue;
+    clearPlayingHighlight();
+    console.log("Sequencer stopped.");
+  }
+
+  /************************************************
+   * setInterval-based scheduler
+   ************************************************/
+  function schedulerLoop() {
+    if (schedulerIntervalId) return;
+
+    schedulerIntervalId = setInterval(function () {
+      while (nextNoteTime < audioCtx.currentTime + 0.1) {
+        scheduleStep(current16th, nextNoteTime);
+        nextNote();
       }
-      const hi = data[offset++];
-      const lo = data[offset++];
-      const patternStr = bytesToPattern(hi, lo);
+    }, scheduleInterval);
+  }
 
-      for (let i = 0; i < 16; i++) {
-        const stepDiv = container.querySelector("[data-step='" + i + "']");
-        if (!stepDiv) continue;
-        if (patternStr[i] === "1") {
-          stepDiv.classList.add("active");
-        } else {
-          stepDiv.classList.remove("active");
+  /************************************************
+   * nextNote & scheduleStep
+   ************************************************/
+  function nextNote() {
+    const bpmVal = parseInt(bpmInput.value) || 120;
+    const secPerBeat = 60.0 / bpmVal;
+    const secPer16th = secPerBeat / 4;
+    nextNoteTime += secPer16th;
+    current16th = (current16th + 1) % 16;
+  }
+
+  function scheduleStep(stepIndex, time) {
+    // 1) If step is active => schedule the sound
+    stepContainers.forEach(function (container) {
+      const instrument = container.getAttribute("data-instrument");
+      const stepDiv = container.querySelector(
+        "[data-step='" + stepIndex + "']"
+      );
+      if (stepDiv && stepDiv.classList.contains("active")) {
+        playSound(instrument, time);
+      }
+    });
+
+    // 2) Also schedule highlight
+    const delay = (time - audioCtx.currentTime) * 1000;
+    setTimeout(
+      function () {
+        highlightStep(stepIndex);
+      },
+      Math.max(0, delay)
+    );
+  }
+
+  function playSound(instrument, when) {
+    const buf = audioBuffers[instrument];
+    if (!buf) return;
+    const source = audioCtx.createBufferSource();
+    source.buffer = buf;
+    source.connect(audioCtx.destination);
+    source.start(when);
+    console.log("Playing " + instrument + " at " + when.toFixed(2) + "s");
+  }
+
+  /************************************************
+   * Highlight Functions
+   ************************************************/
+  function highlightStep(stepIndex) {
+    clearPlayingHighlight();
+    document
+      .querySelectorAll("[data-step='" + stepIndex + "']")
+      .forEach(function (el) {
+        el.classList.add("playing");
+      });
+  }
+
+  function clearPlayingHighlight() {
+    document.querySelectorAll(".step.playing").forEach(function (el) {
+      el.classList.remove("playing");
+    });
+  }
+
+  /************************************************
+   * Base64 Share Logic
+   ************************************************/
+  function patternToBytes(patternStr) {
+    const dec = parseInt(patternStr, 2);
+    const hi = (dec >> 8) & 0xff;
+    const lo = dec & 0xff;
+    return [hi, lo];
+  }
+
+  function bytesToPattern(hi, lo) {
+    const dec = (hi << 8) | lo;
+    let bin = dec.toString(2);
+    return bin.padStart(16, "0");
+  }
+
+  function arrayBufferToBase64(ab) {
+    let str = "";
+    const bytes = new Uint8Array(ab);
+    for (let i = 0; i < bytes.length; i++) {
+      str += String.fromCharCode(bytes[i]);
+    }
+    return btoa(str);
+  }
+
+  function base64ToArrayBuffer(b64) {
+    const bin = atob(b64);
+    const len = bin.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = bin.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
+  /************************************************
+   * SHARE BUTTON
+   ************************************************/
+  shareBtn.addEventListener("click", async function () {
+    try {
+      if (isPlaying) {
+        stopSequencer();
+      }
+      const bpmVal = parseInt(bpmInput.value) || 120;
+
+      const data = new Uint8Array(instrumentsOrder.length * 2);
+      let offset = 0;
+
+      for (let instr of instrumentsOrder) {
+        const container = document.querySelector(
+          ".steps[data-instrument='" + instr + "']"
+        );
+        if (!container) {
+          offset += 2;
+          continue;
+        }
+
+        let patternStr = "";
+        for (let i = 0; i < 16; i++) {
+          const stepDiv = container.querySelector("[data-step='" + i + "']");
+          patternStr += stepDiv.classList.contains("active") ? "1" : "0";
+        }
+
+        const bytes = patternToBytes(patternStr);
+        data[offset++] = bytes[0];
+        data[offset++] = bytes[1];
+      }
+
+      const b64 = arrayBufferToBase64(data.buffer);
+      const domain = window.location.origin;
+      const params = new URLSearchParams();
+      params.set("bpm", bpmVal.toString());
+      params.set("b", b64);
+
+      const shareUrl =
+        domain + window.location.pathname + "?" + params.toString();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const tempInput = document.createElement("input");
+        tempInput.value = shareUrl;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+      }
+      alert("Link to shared track was copied to your clipboard.");
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      alert("Failed to copy the link. Please try manually.");
+    }
+  });
+
+  /************************************************
+   * LOAD FROM URL PARAMS
+   ************************************************/
+  function loadFromURLParams() {
+    const query = new URLSearchParams(window.location.search);
+
+    if (query.has("bpm")) {
+      bpmInput.value = query.get("bpm");
+    }
+
+    if (query.has("b")) {
+      const b64 = query.get("b");
+      const ab = base64ToArrayBuffer(b64);
+      const data = new Uint8Array(ab);
+
+      if (data.length !== instrumentsOrder.length * 2) {
+        return;
+      }
+      let offset = 0;
+      for (let instr of instrumentsOrder) {
+        const container = document.querySelector(
+          ".steps[data-instrument='" + instr + "']"
+        );
+        if (!container) {
+          offset += 2;
+          continue;
+        }
+        const hi = data[offset++];
+        const lo = data[offset++];
+        const patternStr = bytesToPattern(hi, lo);
+
+        for (let i = 0; i < 16; i++) {
+          const stepDiv = container.querySelector("[data-step='" + i + "']");
+          if (!stepDiv) continue;
+          if (patternStr[i] === "1") {
+            stepDiv.classList.add("active");
+          } else {
+            stepDiv.classList.remove("active");
+          }
         }
       }
     }
   }
-}
 </script>
