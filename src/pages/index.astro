@@ -64,7 +64,7 @@ import "@fontsource-variable/open-sans";
       </div>
     </div>
 
-    <!-- Sequencer (13 rows) -->
+    <!-- Sequencer (14 rows) -->
     <div class="sequencer">
       <!-- Kick -->
       <div class="sequence-row">
@@ -981,6 +981,79 @@ import "@fontsource-variable/open-sans";
           </div>
         </div>
       </div>
+
+      <!-- Thatnoise -->
+      <div class="sequence-row">
+        <div class="instrument-panel">
+          <div class="instrument-header">
+            <span class="instrument-label">Thatnoise</span>
+            <div class="instrument-volume-tooltip-wrap" data-volume-wrap="thatnoise">
+              <button
+                class="instrument-volume-trigger"
+                type="button"
+                data-volume-trigger="thatnoise"
+                aria-label="Adjust Thatnoise volume"
+                aria-expanded="false"
+                aria-controls="volume-gauge-thatnoise"
+                title="Adjust Thatnoise volume"
+              >
+                <span class="instrument-volume-trigger-icon"><FiVolume2 /></span>
+              </button>
+              <div
+                class="instrument-volume-tooltip"
+                id="volume-gauge-thatnoise"
+                data-volume-panel="thatnoise"
+              >
+                <input
+                  class="instrument-volume-slider"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="10"
+                  value="100"
+                  data-volume-input="thatnoise"
+                  aria-label="Thatnoise volume"
+                />
+                <span
+                  class="instrument-volume-value"
+                  data-volume-value="thatnoise"
+                >
+                  100%
+                </span>
+              </div>
+            </div>
+            <button
+              class="instrument-pitch-trigger"
+              type="button"
+              data-pitch-trigger="thatnoise"
+              aria-label="Open Thatnoise pitch roll"
+              title="Open Thatnoise pitch roll"
+            >
+              <span class="instrument-pitch-trigger-icon"><FiMusic /></span>
+            </button>
+          </div>
+        </div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="thatnoise">
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="pitchRollDialog" class="pitch-roll-dialog" hidden>
@@ -1436,7 +1509,7 @@ import "@fontsource-variable/open-sans";
     background: rgba(0, 0, 0, 0.72);
     z-index: 120;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     padding: 14px;
   }
@@ -1888,6 +1961,7 @@ import "@fontsource-variable/open-sans";
     "itemdrop",
     "codex",
     "exclamation",
+    "thatnoise",
   ];
 
   const sampleURLs = {
@@ -1904,6 +1978,7 @@ import "@fontsource-variable/open-sans";
     itemdrop: "itemdrop.mp3",
     codex: "codec.mp3",
     exclamation: "exclamation.mp3",
+    thatnoise: "thatnoise.mp3",
   };
 
   const STEPS_PER_PATTERN = 16;
