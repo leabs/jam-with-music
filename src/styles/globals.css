@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+:root {
+  --background: 240 6% 6%;
+  --foreground: 0 0% 96%;
+  --card: 240 5% 12%;
+  --card-foreground: 0 0% 96%;
+  --border: 240 4% 28%;
+  --ring: 24 95% 53%;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}

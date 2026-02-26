@@ -17,25 +17,41 @@ const sortedSongs = songs.sort((a, b) => a.artist.localeCompare(b.artist));
 
 <style>
     .header2 {
-        margin: 8px 0;
-        font-size: 1rem;
+        margin: 8px 0 10px;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #d4d4d8;
+        font-weight: 600;
     }
     #songs a {
-        color: #fff;
+        color: #e4e4e7;
+        text-decoration: none;
+        display: inline-block;
+        line-height: 1.35;
     }
     #songs a:hover {
-        color: #529a60;
+        color: #fb923c;
     }
     .song-list-list {
         margin-top: 0;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 1rem; /* Adjust the gap between items */
+        gap: 0.45rem;
         list-style: none;
         padding: 0;
     }
     .song-list-list li {
-        margin: 0; /* Optional, for consistent spacing */
+        margin: 0;
+        border: 1px solid #3f3f46;
+        background: rgba(39, 39, 42, 0.55);
+        border-radius: 8px;
+        padding: 8px 10px;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .song-list-list li:hover {
+        border-color: #f97316;
+        background: rgba(249, 115, 22, 0.12);
     }
     @media (max-width: 600px) {
         .song-list-list {
