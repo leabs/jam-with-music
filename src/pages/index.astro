@@ -4,6 +4,7 @@ import ArrangeDialog from "../components/ArrangeDialog.jsx";
 import ClearProjectDialog from "../components/ClearProjectDialog.jsx";
 import {
   FiHelpCircle,
+  FiMusic,
   FiPlay,
   FiRepeat,
   FiShare2,
@@ -63,7 +64,7 @@ import "@fontsource-variable/open-sans";
       </div>
     </div>
 
-    <!-- Sequencer (6 rows) -->
+    <!-- Sequencer (7 rows) -->
     <div class="sequencer">
       <!-- Kick -->
       <div class="sequence-row">
@@ -102,6 +103,15 @@ import "@fontsource-variable/open-sans";
                 </span>
               </div>
             </div>
+            <button
+              class="instrument-pitch-trigger"
+              type="button"
+              data-pitch-trigger="kick"
+              aria-label="Open Kick pitch roll"
+              title="Open Kick pitch roll"
+            >
+              <span class="instrument-pitch-trigger-icon"><FiMusic /></span>
+            </button>
           </div>
         </div>
         <div class="all-steps">
@@ -163,6 +173,15 @@ import "@fontsource-variable/open-sans";
                 </span>
               </div>
             </div>
+            <button
+              class="instrument-pitch-trigger"
+              type="button"
+              data-pitch-trigger="snare"
+              aria-label="Open Snare pitch roll"
+              title="Open Snare pitch roll"
+            >
+              <span class="instrument-pitch-trigger-icon"><FiMusic /></span>
+            </button>
           </div>
         </div>
         <div class="all-steps">
@@ -224,6 +243,15 @@ import "@fontsource-variable/open-sans";
                 </span>
               </div>
             </div>
+            <button
+              class="instrument-pitch-trigger"
+              type="button"
+              data-pitch-trigger="hi_hat"
+              aria-label="Open Hi-Hat pitch roll"
+              title="Open Hi-Hat pitch roll"
+            >
+              <span class="instrument-pitch-trigger-icon"><FiMusic /></span>
+            </button>
           </div>
         </div>
         <div class="all-steps">
@@ -285,6 +313,15 @@ import "@fontsource-variable/open-sans";
                 </span>
               </div>
             </div>
+            <button
+              class="instrument-pitch-trigger"
+              type="button"
+              data-pitch-trigger="clap"
+              aria-label="Open Clap pitch roll"
+              title="Open Clap pitch roll"
+            >
+              <span class="instrument-pitch-trigger-icon"><FiMusic /></span>
+            </button>
           </div>
         </div>
         <div class="all-steps">
@@ -346,6 +383,15 @@ import "@fontsource-variable/open-sans";
                 </span>
               </div>
             </div>
+            <button
+              class="instrument-pitch-trigger"
+              type="button"
+              data-pitch-trigger="tom"
+              aria-label="Open Tom pitch roll"
+              title="Open Tom pitch roll"
+            >
+              <span class="instrument-pitch-trigger-icon"><FiMusic /></span>
+            </button>
           </div>
         </div>
         <div class="all-steps">
@@ -407,6 +453,15 @@ import "@fontsource-variable/open-sans";
                 </span>
               </div>
             </div>
+            <button
+              class="instrument-pitch-trigger"
+              type="button"
+              data-pitch-trigger="rattle"
+              aria-label="Open Rattle pitch roll"
+              title="Open Rattle pitch roll"
+            >
+              <span class="instrument-pitch-trigger-icon"><FiMusic /></span>
+            </button>
           </div>
         </div>
         <div class="all-steps">
@@ -428,6 +483,92 @@ import "@fontsource-variable/open-sans";
             <div class="step" data-step="14"></div>
             <div class="step" data-step="15"></div>
           </div>
+        </div>
+      </div>
+
+      <!-- Ring -->
+      <div class="sequence-row">
+        <div class="instrument-panel">
+          <div class="instrument-header">
+            <span class="instrument-label">Ring</span>
+            <div class="instrument-volume-tooltip-wrap" data-volume-wrap="ring">
+              <button
+                class="instrument-volume-trigger"
+                type="button"
+                data-volume-trigger="ring"
+                aria-label="Adjust Ring volume"
+                aria-expanded="false"
+                aria-controls="volume-gauge-ring"
+                title="Adjust Ring volume"
+              >
+                <span class="instrument-volume-trigger-icon"><FiVolume2 /></span>
+              </button>
+              <div
+                class="instrument-volume-tooltip"
+                id="volume-gauge-ring"
+                data-volume-panel="ring"
+              >
+                <input
+                  class="instrument-volume-slider"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="10"
+                  value="100"
+                  data-volume-input="ring"
+                  aria-label="Ring volume"
+                />
+                <span class="instrument-volume-value" data-volume-value="ring">
+                  100%
+                </span>
+              </div>
+            </div>
+            <button
+              class="instrument-pitch-trigger"
+              type="button"
+              data-pitch-trigger="ring"
+              aria-label="Open Ring pitch roll"
+              title="Open Ring pitch roll"
+            >
+              <span class="instrument-pitch-trigger-icon"><FiMusic /></span>
+            </button>
+          </div>
+        </div>
+        <div class="all-steps">
+          <div class="steps" data-instrument="ring">
+            <div class="step" data-step="0"></div>
+            <div class="step" data-step="1"></div>
+            <div class="step" data-step="2"></div>
+            <div class="step" data-step="3"></div>
+            <div class="step" data-step="4"></div>
+            <div class="step" data-step="5"></div>
+            <div class="step" data-step="6"></div>
+            <div class="step" data-step="7"></div>
+            <div class="step" data-step="8"></div>
+            <div class="step" data-step="9"></div>
+            <div class="step" data-step="10"></div>
+            <div class="step" data-step="11"></div>
+            <div class="step" data-step="12"></div>
+            <div class="step" data-step="13"></div>
+            <div class="step" data-step="14"></div>
+            <div class="step" data-step="15"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pitchRollDialog" class="pitch-roll-dialog" hidden>
+      <div class="pitch-roll-sheet" role="dialog" aria-modal="true" aria-labelledby="pitchRollTitle">
+        <div class="pitch-roll-header">
+          <h2 id="pitchRollTitle">Pitch Roll</h2>
+          <button id="pitchRollCloseBtn" type="button">Close</button>
+        </div>
+        <p class="pitch-roll-hint">
+          Tap a step/pitch cell to draw notes. Tap the same filled cell to clear that step.
+        </p>
+        <div class="pitch-roll-grid" id="pitchRollGrid"></div>
+        <div class="pitch-roll-actions">
+          <button id="pitchRollResetBtn" type="button">Reset Instrument Pitch</button>
         </div>
       </div>
     </div>
@@ -753,9 +894,25 @@ import "@fontsource-variable/open-sans";
     position: relative;
     display: inline-flex;
     align-items: center;
+    margin-left: auto;
   }
 
   .instrument-volume-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid rgba(161, 98, 7, 0.55);
+    background: linear-gradient(180deg, rgba(69, 51, 38, 0.95), rgba(40, 30, 23, 0.95));
+    color: #fed7aa;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease;
+  }
+
+  .instrument-pitch-trigger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -779,7 +936,23 @@ import "@fontsource-variable/open-sans";
     outline: none;
   }
 
+  .instrument-pitch-trigger:hover,
+  .instrument-pitch-trigger:focus-visible {
+    border-color: rgba(251, 146, 60, 0.85);
+    background: linear-gradient(180deg, rgba(98, 66, 42, 0.95), rgba(58, 39, 27, 0.95));
+    color: #fff7ed;
+    outline: none;
+  }
+
   .instrument-volume-trigger-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-size: 0.72rem;
+  }
+
+  .instrument-pitch-trigger-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -828,6 +1001,128 @@ import "@fontsource-variable/open-sans";
     font-weight: 600;
     color: #fed7aa;
     line-height: 1;
+  }
+
+  .pitch-roll-dialog {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    z-index: 120;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 14px;
+  }
+
+  .pitch-roll-sheet {
+    width: min(760px, 100%);
+    max-height: min(84vh, 700px);
+    overflow: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(113, 63, 18, 0.88);
+    background: linear-gradient(180deg, rgba(28, 21, 16, 0.99), rgba(18, 14, 11, 0.99));
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.62);
+    padding: 12px;
+  }
+
+  .pitch-roll-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .pitch-roll-header h2 {
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff7ed;
+  }
+
+  #pitchRollCloseBtn,
+  #pitchRollResetBtn {
+    border: 1px solid rgba(161, 98, 7, 0.55);
+    background: linear-gradient(180deg, rgba(69, 51, 38, 0.95), rgba(40, 30, 23, 0.95));
+    color: #fed7aa;
+    border-radius: 4px;
+    padding: 6px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+
+  #pitchRollCloseBtn:hover,
+  #pitchRollCloseBtn:focus-visible,
+  #pitchRollResetBtn:hover,
+  #pitchRollResetBtn:focus-visible {
+    border-color: rgba(251, 146, 60, 0.85);
+    color: #fff7ed;
+    outline: none;
+  }
+
+  .pitch-roll-hint {
+    margin: 8px 0 10px;
+    color: #d9c3ad;
+    font-size: 0.66rem;
+  }
+
+  .pitch-roll-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  :global(.pitch-roll-row) {
+    display: grid;
+    grid-template-columns: 30px repeat(16, minmax(0, 1fr));
+    gap: 2px;
+    align-items: center;
+  }
+
+  :global(.pitch-roll-row-label) {
+    text-align: center;
+    color: #fcd9b2;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  :global(.pitch-roll-cell) {
+    border: 1px solid rgba(120, 93, 72, 0.55);
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(58, 45, 35, 0.88), rgba(42, 33, 26, 0.9));
+    padding: 0;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+    min-height: 14px;
+    transition: border-color 0.12s ease, background 0.12s ease;
+  }
+
+  :global(.pitch-roll-cell.is-quarter) {
+    border-left-color: rgba(251, 146, 60, 0.75);
+  }
+
+  :global(.pitch-roll-cell.is-muted) {
+    opacity: 0.7;
+  }
+
+  :global(.pitch-roll-cell.is-active) {
+    border-color: rgba(251, 146, 60, 0.95);
+    background: linear-gradient(180deg, #fdba74, #f97316);
+  }
+
+  :global(.pitch-roll-cell:hover),
+  :global(.pitch-roll-cell:focus-visible) {
+    border-color: rgba(251, 146, 60, 0.9);
+    outline: none;
+  }
+
+  .pitch-roll-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
   }
 
   .all-steps {
@@ -969,12 +1264,25 @@ import "@fontsource-variable/open-sans";
       transform-origin: initial;
     }
 
+    .instrument-volume-tooltip-wrap {
+      margin-left: 0;
+    }
+
     .instrument-volume-trigger {
       width: 20px;
       height: 20px;
     }
 
+    .instrument-pitch-trigger {
+      width: 20px;
+      height: 20px;
+    }
+
     .instrument-volume-trigger-icon {
+      font-size: 0.58rem;
+    }
+
+    .instrument-pitch-trigger-icon {
       font-size: 0.58rem;
     }
 
@@ -996,6 +1304,48 @@ import "@fontsource-variable/open-sans";
 
     .instrument-volume-value {
       font-size: 0.6rem;
+    }
+
+    .pitch-roll-dialog {
+      padding: 0;
+      align-items: flex-end;
+    }
+
+    .pitch-roll-sheet {
+      width: 100%;
+      max-height: 82vh;
+      border-radius: 10px 10px 0 0;
+      padding: 10px 8px 12px;
+    }
+
+    .pitch-roll-header h2 {
+      font-size: 0.78rem;
+      letter-spacing: 0.03em;
+    }
+
+    #pitchRollCloseBtn,
+    #pitchRollResetBtn {
+      font-size: 0.64rem;
+      padding: 5px 7px;
+    }
+
+    .pitch-roll-hint {
+      font-size: 0.6rem;
+      margin: 6px 0 8px;
+    }
+
+    :global(.pitch-roll-row) {
+      grid-template-columns: 24px repeat(16, minmax(0, 1fr));
+      gap: 1px;
+    }
+
+    :global(.pitch-roll-row-label) {
+      font-size: 0.56rem;
+    }
+
+    :global(.pitch-roll-cell) {
+      min-height: 13px;
+      border-radius: 1px;
     }
 
     .app-title {
@@ -1100,6 +1450,7 @@ import "@fontsource-variable/open-sans";
     "clap",
     "rattle",
     "tom",
+    "ring",
   ];
 
   const sampleURLs = {
@@ -1109,6 +1460,7 @@ import "@fontsource-variable/open-sans";
     clap: "clap.mp3",
     rattle: "rattle.mp3",
     tom: "tom.mp3",
+    ring: "ring.mp3",
   };
 
   const STEPS_PER_PATTERN = 16;
@@ -1116,6 +1468,14 @@ import "@fontsource-variable/open-sans";
   const MAX_PATTERN_REPEATS = 128;
   const DEFAULT_INSTRUMENT_VOLUME_PERCENT = 100;
   const INSTRUMENT_VOLUME_STEP_PERCENT = 10;
+  const PITCH_MIN_SEMITONES = -7;
+  const PITCH_MAX_SEMITONES = 7;
+  const PITCH_LEVELS = Array.from(
+    { length: PITCH_MAX_SEMITONES - PITCH_MIN_SEMITONES + 1 },
+    function (_, index) {
+      return PITCH_MAX_SEMITONES - index;
+    }
+  );
   const scheduleInterval = 25; // ms
 
   const audioBuffers = {};
@@ -1135,6 +1495,11 @@ import "@fontsource-variable/open-sans";
   const clearProjectBtn = document.getElementById("clearProjectBtn");
   const mobileHelpBtn = document.getElementById("mobileHelpBtn");
   const mobileHelpWrap = document.querySelector(".mobile-help-wrap");
+  const pitchRollDialog = document.getElementById("pitchRollDialog");
+  const pitchRollTitle = document.getElementById("pitchRollTitle");
+  const pitchRollGrid = document.getElementById("pitchRollGrid");
+  const pitchRollCloseBtn = document.getElementById("pitchRollCloseBtn");
+  const pitchRollResetBtn = document.getElementById("pitchRollResetBtn");
 
   let patternList = null;
   let newPatternBtn = null;
@@ -1149,6 +1514,7 @@ import "@fontsource-variable/open-sans";
 
   let patterns = [createEmptyPatternBytes()];
   let patternRepeats = [1];
+  let patternPitchOffsets = [createDefaultPatternPitchOffsets()];
   let instrumentVolumes = createDefaultInstrumentVolumes();
   let selectedPatternIndex = 0;
   let loopPatternMode = false;
@@ -1161,10 +1527,13 @@ import "@fontsource-variable/open-sans";
   const instrumentVolumeTriggers = {};
   const instrumentVolumeWraps = {};
   let instrumentVolumeDismissBound = false;
+  let pitchRollBound = false;
+  let activePitchInstrument = null;
 
   function toggleStep(step) {
     step.classList.toggle("active");
     saveSelectedPatternFromGrid();
+    renderPitchRollGrid();
   }
 
   function closeMobileHelpTooltip() {
@@ -1208,6 +1577,168 @@ import "@fontsource-variable/open-sans";
     });
   }
 
+  function closePitchRoll() {
+    if (!pitchRollDialog || pitchRollDialog.hidden) {
+      return;
+    }
+    pitchRollDialog.hidden = true;
+    activePitchInstrument = null;
+  }
+
+  function setInstrumentStepActiveInGrid(instrument, stepIndex, active) {
+    const container = getInstrumentContainer(instrument);
+    if (!container) return;
+    const stepDiv = container.querySelector("[data-step='" + stepIndex + "']");
+    if (!stepDiv) return;
+    stepDiv.classList.toggle("active", Boolean(active));
+  }
+
+  function applyPitchCellSelection(stepIndex, pitchOffset) {
+    if (!activePitchInstrument) return;
+    ensureSongState();
+
+    const instrumentIndex = instrumentsOrder.indexOf(activePitchInstrument);
+    if (instrumentIndex === -1) return;
+
+    const currentPattern = patterns[selectedPatternIndex];
+    const isCurrentlyActive = isStepActive(currentPattern, instrumentIndex, stepIndex);
+    const currentPitchOffset = getStepPitchOffset(
+      selectedPatternIndex,
+      activePitchInstrument,
+      stepIndex
+    );
+
+    if (isCurrentlyActive && currentPitchOffset === pitchOffset) {
+      setInstrumentStepActiveInGrid(activePitchInstrument, stepIndex, false);
+      setStepPitchOffset(selectedPatternIndex, activePitchInstrument, stepIndex, 0);
+    } else {
+      setInstrumentStepActiveInGrid(activePitchInstrument, stepIndex, true);
+      setStepPitchOffset(selectedPatternIndex, activePitchInstrument, stepIndex, pitchOffset);
+    }
+
+    saveSelectedPatternFromGrid();
+    renderPitchRollGrid();
+  }
+
+  function renderPitchRollGrid() {
+    if (!pitchRollGrid || !pitchRollTitle || !activePitchInstrument) {
+      return;
+    }
+
+    ensureSongState();
+    const instrumentIndex = instrumentsOrder.indexOf(activePitchInstrument);
+    const currentPattern = patterns[selectedPatternIndex];
+    pitchRollTitle.textContent = formatInstrumentName(activePitchInstrument) + " Pitch Roll";
+
+    pitchRollGrid.innerHTML = "";
+    PITCH_LEVELS.forEach(function (pitchOffset) {
+      const row = document.createElement("div");
+      row.className = "pitch-roll-row";
+
+      const label = document.createElement("span");
+      label.className = "pitch-roll-row-label";
+      label.textContent = formatPitchOffsetLabel(pitchOffset);
+      row.appendChild(label);
+
+      for (let stepIndex = 0; stepIndex < STEPS_PER_PATTERN; stepIndex++) {
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "pitch-roll-cell";
+        const isQuarter = stepIndex % 4 === 0;
+        if (isQuarter) {
+          cell.classList.add("is-quarter");
+        }
+
+        const isActive = isStepActive(currentPattern, instrumentIndex, stepIndex);
+        const stepPitchOffset = getStepPitchOffset(
+          selectedPatternIndex,
+          activePitchInstrument,
+          stepIndex
+        );
+        if (!isActive) {
+          cell.classList.add("is-muted");
+        }
+        if (isActive && stepPitchOffset === pitchOffset) {
+          cell.classList.add("is-active");
+        }
+
+        cell.setAttribute(
+          "aria-label",
+          formatInstrumentName(activePitchInstrument) +
+            " step " +
+            (stepIndex + 1).toString() +
+            " pitch " +
+            formatPitchOffsetLabel(pitchOffset)
+        );
+        cell.addEventListener("click", function () {
+          applyPitchCellSelection(stepIndex, pitchOffset);
+        });
+        row.appendChild(cell);
+      }
+
+      pitchRollGrid.appendChild(row);
+    });
+  }
+
+  function openPitchRoll(instrument) {
+    if (!pitchRollDialog) return;
+    closeAllInstrumentVolumePanels();
+    activePitchInstrument = instrument;
+    pitchRollDialog.hidden = false;
+    renderPitchRollGrid();
+  }
+
+  function bindPitchRollControls() {
+    if (pitchRollBound) {
+      return;
+    }
+
+    document.querySelectorAll("[data-pitch-trigger]").forEach(function (trigger) {
+      trigger.addEventListener("click", function () {
+        const instrument = trigger.getAttribute("data-pitch-trigger");
+        if (!instrument) return;
+        if (!pitchRollDialog) return;
+        if (!pitchRollDialog.hidden && activePitchInstrument === instrument) {
+          closePitchRoll();
+          return;
+        }
+        openPitchRoll(instrument);
+      });
+    });
+
+    if (pitchRollCloseBtn) {
+      pitchRollCloseBtn.addEventListener("click", function () {
+        closePitchRoll();
+      });
+    }
+
+    if (pitchRollResetBtn) {
+      pitchRollResetBtn.addEventListener("click", function () {
+        if (!activePitchInstrument) return;
+        ensureSongState();
+        patternPitchOffsets[selectedPatternIndex][activePitchInstrument] =
+          createDefaultInstrumentPitchOffsets();
+        renderPitchRollGrid();
+      });
+    }
+
+    if (pitchRollDialog) {
+      pitchRollDialog.addEventListener("click", function (event) {
+        if (event.target === pitchRollDialog) {
+          closePitchRoll();
+        }
+      });
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closePitchRoll();
+      }
+    });
+
+    pitchRollBound = true;
+  }
+
   window.addEventListener("load", async function () {
     playBtn.disabled = true;
     shareBtn.disabled = true;
@@ -1245,6 +1776,7 @@ import "@fontsource-variable/open-sans";
     });
 
     bindMobileHelpTooltip();
+    bindPitchRollControls();
     bindInstrumentVolumeControls();
     loadFromURLParams();
     ensureSongState();
@@ -1280,6 +1812,32 @@ import "@fontsource-variable/open-sans";
     return defaults;
   }
 
+  function createDefaultInstrumentPitchOffsets() {
+    return Array(STEPS_PER_PATTERN).fill(0);
+  }
+
+  function createDefaultPatternPitchOffsets() {
+    const defaults = {};
+    instrumentsOrder.forEach(function (instrument) {
+      defaults[instrument] = createDefaultInstrumentPitchOffsets();
+    });
+    return defaults;
+  }
+
+  function formatInstrumentName(instrument) {
+    return instrument
+      .split("_")
+      .map(function (part) {
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      })
+      .join("-");
+  }
+
+  function formatPitchOffsetLabel(offset) {
+    if (offset === 0) return "0";
+    return (offset > 0 ? "+" : "") + offset.toString();
+  }
+
   function clampInt(value, min, max, fallback) {
     const parsed = parseInt(value, 10);
     if (isNaN(parsed)) return fallback;
@@ -1295,6 +1853,101 @@ import "@fontsource-variable/open-sans";
     }
     const clamped = Math.min(100, Math.max(0, parsed));
     return Math.round(clamped / INSTRUMENT_VOLUME_STEP_PERCENT) * INSTRUMENT_VOLUME_STEP_PERCENT;
+  }
+
+  function clampPitchOffset(value) {
+    return clampInt(value, PITCH_MIN_SEMITONES, PITCH_MAX_SEMITONES, 0);
+  }
+
+  function normalizeInstrumentPitchOffsets(rawOffsets) {
+    const normalized = createDefaultInstrumentPitchOffsets();
+    if (!Array.isArray(rawOffsets)) {
+      return normalized;
+    }
+
+    for (let stepIndex = 0; stepIndex < STEPS_PER_PATTERN; stepIndex++) {
+      normalized[stepIndex] = clampPitchOffset(rawOffsets[stepIndex]);
+    }
+    return normalized;
+  }
+
+  function normalizePatternPitchOffsets(rawPatternPitch) {
+    const normalized = createDefaultPatternPitchOffsets();
+    if (!rawPatternPitch || typeof rawPatternPitch !== "object") {
+      return normalized;
+    }
+
+    instrumentsOrder.forEach(function (instrument) {
+      normalized[instrument] = normalizeInstrumentPitchOffsets(rawPatternPitch[instrument]);
+    });
+
+    return normalized;
+  }
+
+  function getStepPitchOffset(patternIndex, instrument, stepIndex) {
+    const patternPitch = patternPitchOffsets[patternIndex];
+    if (!patternPitch || !Array.isArray(patternPitch[instrument])) {
+      return 0;
+    }
+    return clampPitchOffset(patternPitch[instrument][stepIndex]);
+  }
+
+  function setStepPitchOffset(patternIndex, instrument, stepIndex, pitchOffset) {
+    if (!patternPitchOffsets[patternIndex]) {
+      patternPitchOffsets[patternIndex] = createDefaultPatternPitchOffsets();
+    }
+    if (!Array.isArray(patternPitchOffsets[patternIndex][instrument])) {
+      patternPitchOffsets[patternIndex][instrument] = createDefaultInstrumentPitchOffsets();
+    }
+    patternPitchOffsets[patternIndex][instrument][stepIndex] = clampPitchOffset(pitchOffset);
+  }
+
+  function serializePatternPitchOffsets(patternPitch) {
+    const encoded = {};
+    if (!patternPitch || typeof patternPitch !== "object") {
+      return encoded;
+    }
+
+    instrumentsOrder.forEach(function (instrument) {
+      const offsets = normalizeInstrumentPitchOffsets(patternPitch[instrument]);
+      const entries = [];
+      offsets.forEach(function (pitchOffset, stepIndex) {
+        if (pitchOffset === 0) return;
+        entries.push(stepIndex.toString() + ":" + pitchOffset.toString());
+      });
+      if (entries.length) {
+        encoded[instrument] = entries.join(",");
+      }
+    });
+
+    return encoded;
+  }
+
+  function deserializePatternPitchOffsets(rawPatternPitch) {
+    const normalized = createDefaultPatternPitchOffsets();
+    if (!rawPatternPitch || typeof rawPatternPitch !== "object") {
+      return normalized;
+    }
+
+    instrumentsOrder.forEach(function (instrument) {
+      const encoded = rawPatternPitch[instrument];
+      if (typeof encoded !== "string" || !encoded.trim()) {
+        return;
+      }
+
+      encoded.split(",").forEach(function (entry) {
+        const parts = entry.split(":");
+        if (parts.length < 2) return;
+        const stepIndex = parseInt(parts[0], 10);
+        const pitchOffset = parseInt(parts[1], 10);
+        if (isNaN(stepIndex) || stepIndex < 0 || stepIndex >= STEPS_PER_PATTERN) {
+          return;
+        }
+        normalized[instrument][stepIndex] = clampPitchOffset(pitchOffset);
+      });
+    });
+
+    return normalized;
   }
 
   function normalizeInstrumentVolumes(rawVolumes) {
@@ -1623,6 +2276,20 @@ import "@fontsource-variable/open-sans";
       patternRepeats = patternRepeats.slice(0, patterns.length);
     }
 
+    patternPitchOffsets = Array.isArray(patternPitchOffsets)
+      ? patternPitchOffsets.map(function (patternPitch) {
+          return normalizePatternPitchOffsets(patternPitch);
+        })
+      : [];
+
+    if (patternPitchOffsets.length < patterns.length) {
+      while (patternPitchOffsets.length < patterns.length) {
+        patternPitchOffsets.push(createDefaultPatternPitchOffsets());
+      }
+    } else if (patternPitchOffsets.length > patterns.length) {
+      patternPitchOffsets = patternPitchOffsets.slice(0, patterns.length);
+    }
+
     selectedPatternIndex = clampInt(
       selectedPatternIndex,
       0,
@@ -1700,6 +2367,7 @@ import "@fontsource-variable/open-sans";
   function loadSelectedPatternIntoGrid() {
     ensureSongState();
     writePatternToGrid(patterns[selectedPatternIndex]);
+    renderPitchRollGrid();
     updatePatternMeta();
   }
 
@@ -1723,6 +2391,7 @@ import "@fontsource-variable/open-sans";
     saveSelectedPatternFromGrid();
     selectedPatternIndex = clampInt(playbackPatternIndex, 0, patterns.length - 1, 0);
     writePatternToGrid(patterns[selectedPatternIndex]);
+    renderPitchRollGrid();
     renderPatternList();
     updatePatternMeta();
   }
@@ -1812,8 +2481,10 @@ import "@fontsource-variable/open-sans";
 
     const movedPattern = patterns.splice(from, 1)[0];
     const movedRepeat = patternRepeats.splice(from, 1)[0];
+    const movedPitchOffsets = patternPitchOffsets.splice(from, 1)[0];
     patterns.splice(to, 0, movedPattern);
     patternRepeats.splice(to, 0, movedRepeat);
+    patternPitchOffsets.splice(to, 0, normalizePatternPitchOffsets(movedPitchOffsets));
 
     selectedPatternIndex = Math.max(0, patterns.indexOf(selectedPatternRef));
     playbackPatternIndex = Math.max(0, patterns.indexOf(playbackPatternRef));
@@ -1836,6 +2507,11 @@ import "@fontsource-variable/open-sans";
 
     patterns.splice(insertIndex, 0, normalizePatternBytes(sourcePattern));
     patternRepeats.splice(insertIndex, 0, sourceRepeats);
+    patternPitchOffsets.splice(
+      insertIndex,
+      0,
+      normalizePatternPitchOffsets(patternPitchOffsets[source])
+    );
     selectedPatternIndex = insertIndex;
 
     if (playbackPatternRef) {
@@ -1868,6 +2544,7 @@ import "@fontsource-variable/open-sans";
 
     patterns.splice(target, 1);
     patternRepeats.splice(target, 1);
+    patternPitchOffsets.splice(target, 1);
 
     if (selectedPatternIndex > target) {
       selectedPatternIndex -= 1;
@@ -2092,6 +2769,7 @@ import "@fontsource-variable/open-sans";
       saveSelectedPatternFromGrid();
       patterns.push(createEmptyPatternBytes());
       patternRepeats.push(1);
+      patternPitchOffsets.push(createDefaultPatternPitchOffsets());
       selectedPatternIndex = patterns.length - 1;
       loadSelectedPatternIntoGrid();
       renderPatternList();
@@ -2101,6 +2779,7 @@ import "@fontsource-variable/open-sans";
     clearPatternBtn.addEventListener("click", function () {
       ensureSongState();
       patterns[selectedPatternIndex] = createEmptyPatternBytes();
+      patternPitchOffsets[selectedPatternIndex] = createDefaultPatternPitchOffsets();
       loadSelectedPatternIntoGrid();
       renderPatternList();
       updatePatternMeta();
@@ -2170,9 +2849,11 @@ import "@fontsource-variable/open-sans";
     setLoopPatternMode(false);
     clearPatternDropIndicators();
     clearPlayingHighlight();
+    closePitchRoll();
 
     patterns = [createEmptyPatternBytes()];
     patternRepeats = [1];
+    patternPitchOffsets = [createDefaultPatternPitchOffsets()];
     setAllInstrumentVolumes(createDefaultInstrumentVolumes());
     selectedPatternIndex = 0;
     playbackPatternIndex = 0;
@@ -2250,7 +2931,12 @@ import "@fontsource-variable/open-sans";
 
     instrumentsOrder.forEach(function (instrument, instrumentIndex) {
       if (isStepActive(patternBytes, instrumentIndex, stepIndex)) {
-        playSound(instrument, time);
+        const pitchOffset = getStepPitchOffset(
+          playbackPatternIndex,
+          instrument,
+          stepIndex
+        );
+        playSound(instrument, time, pitchOffset);
       }
     });
 
@@ -2263,12 +2949,13 @@ import "@fontsource-variable/open-sans";
     );
   }
 
-  function playSound(instrument, when) {
+  function playSound(instrument, when, pitchOffset) {
     const buf = audioBuffers[instrument];
     if (!buf) return;
     const source = audioCtx.createBufferSource();
     const gainNode = audioCtx.createGain();
     source.buffer = buf;
+    source.playbackRate.value = Math.pow(2, clampPitchOffset(pitchOffset) / 12);
     gainNode.gain.value = getInstrumentVolumeGain(instrument);
     source.connect(gainNode);
     gainNode.connect(audioCtx.destination);
@@ -2295,8 +2982,17 @@ import "@fontsource-variable/open-sans";
   }
 
   function encodeSongState() {
+    const serializedPitch = patternPitchOffsets
+      .slice(0, patterns.length)
+      .map(function (patternPitch) {
+        return serializePatternPitchOffsets(patternPitch);
+      });
+    const hasPitchData = serializedPitch.some(function (patternPitch) {
+      return Object.keys(patternPitch).length > 0;
+    });
+
     const payload = {
-      v: 3,
+      v: 4,
       p: patterns.map(function (patternBytes) {
         return arrayBufferToBase64(patternBytes);
       }),
@@ -2305,6 +3001,9 @@ import "@fontsource-variable/open-sans";
         return getInstrumentVolumePercent(instrument);
       }),
     };
+    if (hasPitchData) {
+      payload.t = serializedPitch;
+    }
     return btoa(JSON.stringify(payload));
   }
 
@@ -2339,6 +3038,12 @@ import "@fontsource-variable/open-sans";
 
       let loadedRepeats = [];
       let nextPatterns = loadedPatterns;
+      let loadedPitchOffsets = loadedPatterns.map(function (_, patternIndex) {
+        return deserializePatternPitchOffsets(
+          Array.isArray(payload.t) ? payload.t[patternIndex] : null
+        );
+      });
+      let nextPitchOffsets = loadedPitchOffsets;
 
       if (Array.isArray(payload.r)) {
         loadedRepeats = payload.r.map(function (repeatCount) {
@@ -2347,6 +3052,7 @@ import "@fontsource-variable/open-sans";
       } else if (Array.isArray(payload.a)) {
         const expandedPatterns = [];
         const expandedRepeats = [];
+        const expandedPitchOffsets = [];
 
         payload.a.forEach(function (segmentArr) {
           if (!Array.isArray(segmentArr) || segmentArr.length < 2) {
@@ -2371,19 +3077,25 @@ import "@fontsource-variable/open-sans";
 
           expandedPatterns.push(normalizePatternBytes(loadedPatterns[patternIndex]));
           expandedRepeats.push(repeats);
+          expandedPitchOffsets.push(
+            normalizePatternPitchOffsets(loadedPitchOffsets[patternIndex])
+          );
         });
 
         if (expandedPatterns.length) {
           nextPatterns = expandedPatterns;
           loadedRepeats = expandedRepeats;
+          nextPitchOffsets = expandedPitchOffsets;
         }
       }
 
       patterns = nextPatterns;
       patternRepeats = loadedRepeats;
+      patternPitchOffsets = nextPitchOffsets;
       setAllInstrumentVolumes(payload.m);
       selectedPatternIndex = 0;
       ensureSongState();
+      renderPitchRollGrid();
       return true;
     } catch (err) {
       console.warn("Failed to parse song state from URL:", err);
@@ -2400,9 +3112,11 @@ import "@fontsource-variable/open-sans";
 
       patterns = [normalizePatternBytes(bytes)];
       patternRepeats = [1];
+      patternPitchOffsets = [createDefaultPatternPitchOffsets()];
       setAllInstrumentVolumes(createDefaultInstrumentVolumes());
       selectedPatternIndex = 0;
       ensureSongState();
+      renderPitchRollGrid();
       return true;
     } catch (err) {
       console.warn("Failed to parse single pattern from URL:", err);
@@ -2493,6 +3207,7 @@ import "@fontsource-variable/open-sans";
     if (!loaded) {
       patterns = [createEmptyPatternBytes()];
       patternRepeats = [1];
+      patternPitchOffsets = [createDefaultPatternPitchOffsets()];
       if (!mixLoaded) {
         setAllInstrumentVolumes(createDefaultInstrumentVolumes());
       }
