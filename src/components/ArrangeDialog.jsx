@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { FiLayers, FiPlus, FiXCircle } from "react-icons/fi";
+import { FiPlus, FiXCircle } from "react-icons/fi";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog";
 
 export default function ArrangeDialog() {
@@ -14,7 +13,23 @@ export default function ArrangeDialog() {
 
   useEffect(
     function bindArrangementEvents() {
-      if (!open) return undefined;
+      function handleOpen() {
+        setOpen(true);
+      }
+
+      window.addEventListener("open-beats:patterns-ready", handleOpen);
+      const readiness = (window.__openBeatsShellReadiness ||= {
+        page: false,
+        patterns: false,
+      });
+      readiness.patterns = true;
+      window.dispatchEvent(new CustomEvent("open-beats:patterns-consumer-ready"));
+
+      if (!open) {
+        return function cleanupClosed() {
+          window.removeEventListener("open-beats:patterns-ready", handleOpen);
+        };
+      }
 
       let readinessFrame;
 
@@ -43,6 +58,7 @@ export default function ArrangeDialog() {
 
       return function cleanup() {
         window.cancelAnimationFrame(readinessFrame);
+        window.removeEventListener("open-beats:patterns-ready", handleOpen);
       };
     },
     [open]
@@ -58,21 +74,22 @@ export default function ArrangeDialog() {
     }
   }
 
+  function handleOpenChange(nextOpen) {
+    setOpen(nextOpen);
+  }
+
+  function handleCloseAutoFocus(event) {
+    event.preventDefault();
+    document.getElementById("patterns-menu-trigger")?.focus();
+  }
+
   return (
     <section className="pattern-manager" aria-label="Pattern management">
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <button type="button" className="pattern-manager-trigger">
-            <span className="pattern-manager-trigger-label">
-              <FiLayers className="h-4 w-4" aria-hidden="true" />
-              <strong>Patterns</strong>
-            </span>
-            <span className="pattern-manager-summary">Pattern 1 · 1 total</span>
-            <span className="pattern-manager-open">Manage</span>
-          </button>
-        </DialogTrigger>
-
-        <DialogContent className="pattern-manager-dialog">
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent
+          className="pattern-manager-dialog"
+          onCloseAutoFocus={handleCloseAutoFocus}
+        >
           <DialogHeader>
             <DialogTitle>Patterns</DialogTitle>
             <DialogDescription>
@@ -113,26 +130,6 @@ export default function ArrangeDialog() {
           color: var(--pattern-ink);
         }
 
-        .pattern-manager-trigger {
-          display: flex;
-          width: 100%;
-          height: 44px;
-          min-width: 0;
-          align-items: center;
-          gap: 12px;
-          padding: 0 12px;
-          color: var(--pattern-ink);
-          border: 0;
-          background: var(--pattern-chassis);
-          box-shadow: inset 0 0 0 1px var(--pattern-gray);
-          text-align: left;
-        }
-
-        .pattern-manager-trigger:hover {
-          background: var(--pattern-blue);
-        }
-
-        .pattern-manager-trigger:focus-visible,
         .pattern-manager-action:focus-visible,
         .arrange-pattern-button:focus-visible,
         .arrange-row-action:focus-visible,
@@ -142,33 +139,10 @@ export default function ArrangeDialog() {
           box-shadow: 0 0 0 6px var(--pattern-green, #00b578);
         }
 
-        .pattern-manager-trigger-label,
         .pattern-manager-action {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-        }
-
-        .pattern-manager-trigger-label {
-          flex: 0 0 auto;
-          font-size: 0.72rem;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-        }
-
-        .pattern-manager-summary {
-          min-width: 0;
-          flex: 1 1 auto;
-          overflow: hidden;
-          font-size: 0.78rem;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .pattern-manager-open {
-          flex: 0 0 auto;
-          font-size: 0.72rem;
-          font-weight: 800;
         }
 
         .pattern-manager-dialog {
@@ -312,22 +286,6 @@ export default function ArrangeDialog() {
         }
 
         @media (max-width: 640px) {
-          .pattern-manager-trigger {
-            gap: 8px;
-            padding: 0 8px;
-          }
-
-          .pattern-manager-open {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-          }
-
           .pattern-manager-dialog {
             padding: 16px;
           }

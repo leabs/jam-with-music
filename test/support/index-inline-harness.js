@@ -277,6 +277,7 @@ class FakeElement {
 
   focus() {
     if (!this.ownerDocument || this.disabled || !this.focusable) return;
+    this.focusCalls = (this.focusCalls ?? 0) + 1;
     this.ownerDocument.activeElement = this;
   }
 
@@ -371,6 +372,7 @@ function hostCopy(value) {
 
 export function createInlineHarness(options = {}) {
   let spaceDisconnectBlocked = options.spaceDisconnectFailure || false;
+  const deferredDialogCloseCallbacks = [];
   const pageSource = readFileSync(PAGE_PATH, "utf8");
   const filterPresetCardMarkup = [
     ...pageSource.matchAll(
@@ -516,6 +518,7 @@ export function createInlineHarness(options = {}) {
   // This is a behavior fixture. Raw markup assertions belong to
   // filter-page-contract.test.js rather than this synthetic DOM.
   const filterElements = {
+    dialog: document.getElementById("effectsDialog"),
     panel: document.getElementById("filterFxPanel"),
     toggle: document.getElementById("filterFxToggle"),
     toggleLabel: new FakeElement(document),
@@ -534,20 +537,30 @@ export function createInlineHarness(options = {}) {
     macroOutputs: {},
     macroCards: {},
   };
+  filterElements.dialog.open = false;
+  filterElements.dialog.showModal = function showModal() {
+    this.__openerId = document.activeElement?.id || "effects-menu-trigger";
+    this.open = true;
+  };
+  filterElements.dialog.close = function close() {
+    this.open = false;
+    document.getElementById(this.__openerId)?.focus();
+    const dispatchClose = () => this.dispatchEvent({ type: "close" });
+    if (options.deferredEffectsClose) deferredDialogCloseCallbacks.push(dispatchClose);
+    else dispatchClose();
+  };
   filterElements.panel.hidden = false;
   filterElements.panel.dataset.enabled = "false";
   filterElements.panel.dataset.available = "true";
   filterElements.toggleLabel.dataset.filterToggleLabel = "";
-  filterElements.toggleLabel.textContent = "Show effects";
+  filterElements.toggleLabel.textContent = "Close effects";
   filterElements.selectedLabel.dataset.filterSelectedLabel = "";
   filterElements.curveHalo.dataset.filterCurveHalo = "";
-  filterElements.body.hidden = true;
-  filterElements.body.inert = true;
-  filterElements.body.dataset.expanded = "false";
-  filterElements.body.setAttribute("inert", "");
-  filterElements.body.setAttribute("aria-hidden", "true");
+  filterElements.body.hidden = false;
+  filterElements.body.inert = false;
+  filterElements.body.dataset.expanded = "true";
   filterElements.toggle.setAttribute("aria-expanded", "false");
-  filterElements.toggle.setAttribute("aria-label", "Show effects");
+  filterElements.toggle.setAttribute("aria-label", "Close effects");
   filterElements.bypass.disabled = true;
   filterElements.preset.disabled = true;
   filterElements.preset.focusable = false;
@@ -863,6 +876,8 @@ export function createInlineHarness(options = {}) {
   }
 
   const windowListeners = new Map();
+  const animationFrames = new Map();
+  let nextAnimationFrameId = 1;
   const clipboardWrites = [];
   const window = {
     AudioContext: FakeAudioContext,
@@ -896,6 +911,21 @@ export function createInlineHarness(options = {}) {
         callback.call(window, event);
       }
       return true;
+    },
+    requestAnimationFrame(callback) {
+      const id = nextAnimationFrameId++;
+      if (callback.name === "openEffectsFromMenu" && window.__queueEffectsFrame) {
+        animationFrames.set(id, callback);
+      }
+      return id;
+    },
+    cancelAnimationFrame(id) {
+      animationFrames.delete(id);
+    },
+    flushAnimationFrames() {
+      const callbacks = Array.from(animationFrames.values());
+      animationFrames.clear();
+      callbacks.forEach((callback) => callback(Date.now()));
     },
     async dispatchEventAsync(event) {
       event.target ??= window;
@@ -1313,6 +1343,13 @@ globalThis.__jamTest = {
     },
     clearSpaceDisconnectFailure() {
       spaceDisconnectBlocked = false;
+    },
+    flushAnimationFrames() {
+      window.flushAnimationFrames();
+    },
+    flushDeferredDialogClose() {
+      const callbacks = deferredDialogCloseCallbacks.splice(0);
+      callbacks.forEach((callback) => callback());
     },
     async dispatchElementEvent(element, event) {
       const fakeEvent =

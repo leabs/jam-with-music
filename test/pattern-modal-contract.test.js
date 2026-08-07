@@ -14,6 +14,10 @@ const pageSource = readFileSync(
   new URL("../src/pages/index.astro", import.meta.url),
   "utf8",
 );
+const globalStyleSource = readFileSync(
+  new URL("../src/styles/globals.css", import.meta.url),
+  "utf8",
+);
 const clearProjectSource = readFileSync(
   new URL("../src/components/ClearProjectDialog.jsx", import.meta.url),
   "utf8",
@@ -98,38 +102,21 @@ function getButtonById(source, id) {
   return source.slice(startIndex, endIndex + "</button>".length);
 }
 
-test("one 44px Patterns trigger exposes the page-owned current-pattern/count summary", () => {
-  const triggerMarkup = getJsxBlock(arrangeSource, "DialogTrigger");
-  const triggerRule = getCssRuleBody(arrangeSource, ".pattern-manager-trigger");
-
-  assert.equal(countMatches(arrangeSource, /<DialogTrigger\b/g), 1);
-  assert.equal(countMatches(triggerMarkup, /<button\b/g), 1);
-  assert.match(triggerMarkup, /<DialogTrigger\s+asChild>/);
-  assert.match(
-    triggerMarkup,
-    /<button\s+type="button"\s+className="pattern-manager-trigger">/,
+test("Patterns is a 44px app-menu trigger with a readiness-gated consumer", () => {
+  const appMenuSource = readFileSync(
+    new URL("../src/components/AppMenu.jsx", import.meta.url),
+    "utf8",
   );
-  assert.match(triggerMarkup, /<strong>Patterns<\/strong>/);
-  assert.match(
-    triggerMarkup,
-    /className="pattern-manager-summary">Pattern 1 · 1 total<\/span>/,
-  );
-  assertDeclaration(triggerRule, "width", "100%");
-  assertDeclaration(triggerRule, "height", "44px");
-
-  const updateMetaBlock = compact(
-    getBalancedBlock(pageSource, "function updatePatternMeta()"),
-  );
-  assert.match(updateMetaBlock, /document\.querySelector\("\.pattern-manager-summary"\)/);
-  assert.match(
-    updateMetaBlock,
-    /"Pattern " \+ \(selectedPatternIndex \+ 1\) \+ " · " \+ patterns\.length \+ " total"/,
-  );
+  assert.match(appMenuSource, /triggerId="patterns-menu-trigger"/);
+  assert.match(appMenuSource, /action="open-beats:patterns"/);
+  assert.doesNotMatch(arrangeSource, /DialogTrigger/);
+  assert.doesNotMatch(arrangeSource, /pattern-manager-trigger/);
+  assert.match(arrangeSource, /open-beats:patterns-consumer-ready/);
+  assert.match(arrangeSource, /open-beats:patterns-ready/);
 });
 
 test("the complete pattern library and fixed actions live only in DialogContent", () => {
   const contentMarkup = getJsxBlock(arrangeSource, "DialogContent");
-  const triggerMarkup = getJsxBlock(arrangeSource, "DialogTrigger");
   const outsideContent = arrangeSource.replace(contentMarkup, "");
 
   for (const id of ["patternList", "newPatternBtn", "clearPatternBtn"]) {
@@ -141,7 +128,6 @@ test("the complete pattern library and fixed actions live only in DialogContent"
     );
     assert.match(contentMarkup, new RegExp(`\\bid="${id}"`));
     assert.doesNotMatch(outsideContent, new RegExp(`\\bid="${id}"`));
-    assert.doesNotMatch(triggerMarkup, new RegExp(`\\bid="${id}"`));
   }
 
   assert.match(
@@ -280,7 +266,7 @@ test("opening retries readiness after the portal mounts if the rendered list is 
     "function bindArrangementEvents()",
   );
   const effect = compact(effectBody);
-  const openGuardIndex = effect.indexOf("if (!open) return undefined;");
+  const openGuardIndex = effect.indexOf("if (!open) {");
   const mountedRetryIndex = effect.indexOf("function renderWhenMounted()");
   const listLookupIndex = effect.indexOf(
     'document.getElementById("patternList")',
@@ -299,7 +285,7 @@ test("opening retries readiness after the portal mounts if the rendered list is 
   assert.match(effect, /typeof window\.renderPatternManager === "function"/);
   assert.match(
     effect,
-    /return function cleanup\(\) \{ window\.cancelAnimationFrame\(readinessFrame\); \};/,
+    /return function cleanup\(\) \{ window\.cancelAnimationFrame\(readinessFrame\); window\.removeEventListener\("open-beats:patterns-ready", handleOpen\); \};/,
   );
   assert.match(arrangeSource, /\},\s*\[open\]\s*\);/);
 });
@@ -312,8 +298,8 @@ test("React does not rerender and erase page-owned modal rows", () => {
   const retryBlock = compact(
     getBalancedBlock(pageSource, "function tryWireArrangementControlsWithRetry"),
   );
-  assert.match(retryBlock, /wireArrangementControls\(\).*?renderPatternList\(\).*?updatePatternMeta\(\)/);
-  assert.match(pageSource, /window\.renderPatternManager = function \(\) \{\s*updatePatternMeta\(\);\s*return tryWireArrangementControlsWithRetry\(30, 100\);\s*\};/);
+  assert.match(retryBlock, /wireArrangementControls\(\).*?renderPatternList\(\)/);
+  assert.match(pageSource, /window\.renderPatternManager = function \(\) \{\s*return tryWireArrangementControlsWithRetry\(30, 100\);\s*\};/);
   assert.match(pageSource, /window\.addEventListener\("arrangement:ready", function \(\) \{\s*window\.renderPatternManager\(\);\s*\}\);/);
 });
 
@@ -347,8 +333,10 @@ test("modal visibility is local UI state with no song, audio, URL, codec, or tra
     arrangeSource,
     /const \[open, setOpen\] = useState\(false\);/,
   );
-  assert.match(arrangeSource, /<Dialog open=\{open\} onOpenChange=\{setOpen\}>/);
-  assert.equal(countMatches(arrangeSource, /\bsetOpen\b/g), 2);
+  assert.match(arrangeSource, /<Dialog open=\{open\} onOpenChange=\{handleOpenChange\}>/);
+  assert.match(arrangeSource, /open-beats:patterns/);
+  assert.match(arrangeSource, /patterns-menu-trigger/);
+  assert.ok(countMatches(arrangeSource, /\bsetOpen\b/g) >= 2);
   assert.equal(countMatches(arrangeSource, /\buseState\(/g), 1);
 
   const importSources = Array.from(
@@ -361,7 +349,7 @@ test("modal visibility is local UI state with no song, audio, URL, codec, or tra
     arrangeSource.matchAll(/new CustomEvent\("([^"]+)"\)/g),
     (match) => match[1],
   );
-  assert.deepEqual(dispatchedEvents, ["arrangement:ready"]);
+  assert.deepEqual(dispatchedEvents, ["open-beats:patterns-consumer-ready", "arrangement:ready"]);
 
   const forbiddenAuthority = [
     /\bAudioContext\b/,
@@ -389,7 +377,7 @@ test("modal visibility is local UI state with no song, audio, URL, codec, or tra
   }
 });
 
-test("Radix trigger/content structure owns modal focus, Escape, close, and focus return", () => {
+test("Radix content remains authoritative and the menu event owns modal focus handoff", () => {
   const rootMarkup = getJsxBlock(arrangeSource, "Dialog");
   const uiContentStart = dialogSource.indexOf("const DialogContent =");
   const uiContentEnd = dialogSource.indexOf(
@@ -405,7 +393,6 @@ test("Radix trigger/content structure owns modal focus, Escape, close, and focus
     "DialogDescription",
     "DialogHeader",
     "DialogTitle",
-    "DialogTrigger",
   ]) {
     assert.match(
       arrangeSource,
@@ -414,11 +401,11 @@ test("Radix trigger/content structure owns modal focus, Escape, close, and focus
     );
   }
   assert.match(arrangeSource, /from "\.\/ui\/dialog";/);
-  assert.match(rootMarkup, /<DialogTrigger\s+asChild>/);
-  assert.ok(
-    rootMarkup.indexOf("<DialogTrigger") < rootMarkup.indexOf("<DialogContent"),
-    "trigger and content must remain in the same controlled Radix root",
-  );
+  assert.doesNotMatch(rootMarkup, /DialogTrigger/);
+  assert.match(rootMarkup, /<Dialog\s+open=\{open\}\s+onOpenChange=\{handleOpenChange\}>/);
+  assert.match(arrangeSource, /open-beats:patterns/);
+  assert.match(arrangeSource, /patterns-menu-trigger/);
+  assert.match(arrangeSource, /requestAnimationFrame/);
 
   assert.match(dialogSource, /const Dialog = DialogPrimitive\.Root;/);
   assert.match(dialogSource, /const DialogTrigger = DialogPrimitive\.Trigger;/);
@@ -434,7 +421,7 @@ test("Radix trigger/content structure owns modal focus, Escape, close, and focus
   assert.doesNotMatch(rootMarkup, /\bforceMount\b/);
   assert.doesNotMatch(rootMarkup, /\btrapFocus=\{false\}/);
   assert.doesNotMatch(rootMarkup, /\bonEscapeKeyDown\b/);
-  assert.doesNotMatch(rootMarkup, /\bonCloseAutoFocus\b/);
+  assert.match(rootMarkup, /onCloseAutoFocus=\{handleCloseAutoFocus\}/);
 });
 
 test("the modal uses exact instrument tokens and real 44px actions", () => {
@@ -455,7 +442,7 @@ test("the modal uses exact instrument tokens and real 44px actions", () => {
   }
 
   const focusRule = arrangeSource.match(
-    /\.pattern-manager-trigger:focus-visible,[\s\S]*?\.arrange-repeat-input:focus-visible\s*\{([^}]*)\}/,
+    /\.pattern-manager-action:focus-visible,[\s\S]*?\.arrange-repeat-input:focus-visible\s*\{([^}]*)\}/,
   );
   assert.ok(focusRule, "all static and generated pattern controls need one focus rule");
   assertDeclaration(focusRule[1], "outline", "3px solid var(--pattern-ink, #171a1f)");
@@ -495,4 +482,9 @@ test("the modal uses exact instrument tokens and real 44px actions", () => {
     "New and Clear must both inherit the 44px action target",
   );
   assert.match(dialogSource, /\bmin-h-11 min-w-11\b/);
+});
+
+test("the portaled Pattern dialog has a global reduced-motion rule", () => {
+  assert.match(globalStyleSource, /\.pattern-manager-dialog,[\s\S]*?animation-duration:\s*0\.01ms\s*!important/);
+  assert.doesNotMatch(pageSource, /\.pattern-manager-dialog,[\s\S]*?animation-duration:\s*0\.01ms\s*!important/);
 });

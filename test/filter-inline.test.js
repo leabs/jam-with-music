@@ -69,22 +69,19 @@ function assertFilterDisclosure(
   label,
   { hidden = !expanded, transitioning } = {},
 ) {
-  const { body, toggle, toggleLabel } = harness.filterElements;
+  const { dialog, body, toggle, toggleLabel } = harness.filterElements;
 
   assert.equal(
     harness.hostSnapshot().filterPanelExpanded,
     expanded,
     `${label}: controller state`,
   );
-  assert.equal(body.hidden, hidden, `${label}: hidden`);
-  assert.equal(body.dataset.expanded, expanded ? "true" : "false", `${label}: data`);
-  assert.equal(body.inert, !expanded, `${label}: inert property`);
-  assert.equal(body.getAttribute("inert"), expanded ? null : "", `${label}: inert attr`);
-  assert.equal(
-    body.getAttribute("aria-hidden"),
-    expanded ? null : "true",
-    `${label}: aria-hidden`,
-  );
+  assert.equal(dialog.open, expanded, `${label}: dialog open`);
+  assert.equal(body.hidden, false, `${label}: body remains mounted`);
+  assert.equal(body.dataset.expanded, "true", `${label}: body data`);
+  assert.equal(body.inert, false, `${label}: body remains interactive`);
+  assert.equal(body.getAttribute("inert"), null, `${label}: inert attr`);
+  assert.equal(body.getAttribute("aria-hidden"), null, `${label}: aria-hidden`);
   assert.equal(
     toggle.getAttribute("aria-expanded"),
     expanded ? "true" : "false",
@@ -92,12 +89,12 @@ function assertFilterDisclosure(
   );
   assert.equal(
     toggle.getAttribute("aria-label"),
-    expanded ? "Hide effects" : "Show effects",
+    "Close effects",
     `${label}: aria-label`,
   );
   assert.equal(
     toggleLabel.textContent,
-    expanded ? "Hide effects" : "Show effects",
+    "Close effects",
     `${label}: visible label`,
   );
   if (transitioning !== undefined) {
@@ -612,7 +609,8 @@ test("whole-project reset restores neutral Filter state, UI, graph, and v4 codec
   assert.deepEqual(snapshot.filterEffectState, FILTER_EFFECT_DEFAULT_STATE);
   assertFilterDisclosure(harness, false, "project reset");
   assert.deepEqual(snapshot.masterFilterGraphState, FILTER_EFFECT_DEFAULT_STATE);
-  assert.equal(harness.filterElements.body.hidden, true);
+  assert.equal(harness.filterElements.body.hidden, false);
+  assert.equal(harness.filterElements.body.dataset.expanded, "true");
   assert.equal(harness.filterElements.panel.dataset.enabled, "false");
   assert.equal(payload.v, 4);
   assert.equal(Object.hasOwn(payload, "f"), false);
@@ -698,9 +696,7 @@ test("window-load bootstrap leaves every URL class minimized", async () => {
     await harness.dispatchWindowLoad();
 
     const snapshot = harness.hostSnapshot();
-    assertFilterDisclosure(harness, false, `${testCase.label} bootstrap`, {
-      transitioning: false,
-    });
+    assertFilterDisclosure(harness, false, `${testCase.label} bootstrap`);
     assert.equal(snapshot.filterControlsBound, true, `${testCase.label}: controls bound`);
     assert.deepEqual(
       snapshot.filterEffectState,
@@ -725,13 +721,15 @@ test("window-load bootstrap leaves every URL class minimized", async () => {
   }
 });
 
-test("effects disclosure is minimized by default and toggles without authority", async () => {
+test("Effects dialog opens and closes without changing audio or song authority", async () => {
   const harness = createInlineHarness();
   const { body, bypass, panel, status, toggle } = harness.filterElements;
 
   assertFilterDisclosure(harness, false, "synthetic pre-bind fixture");
+  assert.equal(harness.document.activeElement, null, "closed Effects bootstrap must not steal focus");
   harness.api.bindFilterEffectControls();
-  assertFilterDisclosure(harness, false, "bound default", { transitioning: false });
+  assert.equal(harness.document.activeElement, null, "binding closed Effects must not steal focus");
+  assertFilterDisclosure(harness, false, "bound default");
   assert.equal(bypass.getAttribute("aria-pressed"), "false");
   assert.equal(bypass.getAttribute("aria-label"), "Enable filter");
   assert.equal(status.textContent, "Tone: Bypassed · Space: Bypassed");
@@ -743,38 +741,26 @@ test("effects disclosure is minimized by default and toggles without authority",
   harness.api.seedAudioBuffer("kick");
   await harness.api.startSequencer();
   assert.equal(harness.hostSnapshot().isPlaying, true);
-  assertFilterDisclosure(harness, false, "playback while minimized");
+  assertFilterDisclosure(harness, false, "playback while closed");
 
   const graph = harness.api.getMasterFilterGraph();
   const canonicalAuthority = disclosureAuthoritySnapshot(harness);
   const audioIdentity = new Map();
   const canonicalSpaceAudio = spaceAudioAuthoritySnapshot(harness, audioIdentity);
 
-  toggle.focus();
-  toggle.dispatchEvent({ type: "click" });
+  harness.api.setFilterPanelExpanded(true);
   assertFilterDisclosure(harness, true, "synchronous open");
-  assert.equal(harness.document.activeElement, toggle);
   assert.equal(harness.api.getMasterFilterGraph(), graph);
   assert.deepEqual(disclosureAuthoritySnapshot(harness), canonicalAuthority);
   assert.deepEqual(spaceAudioAuthoritySnapshot(harness, audioIdentity), canonicalSpaceAudio);
 
   harness.filterElements.macroInputs.cutoff.focus();
   toggle.dispatchEvent({ type: "click" });
-  assertFilterDisclosure(harness, false, "immediate close exclusion", {
-    hidden: false,
-    transitioning: true,
-  });
-  assert.equal(harness.document.activeElement, toggle);
+  assertFilterDisclosure(harness, false, "immediate close");
   assert.equal(harness.api.getMasterFilterGraph(), graph);
   assert.deepEqual(disclosureAuthoritySnapshot(harness), canonicalAuthority);
   assert.deepEqual(spaceAudioAuthoritySnapshot(harness, audioIdentity), canonicalSpaceAudio);
 
-  const collapseTimers = getFilterPanelCollapseTimers(harness);
-  assert.equal(collapseTimers.length, 1, "one exact 180 ms close fallback");
-  body.dispatchEvent({ type: "transitionend", propertyName: "opacity" });
-  assert.equal(body.hidden, false, "unrelated transition cannot hide the tray");
-  harness.runTimeout(collapseTimers[0][0]);
-  assertFilterDisclosure(harness, false, "settled close", { transitioning: false });
   assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
   assert.equal(getTransitionListenerCount(body), 0);
   assert.equal(harness.api.getMasterFilterGraph(), graph);
@@ -784,6 +770,64 @@ test("effects disclosure is minimized by default and toggles without authority",
   const closePromise = harness.api.stopSequencer();
   harness.runAllFilterTransportTimeouts();
   assert.equal(await closePromise, true);
+});
+
+test("Pattern takeover cancels a queued Effects open before the next frame", () => {
+  const harness = createInlineHarness({ deferredEffectsClose: true });
+  harness.api.bindFilterEffectControls();
+  const effectsTrigger = harness.document.getElementById("effects-menu-trigger");
+  const patternsTrigger = harness.document.getElementById("patterns-menu-trigger");
+  effectsTrigger.focus();
+  const nativeRestoreCountBefore = effectsTrigger.focusCalls;
+  harness.window.addEventListener("open-beats:patterns-ready", () => {
+    patternsTrigger.focus();
+  });
+
+  harness.api.setFilterPanelExpanded(true);
+  assert.equal(harness.filterElements.dialog.open, true);
+  harness.window.__queueEffectsFrame = true;
+  harness.window.dispatchEvent({ type: "open-beats:effects" });
+  harness.window.dispatchEvent({ type: "open-beats:patterns" });
+
+  assert.equal(harness.filterElements.dialog.open, false);
+  assert.equal(effectsTrigger.focusCalls, nativeRestoreCountBefore + 1);
+  assert.equal(harness.document.activeElement, patternsTrigger);
+
+  harness.flushAnimationFrames();
+
+  assert.equal(harness.filterElements.dialog.open, false);
+  assert.equal(harness.hostSnapshot().filterPanelExpanded, true);
+  assert.equal(harness.filterElements.toggle.getAttribute("aria-expanded"), "true");
+  harness.flushDeferredDialogClose();
+
+  assert.equal(harness.filterElements.dialog.open, false);
+  assert.equal(harness.hostSnapshot().filterPanelExpanded, false);
+  assert.equal(harness.filterElements.toggle.getAttribute("aria-expanded"), "false");
+  assert.equal(harness.document.activeElement, patternsTrigger);
+});
+
+test("a delayed native Effects close cannot collapse a replacement open", () => {
+  const harness = createInlineHarness({ deferredEffectsClose: true });
+  harness.api.bindFilterEffectControls();
+  harness.api.setFilterPanelExpanded(true);
+  harness.api.setFilterPanelExpanded(false);
+  harness.api.setFilterPanelExpanded(true);
+  harness.flushDeferredDialogClose();
+
+  assert.equal(harness.filterElements.dialog.open, true);
+  assert.equal(harness.filterElements.toggle.getAttribute("aria-expanded"), "true");
+});
+
+test("a direct native Effects close settles logical and ARIA state", () => {
+  const harness = createInlineHarness({ deferredEffectsClose: true });
+  harness.api.bindFilterEffectControls();
+  harness.api.setFilterPanelExpanded(true);
+  harness.filterElements.dialog.close();
+  harness.flushDeferredDialogClose();
+
+  assert.equal(harness.filterElements.dialog.open, false);
+  assert.equal(harness.hostSnapshot().filterPanelExpanded, false);
+  assert.equal(harness.filterElements.toggle.getAttribute("aria-expanded"), "false");
 });
 
 test("Space presets macros bypass and unavailable UI preserve desired state independently", () => {
@@ -853,11 +897,11 @@ test("Tone bay exposes its own live status alongside the combined Effects summar
   assert.equal(toneStatus.textContent, "Unavailable");
 });
 
-test("Space controls retain focus and closing Effects returns focus to Show effects", () => {
+test("Space controls retain focus and closing Effects returns focus to the menu", () => {
   const harness = createInlineHarness();
   harness.api.bindFilterEffectControls();
   const { toggle } = harness.filterElements;
-  toggle.dispatchEvent({ type: "click" });
+  harness.api.setFilterPanelExpanded(true);
 
   const preset = harness.spaceElements.presetCards.find(
     (card) => card.dataset.spacePreset === "warm-hall",
@@ -873,8 +917,9 @@ test("Space controls retain focus and closing Effects returns focus to Show effe
   assert.equal(harness.document.activeElement, decay);
 
   toggle.dispatchEvent({ type: "click" });
-  assert.equal(harness.document.activeElement, toggle);
-  assert.equal(toggle.getAttribute("aria-label"), "Show effects");
+  assert.equal(harness.document.activeElement, harness.ids.get("effects-menu-trigger"));
+  assert.equal(harness.ids.get("effects-menu-trigger").focusCalls, 1);
+  assert.equal(toggle.getAttribute("aria-label"), "Close effects");
 });
 
 test("each Space preset macro and bypass action performs exactly one UI render", () => {
@@ -934,7 +979,7 @@ test("each Space preset macro and bypass action performs exactly one UI render",
 test("open Effects exposes enabled focusable controls in the frozen order", () => {
   const harness = createInlineHarness();
   harness.api.bindFilterEffectControls();
-  harness.filterElements.toggle.dispatchEvent({ type: "click" });
+  harness.api.setFilterPanelExpanded(true);
   const controls = [
     ...harness.filterElements.presetCards,
     harness.filterElements.reset,
@@ -951,127 +996,46 @@ test("open Effects exposes enabled focusable controls in the frozen order", () =
   }
   harness.spaceElements.macroInputs.mix.focus();
   harness.filterElements.toggle.dispatchEvent({ type: "click" });
-  assert.equal(harness.document.activeElement, harness.filterElements.toggle);
+  assert.equal(harness.document.activeElement, harness.ids.get("effects-menu-trigger"));
 });
 
-test("rapid close-open-close keeps the latest completion and cleans listeners", () => {
+test("rapid Effects dialog close-open-close remains synchronous and bounded", () => {
   const harness = createInlineHarness();
   harness.api.bindFilterEffectControls();
-  const { body, toggle } = harness.filterElements;
+  const { toggle } = harness.filterElements;
 
-  toggle.focus();
-  toggle.dispatchEvent({ type: "click" });
+  harness.api.setFilterPanelExpanded(true);
   assertFilterDisclosure(harness, true, "rapid-toggle open");
 
-  harness.filterElements.macroInputs.mix.focus();
   toggle.dispatchEvent({ type: "click" });
-  assertFilterDisclosure(harness, false, "rapid-toggle close", {
-    hidden: false,
-    transitioning: true,
-  });
-  const staleTimerEntry = getFilterPanelCollapseTimers(harness)[0];
-  const staleTimer = staleTimerEntry?.[1];
-  const staleTransitionHandler = body.listeners.get("transitionend")?.[0];
-  assert.ok(staleTimer, "close schedules a 180 ms fallback");
-  assert.ok(staleTransitionHandler, "close listens for transition completion");
+  assertFilterDisclosure(harness, false, "rapid-toggle close");
 
-  toggle.dispatchEvent({ type: "click" });
+  harness.api.setFilterPanelExpanded(true);
   assertFilterDisclosure(harness, true, "rapid reopen");
   assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
-  assert.equal(getTransitionListenerCount(body), 0, "reopen removes the close listener");
+  assert.equal(harness.filterElements.dialog.open, true);
 
   toggle.dispatchEvent({ type: "click" });
-  assertFilterDisclosure(harness, false, "rapid reclose", {
-    hidden: false,
-    transitioning: true,
-  });
-  const currentTimerEntry = getFilterPanelCollapseTimers(harness)[0];
-  assert.ok(currentTimerEntry, "latest close schedules one fallback");
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 1);
-  assert.equal(getTransitionListenerCount(body), 1);
-
-  staleTimer.callback();
-  staleTransitionHandler({ target: body, propertyName: "grid-template-rows" });
-  assertFilterDisclosure(harness, false, "stale completion cannot settle latest close", {
-    hidden: false,
-    transitioning: true,
-  });
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 1);
-  assert.equal(getTransitionListenerCount(body), 1);
-
-  harness.runTimeout(currentTimerEntry[0]);
-  assertFilterDisclosure(harness, false, "latest close settled", {
-    transitioning: false,
-  });
+  assertFilterDisclosure(harness, false, "rapid reclose");
   assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
-  assert.equal(getTransitionListenerCount(body), 0);
 });
 
-test("same-state disclosure requests stay bounded and reduced motion is immediate", () => {
+test("same-state Effects dialog requests stay bounded", () => {
   const harness = createInlineHarness();
   harness.api.bindFilterEffectControls();
-  const { body, toggle } = harness.filterElements;
+  const { toggle } = harness.filterElements;
 
   harness.api.setFilterPanelExpanded(true, { animate: false });
   const canonicalAuthority = disclosureAuthoritySnapshot(harness);
   harness.api.setFilterPanelExpanded(true, { animate: false });
-  assertFilterDisclosure(harness, true, "repeated settled open", {
-    transitioning: false,
-  });
+  assertFilterDisclosure(harness, true, "repeated settled open");
   assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
-  assert.equal(getTransitionListenerCount(body), 0);
   assert.deepEqual(disclosureAuthoritySnapshot(harness), canonicalAuthority);
 
   harness.api.setFilterPanelExpanded(false);
-  const staleTimer = getFilterPanelCollapseTimers(harness)[0]?.[1];
-  const staleTransitionHandler = body.listeners.get("transitionend")?.[0];
-  assert.ok(staleTimer);
-  assert.ok(staleTransitionHandler);
   harness.api.setFilterPanelExpanded(false);
-  const currentTimerEntry = getFilterPanelCollapseTimers(harness)[0];
-  assert.ok(currentTimerEntry);
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 1);
-  assert.equal(getTransitionListenerCount(body), 1);
-  staleTimer.callback();
-  staleTransitionHandler({ target: body, propertyName: "grid-template-rows" });
-  assertFilterDisclosure(harness, false, "repeated close ignores replaced completion", {
-    hidden: false,
-    transitioning: true,
-  });
-  harness.runTimeout(currentTimerEntry[0]);
-  assertFilterDisclosure(harness, false, "repeated close settled", {
-    transitioning: false,
-  });
+  assertFilterDisclosure(harness, false, "repeated close");
   assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
-  assert.equal(getTransitionListenerCount(body), 0);
-
-  harness.api.setFilterPanelExpanded(false, { animate: false });
-  harness.api.setFilterPanelExpanded(false, { animate: false });
-  assertFilterDisclosure(harness, false, "repeated settled close", {
-    transitioning: false,
-  });
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
-  assert.equal(getTransitionListenerCount(body), 0);
-
-  const reduced = createInlineHarness({ reducedMotion: true });
-  reduced.api.bindFilterEffectControls();
-  reduced.filterElements.toggle.focus();
-  reduced.filterElements.toggle.dispatchEvent({ type: "click" });
-  assertFilterDisclosure(reduced, true, "reduced-motion open", {
-    transitioning: false,
-  });
-  reduced.filterElements.macroInputs.drive.focus();
-  reduced.filterElements.toggle.dispatchEvent({ type: "click" });
-  assertFilterDisclosure(reduced, false, "reduced-motion close", {
-    transitioning: false,
-  });
-  assert.equal(reduced.document.activeElement, reduced.filterElements.toggle);
-  assert.equal(getFilterPanelCollapseTimers(reduced).length, 0);
-  assert.equal(
-    getTransitionListenerCount(reduced.filterElements.body),
-    0,
-    "reduced motion has no close listener",
-  );
 });
 
 test("state, load, Share, and playback paths preserve the disclosure choice", async () => {

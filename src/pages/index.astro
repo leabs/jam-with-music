@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import ArrangeDialog from "../components/ArrangeDialog.jsx";
 import ClearProjectDialog from "../components/ClearProjectDialog.jsx";
+import AppMenu from "../components/AppMenu.jsx";
 import {
   FiHelpCircle,
   FiMusic,
@@ -23,6 +24,10 @@ import "@fontsource-variable/open-sans";
         <span class="app-title-full">Open Beats</span>
         <span class="app-title-short" aria-hidden="true">OB</span>
       </h1>
+
+      <div class="app-menu-slot">
+        <AppMenu client:load />
+      </div>
 
       <div
         class="instrument-screen"
@@ -69,7 +74,7 @@ import "@fontsource-variable/open-sans";
         </button>
         <button id="clearProjectBtn" type="button" disabled>
           <span class="btn-icon"><FiTrash2 /></span>
-          <span class="button-label">Clear Project</span>
+          <span class="button-label">Clear All</span>
         </button>
         <div class="mobile-help-wrap">
           <button
@@ -105,14 +110,15 @@ import "@fontsource-variable/open-sans";
 
     <ArrangeDialog client:load />
 
-    <section
-      id="filterFxPanel"
-      class="filter-fx-panel"
-      aria-labelledby="filterFxTitle"
-      data-enabled="false"
-      data-available="true"
-      data-preset="clean"
-    >
+    <dialog id="effectsDialog" class="effects-dialog" aria-labelledby="filterFxTitle">
+      <section
+        id="filterFxPanel"
+        class="filter-fx-panel"
+        aria-labelledby="filterFxTitle"
+        data-enabled="false"
+        data-available="true"
+        data-preset="clean"
+      >
       <div class="filter-fx-bar">
         <div class="filter-fx-heading">
           <span class="filter-fx-title" id="filterFxTitle">EFFECTS</span>
@@ -140,11 +146,11 @@ import "@fontsource-variable/open-sans";
             id="filterFxToggle"
             class="filter-fx-action"
             type="button"
-            aria-label="Show effects"
+            aria-label="Close effects"
             aria-expanded="false"
-            aria-controls="filterFxBody"
+            aria-controls="effectsDialog"
           >
-            <span data-filter-toggle-label>Show effects</span>
+            <span data-filter-toggle-label>Close effects</span>
           </button>
         </div>
       </div>
@@ -152,10 +158,7 @@ import "@fontsource-variable/open-sans";
       <div
         class="filter-fx-body filter-fx-pedalboard-shelf"
         id="filterFxBody"
-        data-expanded="false"
-        aria-hidden="true"
-        inert
-        hidden
+        data-expanded="true"
       >
         <div class="filter-fx-body-inner">
         <section class="tone-fx-panel" aria-labelledby="toneFxTitle" aria-describedby="filterFxHelp">
@@ -656,7 +659,8 @@ import "@fontsource-variable/open-sans";
         </section>
         </div>
       </div>
-    </section>
+      </section>
+    </dialog>
 
     <!-- Sequencer (14 rows) -->
     <div class="sequencer">
@@ -2655,6 +2659,38 @@ import "@fontsource-variable/open-sans";
     overflow: hidden;
   }
 
+  .effects-dialog {
+    width: min(960px, calc(100vw - 1.5rem));
+    max-width: none;
+    max-height: min(900px, calc(100dvh - 1.5rem));
+    margin: 0 0 0 auto;
+    padding: 0;
+    color: var(--hardware-ink, #171a1f);
+    border: 1px solid var(--hardware-hairline, #a8adb5);
+    border-radius: 14px 0 0 14px;
+    background: var(--hardware-canvas, #f5f6f7);
+    box-shadow: -18px 0 60px rgba(23, 26, 31, 0.26);
+  }
+
+  .effects-dialog::backdrop {
+    background: rgba(23, 26, 31, 0.55);
+    backdrop-filter: blur(3px);
+  }
+
+  .effects-dialog:not([open]) {
+    display: none;
+  }
+
+  .effects-dialog[open] {
+    display: block;
+  }
+
+  .effects-dialog .filter-fx-panel {
+    min-width: 0;
+    max-height: min(900px, calc(100dvh - 1.5rem));
+    overflow: auto;
+  }
+
   .filter-preset-pedal {
     --creature-accent: var(--signal-effect, #00b578);
     position: relative;
@@ -4603,6 +4639,13 @@ import "@fontsource-variable/open-sans";
       transform 180ms ease;
   }
 
+  .effects-dialog .filter-fx-body {
+    display: block;
+    overflow: visible;
+    opacity: 1;
+    transform: none;
+  }
+
   .filter-fx-body[data-expanded="false"] {
     grid-template-rows: 0fr;
     opacity: 0;
@@ -5290,6 +5333,18 @@ import "@fontsource-variable/open-sans";
   }
 
   @media (max-width: 899px) {
+    .effects-dialog {
+      width: 100vw;
+      max-width: 100vw;
+      max-height: 100dvh;
+      margin: auto 0 0;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .effects-dialog .filter-fx-panel {
+      max-height: 100dvh;
+    }
+
     .header-grid {
       grid-template-columns: minmax(110px, 0.35fr) minmax(210px, 0.65fr);
     }
@@ -5533,6 +5588,13 @@ import "@fontsource-variable/open-sans";
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .effects-dialog,
+    .effects-dialog * {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+
     .instrument-screen-playhead,
     .instrument-screen-pulse,
     .filter-fx-body,
@@ -5586,6 +5648,68 @@ import "@fontsource-variable/open-sans";
       animation: none;
       visibility: visible;
       transform: none;
+    }
+  }
+
+  /* Final shell contract: keep the four header children in named areas after
+     the legacy hardware breakpoint rules above have been applied. */
+  .header-grid {
+    grid-template-columns: minmax(118px, 0.35fr) auto minmax(220px, 0.8fr) max-content;
+    grid-template-areas: "title menu scope bpm";
+    height: auto;
+    min-height: 56px;
+  }
+
+  .header-grid > .app-title { grid-area: title; }
+  .header-grid > .instrument-screen { grid-area: scope; }
+  .header-grid > .bpm-control { grid-area: bpm; min-width: 0; }
+
+  /* 900px, 1100px, and 1132px remain in the compact two-row shell. */
+  @media (min-width: 900px) and (max-width: 1132px) {
+    .header-grid {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "title menu" "scope bpm";
+    }
+  }
+
+  @media (max-width: 899px) {
+    .header-grid {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "title menu" "scope bpm";
+      min-height: 0;
+    }
+
+    .header-grid > .bpm-control {
+      grid-column: auto;
+      min-width: 0;
+      overflow: hidden;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .header-grid {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "title menu" "scope bpm";
+      align-items: center;
+    }
+
+    .header-grid > .instrument-screen { min-width: 0; }
+    .header-grid > .bpm-control { justify-content: flex-end; }
+  }
+
+  @media (max-width: 420px) {
+    .header-grid {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "title menu" "scope scope" "bpm bpm";
+    }
+
+    .header-grid > .instrument-screen,
+    .header-grid > .bpm-control {
+      width: 100%;
+    }
+
+    .header-grid > .bpm-control {
+      justify-content: flex-start;
     }
   }
 </style>
@@ -5786,11 +5910,9 @@ import "@fontsource-variable/open-sans";
   });
   let filterEffectAvailable = true;
   let filterPanelExpanded = false;
-  let filterPanelTransitionGeneration = 0;
-  let filterPanelHideTimerId = null;
-  let filterPanelTransitionEndHandler = null;
+  let effectsOpenFrame = null;
+  let shellReadiness;
   let filterControlsBound = false;
-  const FILTER_PANEL_TRANSITION_MS = 180;
   const DUPLICATE_PATTERN_ICON =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
   const DELETE_PATTERN_ICON =
@@ -5817,6 +5939,7 @@ import "@fontsource-variable/open-sans";
   const filterFxToggle = document.getElementById("filterFxToggle");
   const filterFxToggleLabel = document.querySelector("[data-filter-toggle-label]");
   const filterFxBody = document.getElementById("filterFxBody");
+  const effectsDialog = document.getElementById("effectsDialog");
   const filterFxStatus = document.getElementById("filterFxStatus");
   const toneFxStatus = document.getElementById("toneFxStatus");
   const filterFxActionStatus = document.getElementById("filterFxActionStatus");
@@ -6167,100 +6290,41 @@ import "@fontsource-variable/open-sans";
     announceFilterAction("Filter reset; bypassed.");
   }
 
-  function prefersReducedFilterMotion() {
-    return Boolean(
-      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
-  }
-
-  function clearFilterPanelTransitionCompletion() {
-    if (filterPanelHideTimerId !== null) {
-      window.clearTimeout(filterPanelHideTimerId);
-      filterPanelHideTimerId = null;
+  function cancelEffectsOpenFrame() {
+    if (effectsOpenFrame !== null && typeof window.cancelAnimationFrame === "function") {
+      window.cancelAnimationFrame(effectsOpenFrame);
     }
-    if (filterFxBody && filterPanelTransitionEndHandler) {
-      filterFxBody.removeEventListener("transitionend", filterPanelTransitionEndHandler);
-      filterPanelTransitionEndHandler = null;
-    }
-  }
-
-  function finishFilterPanelCollapse(generation) {
-    if (
-      !filterFxBody ||
-      generation !== filterPanelTransitionGeneration ||
-      filterPanelExpanded
-    ) {
-      return;
-    }
-    clearFilterPanelTransitionCompletion();
-    filterFxBody.hidden = true;
-    filterFxBody.dataset.transitioning = "false";
+    effectsOpenFrame = null;
   }
 
   function setFilterPanelExpanded(expanded, options) {
     const nextExpanded = Boolean(expanded);
-    if (!filterFxBody || !filterFxToggle) return false;
-    const shouldAnimate =
-      !(options && options.animate === false) && !prefersReducedFilterMotion();
-    const generation = ++filterPanelTransitionGeneration;
-
-    clearFilterPanelTransitionCompletion();
-
-    if (
-      !nextExpanded &&
-      document.activeElement instanceof Element &&
-      filterFxBody.contains(document.activeElement)
-    ) {
-      filterFxToggle.focus();
-    }
-
+    if (!filterFxBody || !filterFxToggle || !effectsDialog) return false;
     filterPanelExpanded = nextExpanded;
-    filterFxBody.dataset.transitioning = shouldAnimate ? "true" : "false";
+    filterFxBody.dataset.expanded = "true";
+    filterFxBody.hidden = false;
+    filterFxBody.inert = false;
+    filterFxBody.removeAttribute("inert");
+    filterFxBody.removeAttribute("aria-hidden");
     filterFxToggle.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
-    filterFxToggle.setAttribute(
-      "aria-label",
-      nextExpanded ? "Hide effects" : "Show effects"
-    );
-    if (filterFxToggleLabel) {
-      filterFxToggleLabel.textContent = nextExpanded ? "Hide effects" : "Show effects";
-    }
+    filterFxToggle.setAttribute("aria-label", "Close effects");
+    if (filterFxToggleLabel) filterFxToggleLabel.textContent = "Close effects";
 
     if (nextExpanded) {
-      filterFxBody.hidden = false;
-      filterFxBody.inert = false;
-      filterFxBody.removeAttribute("inert");
-      filterFxBody.removeAttribute("aria-hidden");
-      filterFxBody.dataset.expanded = "false";
-      if (shouldAnimate) {
-        void filterFxBody.offsetHeight;
+      if (!effectsDialog.open) {
+        if (typeof effectsDialog.showModal === "function") {
+          effectsDialog.showModal();
+        } else {
+          effectsDialog.setAttribute("open", "");
+        }
       }
-      filterFxBody.dataset.expanded = "true";
-      if (!shouldAnimate) filterFxBody.dataset.transitioning = "false";
       return true;
     }
 
-    filterFxBody.dataset.expanded = "false";
-    filterFxBody.inert = true;
-    filterFxBody.setAttribute("inert", "");
-    filterFxBody.setAttribute("aria-hidden", "true");
-    if (!shouldAnimate) {
-      finishFilterPanelCollapse(generation);
+    if (effectsDialog.open) {
+      effectsDialog.close();
       return true;
     }
-
-    filterPanelTransitionEndHandler = function (event) {
-      if (
-        event.target !== filterFxBody ||
-        (event.propertyName && event.propertyName !== "grid-template-rows")
-      ) {
-        return;
-      }
-      finishFilterPanelCollapse(generation);
-    };
-    filterFxBody.addEventListener("transitionend", filterPanelTransitionEndHandler);
-    filterPanelHideTimerId = window.setTimeout(function () {
-      finishFilterPanelCollapse(generation);
-    }, FILTER_PANEL_TRANSITION_MS);
     return true;
   }
 
@@ -6270,8 +6334,35 @@ import "@fontsource-variable/open-sans";
 
     if (filterFxToggle) {
       filterFxToggle.addEventListener("click", function () {
-        setFilterPanelExpanded(!filterPanelExpanded);
+        setFilterPanelExpanded(false);
       });
+    }
+    if (effectsDialog) {
+      effectsDialog.addEventListener("close", function () {
+        if (effectsDialog.open) return;
+        filterPanelExpanded = false;
+        if (filterFxToggle) filterFxToggle.setAttribute("aria-expanded", "false");
+      });
+      window.addEventListener("open-beats:effects", function () {
+        cancelEffectsOpenFrame();
+        effectsOpenFrame = window.requestAnimationFrame(function openEffectsFromMenu() {
+          effectsOpenFrame = null;
+          setFilterPanelExpanded(true);
+        });
+      });
+      window.addEventListener("open-beats:patterns", function () {
+        cancelEffectsOpenFrame();
+        if (effectsDialog.open) {
+          effectsDialog.close();
+        }
+        window.dispatchEvent(new CustomEvent("open-beats:patterns-ready"));
+      });
+      shellReadiness = (window.__openBeatsShellReadiness ||= {
+        page: false,
+        patterns: false,
+      });
+      shellReadiness.page = true;
+      window.dispatchEvent(new CustomEvent("open-beats:page-consumer-ready"));
     }
     if (filterFxBypassBtn) {
       filterFxBypassBtn.addEventListener("click", function () {
@@ -6973,10 +7064,8 @@ import "@fontsource-variable/open-sans";
     loadFromURLParams();
     ensureSongState();
     loadSelectedPatternIntoGrid();
-    updatePatternMeta();
     tryWireArrangementControlsWithRetry(30, 100);
     window.renderPatternManager = function () {
-      updatePatternMeta();
       return tryWireArrangementControlsWithRetry(30, 100);
     };
     window.addEventListener("arrangement:ready", function () {
@@ -7360,7 +7449,6 @@ import "@fontsource-variable/open-sans";
   function tryWireArrangementControlsWithRetry(maxRetries, intervalMs) {
     if (wireArrangementControls()) {
       renderPatternList();
-      updatePatternMeta();
       return true;
     }
 
@@ -7370,7 +7458,6 @@ import "@fontsource-variable/open-sans";
       if (wireArrangementControls()) {
         clearInterval(retryTimer);
         renderPatternList();
-        updatePatternMeta();
       } else if (retries >= maxRetries) {
         clearInterval(retryTimer);
       }
@@ -7649,7 +7736,6 @@ import "@fontsource-variable/open-sans";
     ensureSongState();
     writePatternToGrid(patterns[selectedPatternIndex]);
     renderPitchRollGrid();
-    updatePatternMeta();
   }
 
   function selectPatternForEditing(nextIndex) {
@@ -7674,7 +7760,6 @@ import "@fontsource-variable/open-sans";
     writePatternToGrid(patterns[selectedPatternIndex]);
     renderPitchRollGrid();
     renderPatternList();
-    updatePatternMeta();
   }
 
   function getRepeatsForPattern(patternIndex) {
@@ -7798,7 +7883,6 @@ import "@fontsource-variable/open-sans";
     ensureSongState();
     loadSelectedPatternIntoGrid();
     renderPatternList();
-    updatePatternMeta();
   }
 
   function movePatternByOffset(fromIndex, offset) {
@@ -7867,7 +7951,6 @@ import "@fontsource-variable/open-sans";
     }
     loadSelectedPatternIntoGrid();
     renderPatternList();
-    updatePatternMeta();
   }
 
   function deletePatternAtIndex(targetIndex) {
@@ -7908,16 +7991,6 @@ import "@fontsource-variable/open-sans";
     }
     loadSelectedPatternIntoGrid();
     renderPatternList();
-    updatePatternMeta();
-  }
-
-  function updatePatternMeta() {
-    ensureSongState();
-    const patternSummary = document.querySelector(".pattern-manager-summary");
-    if (patternSummary) {
-      patternSummary.textContent =
-        "Pattern " + (selectedPatternIndex + 1) + " · " + patterns.length + " total";
-    }
   }
 
   function renderPatternList() {
@@ -8092,7 +8165,6 @@ import "@fontsource-variable/open-sans";
         );
         patternRepeats[index] = repeats;
         repeatInput.value = repeats.toString();
-        updatePatternMeta();
       });
       row.appendChild(repeatInput);
 
@@ -8170,7 +8242,6 @@ import "@fontsource-variable/open-sans";
       selectedPatternIndex = patterns.length - 1;
       loadSelectedPatternIntoGrid();
       renderPatternList();
-      updatePatternMeta();
     });
 
     clearPatternBtn.addEventListener("click", function () {
@@ -8179,7 +8250,6 @@ import "@fontsource-variable/open-sans";
       patternPitchOffsets[selectedPatternIndex] = createDefaultPatternPitchOffsets();
       loadSelectedPatternIntoGrid();
       renderPatternList();
-      updatePatternMeta();
     });
 
     return true;
@@ -8299,7 +8369,6 @@ import "@fontsource-variable/open-sans";
       if (loopPatternMode) {
         loadSelectedPatternIntoGrid();
         renderPatternList();
-        updatePatternMeta();
       } else {
         syncEditingPatternToPlayback();
       }
@@ -8351,7 +8420,6 @@ import "@fontsource-variable/open-sans";
     cancelScheduledSources();
     clearScheduledHighlightTimers();
     clearPlayingHighlight();
-    updatePatternMeta();
     updateAudioReadinessUi();
     return closeOperation;
   }
@@ -8383,7 +8451,6 @@ import "@fontsource-variable/open-sans";
     ensureSongState();
     loadSelectedPatternIntoGrid();
     renderPatternList();
-    updatePatternMeta();
 
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, "", window.location.pathname);
@@ -8462,7 +8529,6 @@ import "@fontsource-variable/open-sans";
           patterns.length - 1,
           0
         );
-        updatePatternMeta();
       } else {
         playbackPatternIndex = (playbackPatternIndex + 1) % patterns.length;
         syncEditingPatternToPlayback();

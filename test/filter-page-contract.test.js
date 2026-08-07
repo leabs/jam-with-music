@@ -10,6 +10,10 @@ const pageSource = readFileSync(
   new URL("../src/pages/index.astro", import.meta.url),
   "utf8"
 );
+const globalStyleSource = readFileSync(
+  new URL("../src/styles/globals.css", import.meta.url),
+  "utf8"
+);
 
 const PRIMARY_HELP_COPY =
   "Filter reshapes the whole groove. Cutoff moves from dark to bright. " +
@@ -378,7 +382,7 @@ test("the preset state mirror is hidden, nonfocusable, and ordered", () => {
   ]);
 });
 
-test("effects shelf starts minimized with an explicit Show effects toggle", () => {
+test("effects drawer starts closed while its controls remain mounted", () => {
   const panelMarkup = getFilterPanelMarkup();
   const toggleTag = getStartTagById(panelMarkup, "filterFxToggle");
   const bodyTag = getStartTagById(panelMarkup, "filterFxBody");
@@ -390,15 +394,14 @@ test("effects shelf starts minimized with an explicit Show effects toggle", () =
     "function setFilterPanelExpanded",
   );
 
-  assertAttribute(toggleTag, "aria-controls", "filterFxBody");
+  assertAttribute(toggleTag, "aria-controls", "effectsDialog");
   assertAttribute(toggleTag, "aria-expanded", "false");
-  assertAttribute(toggleTag, "aria-label", "Show effects");
-  assert.equal(normalizeText(toggleMarkup?.[1] ?? ""), "Show effects");
+  assertAttribute(toggleTag, "aria-label", "Close effects");
+  assert.equal(normalizeText(toggleMarkup?.[1] ?? ""), "Close effects");
   assertAttribute(bodyTag, "id", "filterFxBody");
-  assertAttribute(bodyTag, "data-expanded", "false");
-  assertAttribute(bodyTag, "aria-hidden", "true");
-  assert.match(bodyTag, /\binert(?:\s|>)/);
-  assert.match(bodyTag, /\bhidden(?:\s|>)/);
+  assertAttribute(bodyTag, "data-expanded", "true");
+  assert.doesNotMatch(bodyTag, /\b(?:inert|hidden|aria-hidden)=/);
+  assert.match(pageSource, /<dialog\b[^>]*id="effectsDialog"/);
   assert.equal(panelMarkup.match(/\bclass="filter-fx-body-inner"/g)?.length, 1);
   assert.match(pageSource, /\blet filterPanelExpanded = false\s*;/);
   assert.match(
@@ -406,66 +409,39 @@ test("effects shelf starts minimized with an explicit Show effects toggle", () =
     /setFilterPanelExpanded\(false,\s*\{\s*animate:\s*false\s*\}\)\s*;/,
   );
   assert.equal(
-    toggleStateBlock.match(
-      /nextExpanded\s*\?\s*"Hide effects"\s*:\s*"Show effects"/g,
-    )?.length,
+    toggleStateBlock.match(/Close effects/g)?.length,
     2,
-    "both the accessible name and visible label must use Hide/Show effects",
+    "the close control keeps a stable accessible and visible label",
   );
 });
 
-test("the disclosure controller is the sole visibility writer and no workflow forces it open", () => {
-  const finishBlock = getBalancedBlock(
-    pageSource,
-    "function finishFilterPanelCollapse",
-  );
+test("the native effects dialog controller owns visibility and menu handoff", () => {
   const controllerBlock = getBalancedBlock(
     pageSource,
     "function setFilterPanelExpanded",
   );
-  const disclosureWriterSource = finishBlock + controllerBlock;
-  const focusReturnIndex = controllerBlock.indexOf("filterFxToggle.focus()");
-  const closeInertIndex = controllerBlock.indexOf("filterFxBody.inert = true");
-  const visibilityWrites = [
-    /filterFxBody\.hidden\s*=/g,
-    /filterFxBody\.inert\s*=/g,
-    /filterFxBody\.(?:setAttribute|removeAttribute)\(\s*"(?:inert|aria-hidden)"/g,
-    /filterFxBody\.dataset\.expanded\s*=/g,
-    /filterFxToggle\.setAttribute\(\s*"aria-expanded"/g,
-  ];
-
-  for (const pattern of visibilityWrites) {
-    assert.equal(
-      countMatches(pageSource, pattern),
-      countMatches(disclosureWriterSource, pattern),
-      `${pattern} must only occur in the disclosure controller`,
-    );
-  }
-
-  assert.equal(countMatches(pageSource, /\bfilterPanelExpanded\s*=/g), 2);
-  assert.equal(countMatches(pageSource, /\bsetFilterPanelExpanded\(/g), 3);
-  assert.match(
-    finishBlock,
-    /generation !== filterPanelTransitionGeneration \|\|\s*filterPanelExpanded/,
-  );
   assert.match(
     controllerBlock,
-    /const generation = \+\+filterPanelTransitionGeneration\s*;/,
+    /effectsDialog\.showModal\(\)|effectsDialog\.setAttribute\("open"/,
   );
-  assert.match(controllerBlock, /clearFilterPanelTransitionCompletion\(\)\s*;/);
-  assert.ok(
-    focusReturnIndex !== -1 && focusReturnIndex < closeInertIndex,
-    "contained focus must return to the toggle before the tray becomes inert",
-  );
-  assert.match(
-    controllerBlock,
-    /filterFxBody\.hidden = false\s*;[\s\S]*?filterFxBody\.inert = false\s*;[\s\S]*?removeAttribute\("inert"\)[\s\S]*?removeAttribute\("aria-hidden"\)/,
-  );
+  assert.match(controllerBlock, /effectsDialog\.close\(\)/);
+  assert.doesNotMatch(controllerBlock, /focusEffectsMenuTrigger/);
+  assert.match(pageSource, /effectsDialog\.addEventListener\("close"/);
+  assert.match(pageSource, /let effectsOpenFrame = null/);
+  assert.match(pageSource, /function cancelEffectsOpenFrame/);
+  assert.match(pageSource, /cancelEffectsOpenFrame\(\);[\s\S]*?open-beats:patterns/);
+  assert.match(pageSource, /open-beats:patterns-ready/);
+  assert.doesNotMatch(pageSource, /effectsDialogGeneration|effectsCloseGeneration/);
+  assert.match(pageSource, /if \(effectsDialog\.open\) return/);
+  assert.match(pageSource, /open-beats:page-consumer-ready/);
+  assert.match(pageSource, /open-beats:page-consumer-ready/);
+  assert.match(controllerBlock, /effectsDialog\.close\(\);\s*return true;/);
   assert.match(
     pageSource,
-    /filterFxToggle\.addEventListener\("click",\s*function \(\) \{\s*setFilterPanelExpanded\(!filterPanelExpanded\)\s*;/,
+    /filterFxToggle\.addEventListener\("click",\s*function \(\) \{\s*setFilterPanelExpanded\(false\)/,
   );
-  assert.doesNotMatch(pageSource, /setFilterPanelExpanded\(\s*true\b/);
+  assert.match(pageSource, /window\.addEventListener\("open-beats:effects"/);
+  assert.match(pageSource, /window\.addEventListener\("open-beats:patterns"/);
 });
 
 test("the micro-screen is text-backed presentation with no transport or Filter authority", () => {
@@ -686,50 +662,14 @@ test("real shell, disclosure, shared Filter, and lane controls keep a 44px floor
   }
 });
 
-test("disclosure motion is exactly 180ms and reduced motion completes synchronously", () => {
+test("drawer and portaled Pattern content honor reduced motion", () => {
   const hardwareSource = getHardwareSource();
-  const bodyRule = getCssRuleBody(hardwareSource, "\\.filter-fx-body");
-  const transition = bodyRule.match(/\btransition:\s*([\s\S]*?);/);
-  const reducedMotionBlock = getBalancedBlock(
-    hardwareSource,
-    "@media (prefers-reduced-motion: reduce)"
-  );
-  const preferenceBlock = getBalancedBlock(
-    pageSource,
-    "function prefersReducedFilterMotion",
-  );
-  const controllerBlock = getBalancedBlock(
-    pageSource,
-    "function setFilterPanelExpanded",
-  );
-
-  assert.ok(transition, "effects tray transition must exist");
-  assert.deepEqual(
-    Array.from(transition[1].matchAll(/(\d+)ms/g), (match) => Number(match[1])),
-    [180, 180, 180],
-    "grid, opacity, and translate must share the exact 180ms duration",
-  );
-  assert.match(transition[1], /grid-template-rows\s+180ms\s+ease/);
-  assert.match(transition[1], /opacity\s+180ms\s+ease/);
-  assert.match(transition[1], /transform\s+180ms\s+ease/);
-  assert.match(pageSource, /const FILTER_PANEL_TRANSITION_MS = 180\s*;/);
-  assert.match(
-    controllerBlock,
-    /window\.setTimeout\(function \(\) \{[\s\S]*?finishFilterPanelCollapse\(generation\)[\s\S]*?FILTER_PANEL_TRANSITION_MS/,
-  );
-  assert.match(
-    preferenceBlock,
-    /window\.matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches/,
-  );
-  assert.match(controllerBlock, /&& !prefersReducedFilterMotion\(\)/);
-  assert.match(
-    controllerBlock,
-    /if \(!shouldAnimate\) \{\s*finishFilterPanelCollapse\(generation\)\s*;/,
-  );
-  assert.match(
-    reducedMotionBlock,
-    /\.instrument-screen-playhead,\s*\.instrument-screen-pulse,\s*\.filter-fx-body,[\s\S]*?\{[\s\S]*?animation:\s*none\s*;[\s\S]*?transition:\s*none\s*;/,
-  );
+  assert.match(hardwareSource, /\.effects-dialog\s*\{/);
+  assert.doesNotMatch(hardwareSource, /\.pattern-manager-dialog/);
+  assert.match(globalStyleSource, /\.pattern-manager-dialog,[\s\S]*?\.menu-popup/);
+  assert.match(globalStyleSource, /\.pattern-manager-dialog,[\s\S]*?animation-duration:\s*0\.01ms\s*!important/);
+  assert.match(hardwareSource, /animation-duration:\s*0\.01ms\s*!important/);
+  assert.match(hardwareSource, /transition-duration:\s*0\.01ms\s*!important/);
 });
 
 test("the effects shelf preserves one shared Filter control surface", () => {
