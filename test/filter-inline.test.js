@@ -35,7 +35,7 @@ const FILTER_PRESET_CARD_CONTRACT = [
   ["bright", "Bright", "songbird"],
   ["resonant-sweep", "Resonant Sweep", "ribbon snake"],
   ["grit", "Grit", "black-and-white dragon"],
-  ["custom", "Custom", "chameleon"],
+  ["custom", "Custom", "custom patch"],
 ];
 
 function decodeSongPayload(encoded) {

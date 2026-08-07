@@ -82,7 +82,7 @@ available row width; computed layout remains a browser check.
 ## UI overhaul seam
 
 The authoritative static/VM/build artifact is page
-`ca3c79ee4127be03975c72dadb48af8a9aa26398d0494f73f416a2a65c5b2240`
+`8e0724071d62388a46e4fc584a32cab4dfb655b44106e18d87905fb6bbccd1ad`
 with ArrangeDialog
 `ffb321321d4bc688ff9fea71cf1853bd8d97d1cab1bfc6c4d429d291818ed231`,
 ClearProjectDialog
@@ -90,7 +90,7 @@ ClearProjectDialog
 page contract
 `f9e01c9a355e1193a0549131a904b21fa76b9e8d108896725cad9db72d553e81`,
 Filter inline
-`167741ffdc56b317cc7dc8198b74b5babe9c0850f1a5f7d4f426670ddec72026`,
+`70b1a06b5c224d6a282960f4f4b01f9e2b8a539b7dad7884efefa3644181046b`,
 harness
 `d396e13f377cb654ea000d7c505dba360a03ffdaa08f9cb5a4caaad7acb721c2`,
 and Space graph contract

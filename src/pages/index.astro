@@ -117,6 +117,9 @@ import "@fontsource-variable/open-sans";
         <div class="filter-fx-heading">
           <span class="filter-fx-title" id="filterFxTitle">EFFECTS</span>
           <span class="filter-fx-status-dot" aria-hidden="true"></span>
+          <span class="filter-fx-effect-names" aria-label="Tone and Reverb">
+            <span>TONE</span><span>REVERB</span>
+          </span>
           <span
             class="filter-fx-status"
             id="filterFxStatus"
@@ -391,22 +394,18 @@ import "@fontsource-variable/open-sans";
             data-creature="chameleon"
             data-filter-selected="false"
             data-filter-active="false"
-            aria-label="Select Custom Filter preset, chameleon"
+            aria-label="Select Custom Filter preset, custom patch"
             aria-pressed="false"
             disabled
           >
             <span class="filter-creature-tile" aria-hidden="true">
               <span class="filter-creature-preset">Custom</span>
-              <span class="filter-creature-name">Chameleon</span>
+              <span class="filter-creature-name">Custom Patch</span>
               <svg class="filter-creature-portrait" viewBox="0 0 96 78" aria-hidden="true" focusable="false">
-                <g class="creature-gesture creature-chameleon">
-                  <path d="M28 50 C29 35 42 27 56 32 C68 36 69 53 59 60 C49 67 31 62 28 50 Z"></path>
-                  <circle cx="57" cy="34" r="8"></circle>
-                  <circle cx="59" cy="33" r="2"></circle>
-                  <path d="M29 52 C17 49 15 62 23 66 C32 72 39 59 31 56"></path>
-                  <path d="M66 38 L78 41 L67 45 M38 62 L34 70 M54 62 L58 70"></path>
-                </g>
-                <path class="creature-accent creature-chameleon-patch" d="M39 42 C45 36 57 39 59 48 C57 57 43 58 38 51 C36 47 37 44 39 42 Z"></path>
+                <path class="custom-patch-grid" d="M12 16H84M12 32H84M12 48H84M12 64H84M24 8V70M40 8V70M56 8V70M72 8V70"></path>
+                <path class="custom-patch-signal" d="M12 48H25L31 28L39 58L48 38L56 48H68L75 22L84 48"></path>
+                <circle class="custom-patch-node" cx="31" cy="28" r="3"></circle>
+                <circle class="custom-patch-node" cx="75" cy="22" r="3"></circle>
               </svg>
               <span class="filter-creature-descriptor">Your four values</span>
               <span class="filter-preset-values" data-filter-custom-values>100 · 0 · 0 · 100</span>
@@ -594,8 +593,8 @@ import "@fontsource-variable/open-sans";
         >
           <div class="space-fx-header">
             <div>
-              <span class="space-fx-kicker">SPACE REVERB</span>
-              <h2 id="spaceFxTitle">Space</h2>
+              <span class="space-fx-kicker">REVERB / SPACE</span>
+              <h2 id="spaceFxTitle">Reverb</h2>
             </div>
             <span id="spaceFxStatus" data-space-status role="status" aria-live="polite">Bypassed</span>
           </div>
@@ -2827,6 +2826,27 @@ import "@fontsource-variable/open-sans";
     stroke: currentColor !important;
   }
 
+  .custom-patch-grid {
+    fill: none;
+    stroke: var(--hardware-hairline, #a8adb5);
+    stroke-width: 1;
+    stroke-dasharray: 2 3;
+    opacity: 0.75;
+  }
+
+  .custom-patch-signal {
+    fill: none !important;
+    stroke: var(--signal-selection, #00a6d6) !important;
+    stroke-width: 2.8 !important;
+    stroke-linecap: square !important;
+  }
+
+  .custom-patch-node {
+    fill: var(--signal-playback, #f05a28) !important;
+    stroke: var(--hardware-surface, #f5f6f7) !important;
+    stroke-width: 1.5 !important;
+  }
+
   .creature-dragon .creature-dragon-silhouette {
     fill: var(--hardware-ink, #171a1f);
     stroke: var(--hardware-ink, #171a1f);
@@ -4263,8 +4283,8 @@ import "@fontsource-variable/open-sans";
   .instrument-screen-trace {
     inset: 3px 2px 6px;
     background: var(--hardware-hairline);
-    clip-path: polygon(0 74%, 7% 60%, 13% 70%, 20% 32%, 27% 63%, 34% 50%, 41% 68%, 48% 21%, 55% 58%, 62% 43%, 69% 65%, 76% 31%, 83% 55%, 90% 46%, 96% 66%, 100% 52%, 100% 58%, 96% 72%, 90% 52%, 83% 61%, 76% 37%, 69% 71%, 62% 49%, 55% 64%, 48% 27%, 41% 74%, 34% 56%, 27% 69%, 20% 38%, 13% 76%, 7% 66%, 0 80%);
-    opacity: 0.82;
+    clip-path: polygon(0 66%, 8% 66%, 12% 48%, 16% 66%, 27% 66%, 31% 34%, 35% 66%, 47% 66%, 51% 54%, 55% 66%, 68% 66%, 73% 24%, 78% 66%, 91% 66%, 95% 44%, 100% 66%, 100% 72%, 94% 54%, 90% 72%, 76% 72%, 73% 35%, 69% 72%, 54% 72%, 51% 61%, 47% 72%, 34% 72%, 31% 42%, 27% 72%, 15% 72%, 12% 56%, 8% 72%, 0 72%);
+    opacity: 0.9;
   }
 
   .instrument-screen[data-filter-active="true"] .instrument-screen-trace {
@@ -4486,6 +4506,36 @@ import "@fontsource-variable/open-sans";
     padding: 2px 5px 2px 12px;
   }
 
+  .filter-fx-heading,
+  .filter-fx-bar-actions {
+    min-width: 0;
+  }
+
+  .filter-fx-heading {
+    flex: 1 1 auto;
+    overflow: hidden;
+    gap: 6px;
+  }
+
+  .filter-fx-effect-names {
+    display: inline-flex;
+    flex: 0 1 auto;
+    min-width: 0;
+    gap: 5px;
+    color: var(--hardware-muted);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
+  .filter-fx-effect-names span + span::before {
+    margin-right: 5px;
+    color: var(--signal-selection);
+    content: "/";
+  }
+
   .filter-fx-title,
   .filter-fx-status,
   .filter-fx-help,
@@ -4515,8 +4565,10 @@ import "@fontsource-variable/open-sans";
   }
 
   .filter-fx-action {
-    min-width: 76px;
+    min-width: 44px;
     min-height: 44px;
+    max-width: 100%;
+    padding-inline: 8px;
     color: var(--hardware-ink);
     border: 1px solid var(--signal-effect);
     border-radius: 6px;
@@ -5156,8 +5208,8 @@ import "@fontsource-variable/open-sans";
     }
 
     .filter-fx-bar {
-      height: 36px;
-      min-height: 36px;
+      height: 48px;
+      min-height: 48px;
       padding: 0 4px 0 10px;
     }
 
@@ -5365,7 +5417,7 @@ import "@fontsource-variable/open-sans";
     }
 
     .filter-fx-action {
-      min-width: 72px;
+      min-width: 44px;
       min-height: 44px;
       padding: 7px 8px;
     }
