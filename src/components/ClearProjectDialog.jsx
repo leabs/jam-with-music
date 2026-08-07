@@ -10,10 +10,10 @@ import {
 } from "./ui/dialog";
 
 const cancelBtn =
-  "inline-flex items-center gap-1.5 rounded-sm bg-zinc-800/90 px-3 py-2 text-sm font-semibold tracking-wide text-zinc-100 transition hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-orange-400";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[#A8ADB5] bg-[#F5F6F7] px-3 py-2 text-sm font-semibold tracking-wide text-[#171A1F] transition-colors hover:border-[#00A6D6] hover:bg-[#00A6D6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171A1F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00B578]";
 
 const clearBtn =
-  "inline-flex items-center gap-1.5 rounded-sm bg-red-900/90 px-3 py-2 text-sm font-semibold tracking-wide text-red-100 transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-400";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[#C83D3D] bg-[#C83D3D] px-3 py-2 text-sm font-semibold tracking-wide text-white shadow-[0_2px_0_rgba(23,26,31,0.16)] transition-colors hover:border-[#171A1F] hover:bg-[#9C302F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171A1F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00B578]";
 
 export default function ClearProjectDialog() {
   const [open, setOpen] = useState(false);
@@ -36,10 +36,10 @@ export default function ClearProjectDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-md border-zinc-700/90 bg-zinc-950 p-5 text-zinc-100">
+      <DialogContent className="max-w-md border-[#A8ADB5] bg-[#F5F6F7] p-5 text-[#171A1F]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FiAlertTriangle className="h-5 w-5 text-red-300" aria-hidden="true" />
+            <FiAlertTriangle className="h-5 w-5 text-[#C83D3D]" aria-hidden="true" />
             <span>Clear Project?</span>
           </DialogTitle>
           <DialogDescription>

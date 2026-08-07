@@ -16,7 +16,7 @@ const DialogOverlay = React.forwardRef(function DialogOverlay(
     <DialogPrimitive.Overlay
       ref={ref}
       className={cn(
-        "fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-[3px]",
+        "fixed inset-0 z-50 bg-[#171A1F]/55 backdrop-blur-[3px]",
         className
       )}
       {...props}
@@ -35,13 +35,13 @@ const DialogContent = React.forwardRef(function DialogContent(
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 grid w-[min(960px,calc(100%-1.5rem))] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-zinc-700/90 bg-zinc-950 p-6 text-zinc-100 shadow-[0_30px_90px_rgba(0,0,0,0.65)]",
+          "fixed left-[50%] top-[50%] z-50 grid w-[min(960px,calc(100%-1.5rem))] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-[#A8ADB5] bg-[#F5F6F7] p-6 text-[#171A1F] shadow-[0_30px_90px_rgba(23,26,31,0.28)]",
           className
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-md border border-zinc-700/80 bg-zinc-900/80 p-1 text-zinc-400 transition hover:border-orange-400/60 hover:text-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-400">
+        <DialogPrimitive.Close className="absolute right-4 top-4 inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-[#A8ADB5] bg-[#E3E6EB] p-1 text-[#171A1F] transition-colors hover:border-[#00A6D6] hover:bg-[#00A6D6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171A1F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00B578]">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
@@ -88,7 +88,7 @@ const DialogDescription = React.forwardRef(function DialogDescription(
   return (
     <DialogPrimitive.Description
       ref={ref}
-      className={cn("text-sm text-zinc-300", className)}
+      className={cn("text-sm text-[#515860]", className)}
       {...props}
     />
   );

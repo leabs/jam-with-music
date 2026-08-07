@@ -2,7 +2,11 @@
   "name": "drumkit",
   "type": "module",
   "version": "0.0.1",
+  "engines": {
+    "node": "22.14.0"
+  },
   "scripts": {
+    "test": "node --test --test-concurrency=1 test/*.test.js",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

@@ -24,26 +24,50 @@ import "@fontsource-variable/open-sans";
         <span class="app-title-short" aria-hidden="true">OB</span>
       </h1>
 
+      <div
+        class="instrument-screen"
+        id="instrumentScreen"
+        role="img"
+        aria-label="Stopped, 120 BPM, Filter bypassed."
+        data-playing="false"
+      >
+        <div class="instrument-screen-head" aria-hidden="true">
+          <span>STEP SCOPE</span>
+          <span><span data-screen-bpm>120</span> BPM</span>
+        </div>
+        <div class="instrument-screen-scope" aria-hidden="true">
+          <span class="instrument-screen-baseline"></span>
+          <span class="instrument-screen-trace"></span>
+          <span class="instrument-screen-edit-context"></span>
+          <span class="instrument-screen-playhead"></span>
+          <span class="instrument-screen-pulse"></span>
+        </div>
+        <div class="instrument-screen-readout" aria-hidden="true">
+          <span data-screen-mode>STOPPED</span>
+          <span data-screen-filter>FILTER BYPASSED</span>
+        </div>
+      </div>
+
       <!-- BPM Control -->
       <div class="bpm-control">
         <label for="bpm">BPM:</label>
         <input type="number" id="bpm" value="120" min="40" max="300" />
-        <button id="playBtn" type="button">
+        <button id="playBtn" type="button" data-mode="play" aria-describedby="audioStatus" disabled>
           <span class="btn-icon" id="playBtnIconPlay"><FiPlay /></span>
           <span class="btn-icon btn-icon-hidden" id="playBtnIconStop">
             <FiSquare />
           </span>
           <span class="button-label" id="playBtnLabel">Play</span>
         </button>
-        <button id="loopPatternBtn" type="button" aria-pressed="false">
+        <button id="loopPatternBtn" type="button" aria-pressed="false" disabled>
           <span class="btn-icon"><FiRepeat /></span>
           <span class="button-label" data-loop-label>Loop Pattern</span>
         </button>
-        <button id="shareBtn" type="button">
+        <button id="shareBtn" type="button" disabled>
           <span class="btn-icon"><FiShare2 /></span>
           <span class="button-label">Share</span>
         </button>
-        <button id="clearProjectBtn" type="button">
+        <button id="clearProjectBtn" type="button" disabled>
           <span class="btn-icon"><FiTrash2 /></span>
           <span class="button-label">Clear Project</span>
         </button>
@@ -63,6 +87,577 @@ import "@fontsource-variable/open-sans";
         </div>
       </div>
     </div>
+
+    <div class="audio-status-row">
+      <p
+        id="audioStatus"
+        class="audio-status"
+        role="status"
+        aria-live="polite"
+        tabindex="-1"
+      >
+        Preparing sounds…
+      </p>
+      <button id="retrySamplesBtn" class="retry-samples-btn" type="button" hidden>
+        Retry failed sounds
+      </button>
+    </div>
+
+    <ArrangeDialog client:load />
+
+    <section
+      id="filterFxPanel"
+      class="filter-fx-panel"
+      aria-labelledby="filterFxTitle"
+      data-enabled="false"
+      data-available="true"
+      data-preset="clean"
+    >
+      <div class="filter-fx-bar">
+        <div class="filter-fx-heading">
+          <span class="filter-fx-title" id="filterFxTitle">EFFECTS</span>
+          <span class="filter-fx-status-dot" aria-hidden="true"></span>
+          <span
+            class="filter-fx-status"
+            id="filterFxStatus"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >Tone: Bypassed · Space: Bypassed</span>
+          <span
+            class="sr-only"
+            id="filterFxActionStatus"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          ></span>
+        </div>
+        <div class="filter-fx-bar-actions">
+          <button
+            id="filterFxToggle"
+            class="filter-fx-action"
+            type="button"
+            aria-label="Show effects"
+            aria-expanded="false"
+            aria-controls="filterFxBody"
+          >
+            <span data-filter-toggle-label>Show effects</span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="filter-fx-body filter-fx-pedalboard-shelf"
+        id="filterFxBody"
+        data-expanded="false"
+        aria-hidden="true"
+        inert
+        hidden
+      >
+        <div class="filter-fx-body-inner">
+        <section class="tone-fx-panel" aria-labelledby="toneFxTitle" aria-describedby="filterFxHelp">
+        <div class="tone-fx-header">
+          <div><span class="tone-fx-kicker">TONE FILTER</span><h2 id="toneFxTitle">Tone</h2></div>
+          <span id="toneFxStatus" role="status" aria-live="polite">Bypassed</span>
+        </div>
+        <p class="filter-fx-help" id="filterFxHelp">
+          Filter reshapes the whole groove. Cutoff moves from dark to bright. Resonance
+          adds a peak. Drive adds grit. Mix blends the filtered sound with the clean
+          signal.
+        </p>
+
+        <div class="sr-only" aria-hidden="true">
+          <label for="filterFxPreset">Preset state mirror</label>
+          <select id="filterFxPreset" tabindex="-1" disabled>
+            <option value="clean">Clean</option>
+            <option value="warm">Warm</option>
+            <option value="bright">Bright</option>
+            <option value="resonant-sweep">Resonant Sweep</option>
+            <option value="grit">Grit</option>
+            <option value="custom" disabled>Custom</option>
+          </select>
+        </div>
+
+        <div
+          class="filter-fx-pedalboard"
+          data-filter-pedalboard
+          role="group"
+          aria-label="Filter presets"
+        >
+          <button
+            class="filter-preset-pedal"
+            type="button"
+            data-filter-preset-card="clean"
+            data-creature="moon-rabbit"
+            data-filter-selected="true"
+            data-filter-active="false"
+            aria-label="Select Clean Filter preset, moon rabbit"
+            aria-pressed="true"
+            disabled
+          >
+            <span class="filter-creature-tile" aria-hidden="true">
+              <span class="filter-creature-preset">Clean</span>
+              <span class="filter-creature-name">Moon Rabbit</span>
+              <svg class="filter-creature-portrait" viewBox="0 0 96 78" aria-hidden="true" focusable="false">
+                <circle class="creature-accent creature-rabbit-pulse" cx="48" cy="43" r="25"></circle>
+                <g class="creature-gesture creature-rabbit">
+                  <path d="M38 27 C32 18 32 6 38 5 C44 7 45 20 44 28"></path>
+                  <path d="M52 28 C52 16 55 6 61 7 C66 12 61 24 58 31"></path>
+                  <path d="M32 51 C32 35 39 27 50 27 C63 27 69 38 67 53 C65 65 36 66 32 51 Z"></path>
+                  <path d="M38 58 C40 52 44 50 48 55 C52 49 57 52 60 58"></path>
+                  <path d="M42 42 L45 42 M56 42 L59 42 M49 47 L52 47"></path>
+                </g>
+              </svg>
+              <span class="filter-creature-descriptor">Open + clear</span>
+              <svg class="filter-creature-response" viewBox="0 0 240 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path data-filter-preview-path d="M12 52 L210 52 Q224 52 228 94"></path>
+              </svg>
+              <span class="filter-creature-state"></span>
+              <span class="filter-creature-preview-values" hidden>
+                <span data-filter-preview-control="cutoff" style="--preview-value: 100"></span>
+                <span data-filter-preview-control="resonance" style="--preview-value: 0"></span>
+                <span data-filter-preview-control="drive" style="--preview-value: 0"></span>
+                <span data-filter-preview-control="mix" style="--preview-value: 100"></span>
+              </span>
+            </span>
+          </button>
+
+          <button
+            class="filter-preset-pedal"
+            type="button"
+            data-filter-preset-card="warm"
+            data-creature="sleepy-bear"
+            data-filter-selected="false"
+            data-filter-active="false"
+            aria-label="Select Warm Filter preset, sleepy bear"
+            aria-pressed="false"
+            disabled
+          >
+            <span class="filter-creature-tile" aria-hidden="true">
+              <span class="filter-creature-preset">Warm</span>
+              <span class="filter-creature-name">Sleepy Bear</span>
+              <svg class="filter-creature-portrait" viewBox="0 0 96 78" aria-hidden="true" focusable="false">
+                <g class="creature-gesture creature-bear">
+                  <circle cx="33" cy="25" r="8"></circle>
+                  <circle cx="63" cy="25" r="8"></circle>
+                  <path d="M28 47 C28 30 37 23 48 23 C60 23 68 32 68 48 C68 64 59 69 48 69 C36 69 28 62 28 47 Z"></path>
+                  <ellipse cx="48" cy="51" rx="13" ry="11"></ellipse>
+                  <path d="M37 40 Q41 44 45 40 M51 40 Q55 44 59 40 M45 51 Q48 54 51 51"></path>
+                </g>
+                <g class="creature-accent creature-bear-warmth">
+                  <path d="M39 17 C35 12 41 10 38 5"></path>
+                  <path d="M55 17 C51 12 58 10 55 5"></path>
+                </g>
+              </svg>
+              <span class="filter-creature-descriptor">Soft + round</span>
+              <svg class="filter-creature-response" viewBox="0 0 240 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path data-filter-preview-path d="M12 52 L150 52 Q178 52 228 94"></path>
+              </svg>
+              <span class="filter-creature-state"></span>
+              <span class="filter-creature-preview-values" hidden>
+                <span data-filter-preview-control="cutoff" style="--preview-value: 68"></span>
+                <span data-filter-preview-control="resonance" style="--preview-value: 18"></span>
+                <span data-filter-preview-control="drive" style="--preview-value: 14"></span>
+                <span data-filter-preview-control="mix" style="--preview-value: 78"></span>
+              </span>
+            </span>
+          </button>
+
+          <button
+            class="filter-preset-pedal"
+            type="button"
+            data-filter-preset-card="bright"
+            data-creature="songbird"
+            data-filter-selected="false"
+            data-filter-active="false"
+            aria-label="Select Bright Filter preset, songbird"
+            aria-pressed="false"
+            disabled
+          >
+            <span class="filter-creature-tile" aria-hidden="true">
+              <span class="filter-creature-preset">Bright</span>
+              <span class="filter-creature-name">Songbird</span>
+              <svg class="filter-creature-portrait" viewBox="0 0 96 78" aria-hidden="true" focusable="false">
+                <g class="creature-gesture creature-bird">
+                  <path d="M30 52 C30 37 39 28 52 29 C65 30 70 43 65 55 C61 65 37 65 30 52 Z"></path>
+                  <circle cx="58" cy="28" r="12"></circle>
+                  <path d="M69 27 L80 31 L69 35 Z M39 45 Q49 38 58 48 Q49 56 39 45 Z"></path>
+                  <path d="M43 63 L40 69 M54 63 L57 69 M59 27 L61 27"></path>
+                </g>
+                <g class="creature-accent creature-bird-chirp">
+                  <path d="M74 18 L82 12 M76 24 L88 22 M70 13 L72 4"></path>
+                </g>
+              </svg>
+              <span class="filter-creature-descriptor">Airy + light</span>
+              <svg class="filter-creature-response" viewBox="0 0 240 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path data-filter-preview-path d="M12 52 L196 52 Q216 52 228 94"></path>
+              </svg>
+              <span class="filter-creature-state"></span>
+              <span class="filter-creature-preview-values" hidden>
+                <span data-filter-preview-control="cutoff" style="--preview-value: 90"></span>
+                <span data-filter-preview-control="resonance" style="--preview-value: 10"></span>
+                <span data-filter-preview-control="drive" style="--preview-value: 8"></span>
+                <span data-filter-preview-control="mix" style="--preview-value: 94"></span>
+              </span>
+            </span>
+          </button>
+
+          <button
+            class="filter-preset-pedal"
+            type="button"
+            data-filter-preset-card="resonant-sweep"
+            data-creature="ribbon-snake"
+            data-filter-selected="false"
+            data-filter-active="false"
+            aria-label="Select Resonant Sweep Filter preset, ribbon snake"
+            aria-pressed="false"
+            disabled
+          >
+            <span class="filter-creature-tile" aria-hidden="true">
+              <span class="filter-creature-preset">Resonant Sweep</span>
+              <span class="filter-creature-name">Ribbon Snake</span>
+              <svg class="filter-creature-portrait" viewBox="0 0 96 78" aria-hidden="true" focusable="false">
+                <path class="creature-snake-body" d="M18 50 C18 25 74 24 74 47 C74 67 31 69 27 53 C24 40 51 35 61 47"></path>
+                <g class="creature-gesture creature-snake-head">
+                  <path d="M55 42 C61 37 71 39 73 46 C73 53 65 57 58 53 C54 50 53 46 55 42 Z"></path>
+                  <path d="M66 46 L68 46 M73 49 L80 47 M73 49 L80 52"></path>
+                </g>
+                <path class="creature-accent creature-snake-sweep" d="M19 55 C31 70 71 65 77 46"></path>
+              </svg>
+              <span class="filter-creature-descriptor">Peaked + moving</span>
+              <svg class="filter-creature-response" viewBox="0 0 240 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path data-filter-preview-path d="M12 52 L108 52 Q124 10 142 63 Q176 74 228 94"></path>
+              </svg>
+              <span class="filter-creature-state"></span>
+              <span class="filter-creature-preview-values" hidden>
+                <span data-filter-preview-control="cutoff" style="--preview-value: 45"></span>
+                <span data-filter-preview-control="resonance" style="--preview-value: 64"></span>
+                <span data-filter-preview-control="drive" style="--preview-value: 5"></span>
+                <span data-filter-preview-control="mix" style="--preview-value: 72"></span>
+              </span>
+            </span>
+          </button>
+
+          <button
+            class="filter-preset-pedal"
+            type="button"
+            data-filter-preset-card="grit"
+            data-creature="dragon"
+            data-filter-selected="false"
+            data-filter-active="false"
+            aria-label="Select Grit Filter preset, black-and-white dragon"
+            aria-pressed="false"
+            disabled
+          >
+            <span class="filter-creature-tile" aria-hidden="true">
+              <span class="filter-creature-preset">Grit</span>
+              <span class="filter-creature-name">Black-and-white Dragon</span>
+              <svg class="filter-creature-portrait" viewBox="0 0 96 78" aria-hidden="true" focusable="false">
+                <g class="creature-gesture creature-dragon">
+                  <path class="creature-dragon-tail" d="M35 59 C20 70 10 61 17 51 C21 45 30 48 28 55 C26 61 19 59 20 54"></path>
+                  <path class="creature-dragon-silhouette creature-dragon-wing" d="M40 45 L24 25 L27 46 L16 39 L27 61 L42 57 Z"></path>
+                  <path class="creature-dragon-silhouette creature-dragon-wing" d="M54 44 L66 25 L67 45 L77 38 L65 60 L52 57 Z"></path>
+                  <path class="creature-dragon-silhouette" d="M31 57 C29 44 36 35 47 35 C58 35 64 44 62 57 C60 67 35 68 31 57 Z"></path>
+                  <path class="creature-dragon-silhouette creature-dragon-snout" d="M45 42 C46 29 53 22 63 23 L68 17 L69 25 C76 25 81 29 82 34 L89 36 L82 43 L61 43 Z"></path>
+                  <path class="creature-dragon-horns" d="M55 25 L51 13 L62 22 M66 23 L71 12 L73 27"></path>
+                  <path class="creature-dragon-cutout" d="M38 50 C42 45 53 45 57 51 C55 61 41 63 36 56 Z"></path>
+                  <path class="creature-dragon-cutout creature-dragon-eyes-quiet" d="M57 32 L63 32 M68 32 L74 32"></path>
+                  <path class="creature-dragon-cutout creature-dragon-brows" d="M56 32 L64 29 M68 29 L76 32"></path>
+                  <path class="creature-dragon-cutout creature-dragon-nostril" d="M78 37 L80 37"></path>
+                </g>
+                <g class="creature-accent creature-dragon-flame">
+                  <path class="creature-flame-outer" d="M81 37 C87 34 88 27 94 24 C92 30 97 33 94 38 C91 43 85 42 81 37 Z"></path>
+                  <path class="creature-flame-inner" d="M85 37 C89 34 89 31 92 29 C91 33 94 35 91 38 C89 40 87 39 85 37 Z"></path>
+                </g>
+              </svg>
+              <span class="filter-creature-descriptor">Rough + driven</span>
+              <svg class="filter-creature-response" viewBox="0 0 240 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path data-filter-preview-path d="M12 52 L140 52 Q166 48 228 94"></path>
+              </svg>
+              <span class="filter-creature-state"></span>
+              <span class="filter-creature-preview-values" hidden>
+                <span data-filter-preview-control="cutoff" style="--preview-value: 60"></span>
+                <span data-filter-preview-control="resonance" style="--preview-value: 28"></span>
+                <span data-filter-preview-control="drive" style="--preview-value: 68"></span>
+                <span data-filter-preview-control="mix" style="--preview-value: 76"></span>
+              </span>
+            </span>
+          </button>
+
+          <button
+            class="filter-preset-pedal"
+            type="button"
+            data-filter-preset-card="custom"
+            data-creature="chameleon"
+            data-filter-selected="false"
+            data-filter-active="false"
+            aria-label="Select Custom Filter preset, chameleon"
+            aria-pressed="false"
+            disabled
+          >
+            <span class="filter-creature-tile" aria-hidden="true">
+              <span class="filter-creature-preset">Custom</span>
+              <span class="filter-creature-name">Chameleon</span>
+              <svg class="filter-creature-portrait" viewBox="0 0 96 78" aria-hidden="true" focusable="false">
+                <g class="creature-gesture creature-chameleon">
+                  <path d="M28 50 C29 35 42 27 56 32 C68 36 69 53 59 60 C49 67 31 62 28 50 Z"></path>
+                  <circle cx="57" cy="34" r="8"></circle>
+                  <circle cx="59" cy="33" r="2"></circle>
+                  <path d="M29 52 C17 49 15 62 23 66 C32 72 39 59 31 56"></path>
+                  <path d="M66 38 L78 41 L67 45 M38 62 L34 70 M54 62 L58 70"></path>
+                </g>
+                <path class="creature-accent creature-chameleon-patch" d="M39 42 C45 36 57 39 59 48 C57 57 43 58 38 51 C36 47 37 44 39 42 Z"></path>
+              </svg>
+              <span class="filter-creature-descriptor">Your four values</span>
+              <span class="filter-preset-values" data-filter-custom-values>100 · 0 · 0 · 100</span>
+              <svg class="filter-creature-response" viewBox="0 0 240 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path data-filter-preview-path d="M12 52 L210 52 Q224 52 228 94"></path>
+              </svg>
+              <span class="filter-creature-state"></span>
+              <span class="filter-creature-preview-values" hidden>
+                <span data-filter-preview-control="cutoff" style="--preview-value: 100"></span>
+                <span data-filter-preview-control="resonance" style="--preview-value: 0"></span>
+                <span data-filter-preview-control="drive" style="--preview-value: 0"></span>
+                <span data-filter-preview-control="mix" style="--preview-value: 100"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <div class="filter-fx-shared-controls" data-filter-shared-controls>
+          <div class="filter-fx-shared-header">
+            <div>
+              <span class="filter-fx-shared-kicker">ONE MASTER FILTER</span>
+              <span class="filter-fx-selected-preset" data-filter-selected-label>Clean selected</span>
+            </div>
+            <button id="filterFxResetBtn" class="filter-fx-action" type="button" disabled>
+              Reset
+            </button>
+          </div>
+
+          <div class="filter-fx-layout">
+            <div
+              class="filter-fx-graphic"
+              id="filterFxGraphic"
+              role="img"
+              aria-label="Filter response: bypassed. Macro settings are preserved."
+            >
+              <svg viewBox="0 0 240 120" aria-hidden="true" focusable="false">
+                <path class="filter-fx-grid-line" d="M12 92 H228 M12 62 H228 M12 32 H228" />
+                <path
+                  class="filter-fx-curve-halo"
+                  data-filter-curve-halo
+                  d="M12 36 L208 36 Q218 36 228 96"
+                />
+                <path
+                  class="filter-fx-curve"
+                  id="filterFxCurve"
+                  d="M12 36 L208 36 Q218 36 228 96"
+                />
+              </svg>
+              <p class="filter-fx-graphic-state" id="filterFxGraphicState">Bypassed</p>
+            </div>
+
+            <fieldset class="filter-fx-macros">
+              <legend class="sr-only">Shared Filter controls</legend>
+
+            <div class="filter-fx-macro" data-filter-control="cutoff">
+              <div class="filter-fx-macro-heading">
+                <label for="filterFxCutoff">Cutoff</label>
+                <output
+                  id="filterFxCutoffValue"
+                  for="filterFxCutoff"
+                  data-filter-output="cutoff"
+                >18 kHz</output>
+              </div>
+              <div class="filter-fx-knob" aria-hidden="true">
+                <span class="filter-fx-knob-indicator"></span>
+              </div>
+              <input
+                id="filterFxCutoff"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="100"
+                data-filter-macro="cutoff"
+                aria-describedby="filterFxCutoffHint"
+                disabled
+              />
+              <span class="filter-fx-macro-hint" id="filterFxCutoffHint">Dark ↔ Bright</span>
+            </div>
+
+            <div class="filter-fx-macro" data-filter-control="resonance">
+              <div class="filter-fx-macro-heading">
+                <label for="filterFxResonance">Resonance</label>
+                <output
+                  id="filterFxResonanceValue"
+                  for="filterFxResonance"
+                  data-filter-output="resonance"
+                >0%</output>
+              </div>
+              <div class="filter-fx-knob" aria-hidden="true">
+                <span class="filter-fx-knob-indicator"></span>
+              </div>
+              <input
+                id="filterFxResonance"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="0"
+                data-filter-macro="resonance"
+                aria-describedby="filterFxResonanceHint"
+                disabled
+              />
+              <span class="filter-fx-macro-hint" id="filterFxResonanceHint"
+                >Calm ↔ Peaked</span
+              >
+            </div>
+
+            <div class="filter-fx-macro" data-filter-control="drive">
+              <div class="filter-fx-macro-heading">
+                <label for="filterFxDrive">Drive</label>
+                <output
+                  id="filterFxDriveValue"
+                  for="filterFxDrive"
+                  data-filter-output="drive"
+                >0%, Clean</output>
+              </div>
+              <div class="filter-fx-knob" aria-hidden="true">
+                <span class="filter-fx-knob-indicator"></span>
+              </div>
+              <input
+                id="filterFxDrive"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="0"
+                data-filter-macro="drive"
+                aria-describedby="filterFxDriveHint"
+                disabled
+              />
+              <span class="filter-fx-macro-hint" id="filterFxDriveHint">Clean ↔ Driven</span>
+            </div>
+
+            <div class="filter-fx-macro" data-filter-control="mix">
+              <div class="filter-fx-macro-heading">
+                <label for="filterFxMix">Mix</label>
+                <output
+                  id="filterFxMixValue"
+                  for="filterFxMix"
+                  data-filter-output="mix"
+                >100%, Wet</output>
+              </div>
+              <div class="filter-fx-knob" aria-hidden="true">
+                <span class="filter-fx-knob-indicator"></span>
+              </div>
+              <input
+                id="filterFxMix"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value="100"
+                data-filter-macro="mix"
+                aria-describedby="filterFxMixHint"
+                disabled
+              />
+              <span class="filter-fx-macro-hint" id="filterFxMixHint">Dry ↔ Wet</span>
+            </div>
+            </fieldset>
+
+            <button
+              id="filterFxBypassBtn"
+              class="filter-fx-action filter-fx-footswitch"
+              type="button"
+              aria-label="Enable filter"
+              aria-pressed="false"
+              data-filter-footswitch
+              disabled
+            >
+              Enable filter
+            </button>
+          </div>
+        </div>
+        </section>
+
+        <section
+          id="spaceFxPanel"
+          class="space-fx-panel"
+          aria-labelledby="spaceFxTitle"
+          aria-describedby="spaceFxHelp"
+          data-enabled="false"
+          data-available="true"
+          data-preset="pocket-room"
+        >
+          <div class="space-fx-header">
+            <div>
+              <span class="space-fx-kicker">SPACE REVERB</span>
+              <h2 id="spaceFxTitle">Space</h2>
+            </div>
+            <span id="spaceFxStatus" data-space-status role="status" aria-live="polite">Bypassed</span>
+          </div>
+          <div id="spaceFxBody" class="space-fx-body">
+            <p id="spaceFxHelp" class="space-fx-help">Shape the room, tail, brightness, and wet blend.</p>
+            <p id="spaceFxSummary" class="space-fx-summary" data-space-summary>
+              Space Reverb · Pocket Room · Size 22 · Decay 18 · Air 34 · Mix 24
+            </p>
+
+            <div class="space-fx-presets" role="group" aria-label="Space presets">
+              <button type="button" data-space-preset="pocket-room" data-space-creature="burrowing-mole" data-space-selected="true" aria-label="Pocket Room, Mole" aria-pressed="true" disabled>
+                <span>Pocket Room</span>
+                <svg viewBox="0 0 80 52" aria-hidden="true" focusable="false"><path d="M18 34c0-12 9-20 22-20s22 8 22 20H18Zm8-15-6-8m34 8 6-8M31 30h2m14 0h2m-15 8c4 3 8 3 12 0" /><path class="space-creature-gesture space-mole-dust" d="M13 39q6-5 12 0m29 0q6-5 12 0" /></svg>
+                <small>Mole</small>
+              </button>
+              <button type="button" data-space-preset="warm-hall" data-space-creature="whale" data-space-selected="false" aria-label="Warm Hall, Whale" aria-pressed="false" disabled>
+                <span>Warm Hall</span>
+                <svg viewBox="0 0 80 52" aria-hidden="true" focusable="false"><path d="M11 32c8-17 26-22 43-13 8 4 12 11 15 20-17-8-37 7-58-7Zm18-5h2m13-4h2m-18 11c8 5 17 5 26 1" /><path class="space-creature-gesture space-whale-sonar" d="M55 14q10-8 18 1M58 20q7-5 13 1" /></svg>
+                <small>Whale</small>
+              </button>
+              <button type="button" data-space-preset="shimmer" data-space-creature="jellyfish" data-space-selected="false" aria-label="Shimmer, Jellyfish" aria-pressed="false" disabled>
+                <span>Shimmer</span>
+                <svg viewBox="0 0 80 52" aria-hidden="true" focusable="false"><path d="M20 24c0-12 9-18 20-18s20 6 20 18H20Zm4 0c0 16 8 7 8 21m8-21c0 18 8 7 8 21m8-21c0 16 7 8 7 19" /><ellipse class="space-creature-gesture space-jellyfish-ripple" cx="40" cy="26" rx="24" ry="7" /></svg>
+                <small>Jellyfish</small>
+              </button>
+              <button type="button" data-space-preset="bloom" data-space-creature="snail" data-space-selected="false" aria-label="Bloom, Snail" aria-pressed="false" disabled>
+                <span>Bloom</span>
+                <svg viewBox="0 0 80 52" aria-hidden="true" focusable="false"><path d="M18 35c0-12 10-20 24-20 12 0 20 7 20 17 0 9-8 14-17 14-8 0-13-4-13-9 0-4 4-7 8-7 4 0 7 2 7 5m-25-9-9-5" /><path class="space-creature-gesture space-snail-crescent" d="M57 9q12 8 2 20q5-12-2-20Z" /></svg>
+                <small>Snail</small>
+              </button>
+              <button type="button" class="space-fx-custom-preset" data-space-preset="custom" data-space-selected="false" aria-label="Custom Space preset" aria-pressed="false" disabled>Custom</button>
+            </div>
+
+            <fieldset class="space-fx-macros">
+              <legend class="sr-only">Space controls</legend>
+              <div class="space-fx-macro" data-space-control="size">
+                <label for="spaceFxSize">Size</label><output id="spaceFxSizeValue" for="spaceFxSize" data-space-output="size">22%</output>
+                <input id="spaceFxSize" type="range" min="0" max="100" step="1" value="22" data-space-macro="size" aria-describedby="spaceFxSizeHint" disabled />
+                <span id="spaceFxSizeHint">Tight ↔ Vast</span>
+              </div>
+              <div class="space-fx-macro" data-space-control="decay">
+                <label for="spaceFxDecay">Decay</label><output id="spaceFxDecayValue" for="spaceFxDecay" data-space-output="decay">18%</output>
+                <input id="spaceFxDecay" type="range" min="0" max="100" step="1" value="18" data-space-macro="decay" aria-describedby="spaceFxDecayHint" disabled />
+                <span id="spaceFxDecayHint">Short ↔ Long</span>
+              </div>
+              <div class="space-fx-macro" data-space-control="air">
+                <label for="spaceFxAir">Air</label><output id="spaceFxAirValue" for="spaceFxAir" data-space-output="air">34%</output>
+                <input id="spaceFxAir" type="range" min="0" max="100" step="1" value="34" data-space-macro="air" aria-describedby="spaceFxAirHint" disabled />
+                <span id="spaceFxAirHint">Dark ↔ Bright</span>
+              </div>
+              <div class="space-fx-macro" data-space-control="mix">
+                <label for="spaceFxMix">Mix</label><output id="spaceFxMixValue" for="spaceFxMix" data-space-output="mix">24%</output>
+                <input id="spaceFxMix" type="range" min="0" max="100" step="1" value="24" data-space-macro="mix" aria-describedby="spaceFxMixHint" disabled />
+                <span id="spaceFxMixHint">Dry ↔ Wet</span>
+              </div>
+            </fieldset>
+            <button id="spaceFxBypassBtn" class="space-fx-bypass" type="button" data-space-bypass aria-pressed="false" disabled>Enable Space</button>
+          </div>
+        </section>
+        </div>
+      </div>
+    </section>
 
     <!-- Sequencer (14 rows) -->
     <div class="sequencer">
@@ -1057,13 +1652,20 @@ import "@fontsource-variable/open-sans";
     </div>
 
     <div id="pitchRollDialog" class="pitch-roll-dialog" hidden>
-      <div class="pitch-roll-sheet" role="dialog" aria-modal="true" aria-labelledby="pitchRollTitle">
+      <div
+        class="pitch-roll-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pitchRollTitle"
+        aria-describedby="pitchRollHint"
+      >
         <div class="pitch-roll-header">
           <h2 id="pitchRollTitle">Pitch Roll</h2>
           <button id="pitchRollCloseBtn" type="button">Close</button>
         </div>
-        <p class="pitch-roll-hint">
-          Tap a step/pitch cell to draw notes. Tap the same filled cell to clear that step.
+        <p class="pitch-roll-hint" id="pitchRollHint">
+          Select a step/pitch cell to draw notes. Select the same filled cell to clear that
+          step.
         </p>
         <div class="pitch-roll-grid" id="pitchRollGrid"></div>
         <div class="pitch-roll-actions">
@@ -1072,7 +1674,6 @@ import "@fontsource-variable/open-sans";
       </div>
     </div>
 
-    <ArrangeDialog client:load />
     <ClearProjectDialog client:load />
   </div>
 </Layout>
@@ -1211,6 +1812,1407 @@ import "@fontsource-variable/open-sans";
     border-color: var(--daw-accent-2);
   }
 
+  .audio-status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 28px;
+    margin: -2px 0 10px;
+    padding: 0 2px;
+  }
+
+  .audio-status {
+    flex: 1;
+    color: #d9c3ad;
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .audio-status[data-state="error"] {
+    color: #fecaca;
+  }
+
+  .audio-status[data-state="warning"] {
+    color: #fed7aa;
+  }
+
+  .audio-status:focus-visible {
+    outline: 2px solid var(--daw-accent-2);
+    outline-offset: 2px;
+  }
+
+  .retry-samples-btn {
+    border: 1px solid rgba(251, 146, 60, 0.62);
+    border-radius: 4px;
+    background: linear-gradient(180deg, #4a3a31, #342922);
+    color: #fff7ed;
+    cursor: pointer;
+    padding: 5px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .retry-samples-btn:focus-visible {
+    outline: 2px solid var(--daw-accent-2);
+    outline-offset: 2px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .filter-fx-panel {
+    --filter-green: #6ee7a2;
+    --filter-green-bright: #a7f3d0;
+    --filter-green-dark: #123b2a;
+    --pedal-face: #dde8ea;
+    --pedal-ink: #26363b;
+    --pedal-led: #63d9a0;
+    --pedal-face-name: "CLEAR SIGNAL";
+    --pedal-pattern: linear-gradient(145deg, rgba(255, 255, 255, 0.3), transparent 42%);
+    --pedal-control-surface: rgba(255, 255, 255, 0.18);
+    margin: 0 0 12px;
+    overflow: hidden;
+    border: 1px solid rgba(167, 184, 175, 0.3);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(27, 31, 29, 0.98), rgba(12, 15, 13, 0.99));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 10px 26px rgba(0, 0, 0, 0.24);
+  }
+
+  .filter-fx-panel[data-preset="warm"] {
+    --pedal-face: #6d3f4e;
+    --pedal-ink: #f4d6a8;
+    --pedal-led: #ffc76b;
+    --pedal-face-name: "VELVET TONE";
+    --pedal-pattern: radial-gradient(circle at 50% 12%, rgba(255, 215, 168, 0.2), transparent 42%);
+    --pedal-control-surface: rgba(0, 0, 0, 0.12);
+  }
+
+  .filter-fx-panel[data-preset="bright"] {
+    --pedal-face: #ddebfa;
+    --pedal-ink: #25384a;
+    --pedal-led: #63cff2;
+    --pedal-face-name: "LIGHT BOOST";
+    --pedal-control-surface: rgba(255, 255, 255, 0.16);
+    --pedal-pattern:
+      radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.88) 0 2px, transparent 3px),
+      linear-gradient(120deg, rgba(255, 255, 255, 0.42), transparent 46%);
+  }
+
+  .filter-fx-panel[data-preset="resonant-sweep"] {
+    --pedal-face: #183b40;
+    --pedal-ink: #b7f1d6;
+    --pedal-led: #84f0d0;
+    --pedal-face-name: "RESONANT MOTION";
+    --pedal-pattern: radial-gradient(ellipse at 74% 10%, transparent 0 32%, rgba(132, 240, 208, 0.16) 33% 35%, transparent 36%);
+    --pedal-control-surface: rgba(0, 0, 0, 0.14);
+  }
+
+  .filter-fx-panel[data-preset="grit"] {
+    --pedal-face: #d46a2e;
+    --pedal-ink: #201713;
+    --pedal-led: #ffd08a;
+    --pedal-face-name: "ORANGE DRIVE";
+    --pedal-pattern: repeating-linear-gradient(135deg, rgba(32, 23, 19, 0.08) 0 2px, transparent 2px 13px);
+    --pedal-control-surface: rgba(255, 255, 255, 0.12);
+  }
+
+  .filter-fx-panel[data-preset="custom"] {
+    --pedal-face: #4e565e;
+    --pedal-ink: #f1f4f6;
+    --pedal-led: #9fe7d4;
+    --pedal-face-name: "CUSTOM WORKBENCH";
+    --pedal-control-surface: rgba(0, 0, 0, 0.12);
+    --pedal-pattern:
+      linear-gradient(rgba(241, 244, 246, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(241, 244, 246, 0.07) 1px, transparent 1px);
+  }
+
+  .filter-fx-panel[data-available="false"] {
+    border-color: rgba(178, 163, 152, 0.28);
+  }
+
+  .filter-fx-bar,
+  .filter-fx-heading,
+  .filter-fx-bar-actions,
+  .filter-fx-preset-row,
+  .filter-fx-macro-heading {
+    display: flex;
+    align-items: center;
+  }
+
+  .filter-fx-bar {
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    padding: 4px 8px 4px 14px;
+  }
+
+  .filter-fx-heading,
+  .filter-fx-bar-actions {
+    gap: 8px;
+  }
+
+  .filter-fx-title {
+    color: var(--filter-green-bright);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+  }
+
+  .filter-fx-status {
+    color: #bfdbc9;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .filter-fx-status-dot {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+    border-radius: 999px;
+    background: #718078;
+    box-shadow: 0 0 0 2px rgba(113, 128, 120, 0.14);
+  }
+
+  .filter-fx-panel[data-enabled="true"] .filter-fx-status-dot {
+    background: var(--filter-green);
+    box-shadow:
+      0 0 0 2px rgba(110, 231, 162, 0.18),
+      0 0 12px rgba(110, 231, 162, 0.58);
+  }
+
+  .filter-fx-action,
+  .filter-fx-preset-row select {
+    min-height: 44px;
+    border: 1px solid rgba(110, 231, 162, 0.38);
+    border-radius: 5px;
+    background: linear-gradient(180deg, #274a38, #183426);
+    color: #ecfdf5;
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .filter-fx-action {
+    min-width: 68px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  .filter-fx-action:hover:not(:disabled),
+  .filter-fx-preset-row select:hover:not(:disabled) {
+    border-color: rgba(167, 243, 208, 0.78);
+    filter: brightness(1.08);
+  }
+
+  .filter-fx-action:disabled,
+  .filter-fx-preset-row select:disabled,
+  .filter-fx-macro input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .filter-fx-action:focus-visible,
+  .filter-fx-preset-row select:focus-visible,
+  .filter-fx-macro input:focus-visible {
+    outline: 3px solid #171a1f;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--filter-green, #00b578);
+  }
+
+  .filter-fx-body {
+    padding: 0 14px 14px;
+    border-top: 0;
+  }
+
+  .filter-fx-body[hidden] {
+    display: none;
+  }
+
+  .filter-fx-help {
+    margin: 12px 0;
+    color: #bdd5c5;
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  .filter-fx-preset-row {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .filter-fx-preset-row label {
+    color: #dcfce7;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .filter-fx-preset-row select {
+    width: min(230px, 100%);
+    padding: 8px 34px 8px 10px;
+  }
+
+  .filter-fx-pedalboard {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 16px;
+    min-width: 0;
+    padding: 22px 18px 26px;
+    overflow: hidden;
+    border: 1px solid rgba(178, 163, 152, 0.34);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(0, 0, 0, 0.16)),
+      repeating-linear-gradient(
+        90deg,
+        rgba(62, 50, 42, 0.82) 0 28px,
+        rgba(46, 38, 32, 0.88) 28px 56px
+      );
+    box-shadow:
+      inset 0 8px 18px rgba(0, 0, 0, 0.38),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .filter-fx-layout {
+    position: relative;
+    display: block;
+    flex: 0 0 clamp(228px, 26vw, 270px);
+    width: clamp(228px, 26vw, 270px);
+    max-width: 100%;
+    aspect-ratio: 13 / 20;
+    isolation: isolate;
+    min-width: 0;
+    padding: 0;
+    overflow: visible;
+    color: var(--pedal-ink);
+    border: 2px solid color-mix(in srgb, var(--pedal-ink) 82%, #000000);
+    border-radius: 20px 20px 15px 15px;
+    background: transparent;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.34),
+      inset 0 -12px 20px rgba(0, 0, 0, 0.2),
+      0 5px 0 rgba(0, 0, 0, 0.48),
+      0 16px 28px rgba(0, 0, 0, 0.4);
+  }
+
+  .filter-fx-layout::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--pedal-pattern), var(--pedal-face);
+    background-size: auto, auto;
+    box-shadow:
+      inset 8px 0 12px rgba(255, 255, 255, 0.08),
+      inset -9px 0 14px rgba(0, 0, 0, 0.13),
+      inset 0 -15px 20px rgba(0, 0, 0, 0.12);
+    transition: filter 160ms ease, background 160ms ease;
+    pointer-events: none;
+  }
+
+  .filter-fx-layout::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 17px 17px 12px 12px;
+    pointer-events: none;
+  }
+
+  .filter-fx-control-deck {
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    display: grid;
+    height: calc(58% - 14px);
+    grid-template-rows: auto 52px minmax(0, 1fr) 22px;
+    gap: 3px;
+    min-height: 0;
+    padding: 9px 10px 7px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--pedal-ink) 58%, transparent);
+    border-radius: 12px 12px 9px 9px;
+    background:
+      linear-gradient(155deg, rgba(255, 255, 255, 0.2), transparent 38%),
+      color-mix(in srgb, var(--pedal-face) 89%, #ffffff 11%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.38),
+      inset 0 -5px 9px rgba(0, 0, 0, 0.14),
+      0 4px 6px rgba(0, 0, 0, 0.28);
+  }
+
+  .filter-fx-panel[data-preset="custom"] .filter-fx-layout::before {
+    background-size: 20px 20px, 20px 20px, auto;
+  }
+
+  .filter-fx-panel[data-preset="warm"] .filter-fx-pedal-identity {
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.12);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .filter-fx-panel[data-preset="grit"] .filter-fx-layout {
+    border-width: 3px;
+  }
+
+  .filter-fx-panel[data-enabled="false"] .filter-fx-layout::before {
+    filter: saturate(0.28);
+  }
+
+  .filter-fx-panel[data-available="false"] .filter-fx-layout::before {
+    filter: grayscale(1) opacity(0.72);
+  }
+
+  .filter-fx-panel[data-enabled="false"] .filter-fx-knob-indicator {
+    background: #f7faf9;
+  }
+
+  .filter-fx-pedal-jack {
+    position: absolute;
+    z-index: 0;
+    top: 19%;
+    width: 13px;
+    height: 31px;
+    border: 1px solid rgba(0, 0, 0, 0.72);
+    background: linear-gradient(90deg, #6a6d6b, #d7dad8 44%, #767b78);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.68),
+      0 2px 5px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+  }
+
+  .filter-fx-pedal-jack::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    width: 8px;
+    height: 13px;
+    border: 2px solid #2d302f;
+    border-radius: 50%;
+    background: #0b0d0c;
+  }
+
+  .filter-fx-pedal-jack.is-left {
+    left: -11px;
+    border-radius: 5px 0 0 5px;
+  }
+
+  .filter-fx-pedal-jack.is-left::after {
+    left: -4px;
+  }
+
+  .filter-fx-pedal-jack.is-right {
+    right: -11px;
+    border-radius: 0 5px 5px 0;
+  }
+
+  .filter-fx-pedal-jack.is-right::after {
+    right: -4px;
+  }
+
+  .filter-fx-pedal-seam {
+    position: absolute;
+    z-index: 2;
+    top: 57%;
+    right: 1px;
+    left: 1px;
+    height: 7px;
+    border-top: 1px solid rgba(0, 0, 0, 0.48);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 48%);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
+    pointer-events: none;
+  }
+
+  .filter-fx-pedal-screw {
+    position: absolute;
+    z-index: 3;
+    width: 8px;
+    height: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.42);
+    border-radius: 50%;
+    background:
+      linear-gradient(45deg, transparent 43%, rgba(0, 0, 0, 0.62) 44% 56%, transparent 57%),
+      #b7bbb8;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      0 1px 2px rgba(0, 0, 0, 0.34);
+    pointer-events: none;
+  }
+
+  .filter-fx-pedal-screw.is-top-left {
+    top: 5px;
+    left: 5px;
+  }
+
+  .filter-fx-pedal-screw.is-top-right {
+    top: 5px;
+    right: 5px;
+  }
+
+  .filter-fx-pedal-screw.is-bottom-left {
+    bottom: 5px;
+    left: 5px;
+  }
+
+  .filter-fx-pedal-screw.is-bottom-right {
+    right: 5px;
+    bottom: 5px;
+  }
+
+  .filter-fx-pedal-identity {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    min-width: 0;
+    padding: 0 3px;
+    color: var(--pedal-ink);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .filter-fx-pedal-kicker,
+  .filter-fx-pedal-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .filter-fx-pedal-kicker {
+    font-size: 0.46rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    opacity: 0.76;
+  }
+
+  .filter-fx-pedal-name {
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .filter-fx-pedal-name::after {
+    content: var(--pedal-face-name);
+  }
+
+  .filter-fx-pedal-power {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 20px;
+    font-size: 0.48rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .filter-fx-pedal-led {
+    width: 13px;
+    height: 13px;
+    border: 2px solid var(--pedal-ink);
+    border-radius: 50%;
+    background: #727a76;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .filter-fx-pedal-led-label::after {
+    content: "Bypassed";
+  }
+
+  .filter-fx-panel[data-enabled="true"] .filter-fx-pedal-led {
+    background: var(--pedal-led);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.58),
+      0 0 0 2px rgba(0, 0, 0, 0.18),
+      0 0 13px var(--pedal-led);
+  }
+
+  .filter-fx-panel[data-enabled="true"] .filter-fx-pedal-led-label::after {
+    content: "On";
+  }
+
+  .filter-fx-graphic {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    min-height: 0;
+    height: 52px;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    color: #c9e8d5;
+    border: 2px solid rgba(7, 18, 13, 0.72);
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 68% 34%, rgba(110, 231, 162, 0.12), transparent 42%),
+      #091a12;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+      inset 0 8px 20px rgba(0, 0, 0, 0.34);
+  }
+
+  .filter-fx-graphic svg {
+    display: block;
+    width: 100%;
+    min-height: 0;
+    height: 38px;
+  }
+
+  .filter-fx-grid-line,
+  .filter-fx-curve-halo,
+  .filter-fx-curve {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .filter-fx-grid-line {
+    stroke: rgba(167, 243, 208, 0.08);
+    stroke-width: 1;
+  }
+
+  .filter-fx-curve-halo {
+    stroke: var(--filter-green);
+    stroke-width: 9;
+    opacity: calc(var(--filter-drive, 0) * 0.004);
+    filter: blur(5px);
+  }
+
+  .filter-fx-curve {
+    stroke: var(--filter-green);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: calc(0.28 + var(--filter-mix, 100) * 0.0072);
+    stroke-dasharray: var(--filter-dash, none);
+    transition: opacity 120ms ease, stroke 120ms ease;
+  }
+
+  .filter-fx-panel[data-enabled="false"] .filter-fx-curve,
+  .filter-fx-panel[data-available="false"] .filter-fx-curve {
+    stroke: #829188;
+    opacity: 0.42;
+    stroke-dasharray: none;
+  }
+
+  .filter-fx-panel[data-enabled="false"] .filter-fx-curve-halo,
+  .filter-fx-panel[data-available="false"] .filter-fx-curve-halo {
+    opacity: 0;
+  }
+
+  .filter-fx-graphic-state {
+    position: absolute;
+    right: 5px;
+    bottom: 3px;
+    left: 5px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    color: #c9e8d5;
+    font-size: 0.48rem;
+    line-height: 1.1;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .filter-fx-macros {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 2px 8px;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .filter-fx-macro {
+    --filter-value: 0;
+    position: relative;
+    display: grid;
+    grid-template-rows: auto minmax(44px, 1fr);
+    min-width: 0;
+    align-items: center;
+    justify-items: center;
+    gap: 0;
+    padding: 0 3px;
+    color: var(--pedal-ink);
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+  }
+
+  .filter-fx-macro-heading {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 3px;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    text-transform: uppercase;
+  }
+
+  .filter-fx-macro-heading label,
+  .filter-fx-macro-heading output {
+    min-width: 0;
+    color: inherit;
+    font-size: 0.43rem;
+    line-height: 1;
+  }
+
+  .filter-fx-macro-heading output {
+    overflow: hidden;
+    color: inherit;
+    font-weight: 700;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .filter-fx-knob {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    align-self: center;
+    border: 3px solid rgba(0, 0, 0, 0.82);
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 36% 29%, rgba(255, 255, 255, 0.24), transparent 26%),
+      repeating-conic-gradient(#222725 0deg 9deg, #0c0f0e 9deg 18deg);
+    box-shadow:
+      inset 0 -7px 10px rgba(0, 0, 0, 0.5),
+      inset 0 2px 2px rgba(255, 255, 255, 0.18),
+      0 2px 0 rgba(255, 255, 255, 0.14),
+      0 5px 9px rgba(0, 0, 0, 0.35);
+  }
+
+  .filter-fx-knob-indicator {
+    position: absolute;
+    left: 50%;
+    bottom: 50%;
+    width: 4px;
+    height: 16px;
+    border-radius: 999px;
+    background: #f7faf9;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.46);
+    transform-origin: 50% 100%;
+    transform: translateX(-50%) rotate(calc(-135deg + var(--filter-value) * 2.7deg));
+    transition: transform 120ms ease;
+  }
+
+  .filter-fx-macro input[type="range"] {
+    position: absolute;
+    right: auto;
+    bottom: 0;
+    left: 50%;
+    z-index: 3;
+    width: 54px;
+    min-width: 54px;
+    height: 46px;
+    min-height: 46px;
+    margin: 0;
+    opacity: 0.001;
+    transform: translateX(-50%);
+    cursor: pointer;
+  }
+
+  .filter-fx-macro:has(input[type="range"]:focus-visible) {
+    outline: 3px solid #ffffff;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 5px #111111;
+  }
+
+  .filter-fx-macro-hint {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .filter-fx-footswitch {
+    position: absolute;
+    z-index: 3;
+    right: 7%;
+    bottom: 5.5%;
+    left: 7%;
+    display: flex;
+    width: auto;
+    height: 30%;
+    min-height: 64px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    overflow: hidden;
+    color: #f5f7f6;
+    border: 2px solid rgba(0, 0, 0, 0.84);
+    border-radius: 8px 8px 11px 11px;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.055) 0 2px,
+        transparent 2px 8px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.035) 0 2px,
+        transparent 2px 14px
+      ),
+      linear-gradient(180deg, #303432, #171a19);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.14),
+      inset 0 -9px 14px rgba(0, 0, 0, 0.42),
+      0 5px 0 rgba(0, 0, 0, 0.52),
+      0 8px 12px rgba(0, 0, 0, 0.32);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: translateY(0);
+    transition: transform 100ms ease, box-shadow 100ms ease, filter 100ms ease;
+  }
+
+  .filter-fx-footswitch::before {
+    content: "MASTER BYPASS";
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.46rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+  }
+
+  .filter-fx-footswitch[aria-pressed="true"] {
+    transform: translateY(3px);
+    box-shadow:
+      inset 0 8px 14px rgba(0, 0, 0, 0.46),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 2px 0 rgba(0, 0, 0, 0.52);
+  }
+
+  .filter-fx-footswitch:hover:not(:disabled) {
+    border-color: var(--pedal-ink);
+    filter: brightness(1.05);
+  }
+
+  .filter-fx-footswitch:focus-visible,
+  .filter-fx-macro input:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px #111111;
+  }
+
+  .filter-fx-macro input:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .filter-fx-pedalboard {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 18px;
+    overflow: hidden;
+  }
+
+  .filter-preset-pedal {
+    --creature-accent: var(--signal-effect, #00b578);
+    position: relative;
+    flex: 0 1 116px;
+    width: clamp(88px, 9.2vw, 116px);
+    min-width: 88px;
+    max-width: 116px;
+    height: clamp(112px, 12vw, 152px);
+    padding: 0;
+    overflow: visible;
+    color: var(--hardware-ink, #171a1f);
+    border: 1px solid var(--hardware-hairline, #a8adb5);
+    border-radius: 10px;
+    background: var(--hardware-surface, #f5f6f7);
+    box-shadow: 0 2px 5px rgba(23, 26, 31, 0.1);
+    cursor: pointer;
+    transition:
+      border-color 120ms ease,
+      box-shadow 120ms ease,
+      transform 120ms ease;
+  }
+
+  .filter-preset-pedal[data-creature="sleepy-bear"],
+  .filter-preset-pedal[data-creature="songbird"],
+  .filter-preset-pedal[data-creature="dragon"] {
+    --creature-accent: var(--signal-playback, #f05a28);
+  }
+
+  .filter-preset-pedal[data-creature="ribbon-snake"],
+  .filter-preset-pedal[data-creature="chameleon"] {
+    --creature-accent: var(--signal-selection, #00a6d6);
+  }
+
+  .filter-preset-pedal:disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+  }
+
+  .filter-preset-pedal:hover:not(:disabled) {
+    border-color: var(--hardware-ink, #171a1f);
+    transform: translateY(-1px);
+  }
+
+  .filter-preset-pedal:focus-visible {
+    outline: 3px solid var(--hardware-ink, #171a1f);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 7px var(--signal-effect, #00b578);
+  }
+
+  .filter-preset-pedal[data-filter-selected="true"] {
+    border-color: var(--signal-selection, #00a6d6);
+    box-shadow:
+      0 0 0 2px var(--signal-selection, #00a6d6),
+      0 3px 7px rgba(23, 26, 31, 0.14);
+  }
+
+  .filter-creature-tile {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1px;
+    padding: 5px 6px;
+    overflow: hidden;
+    border-radius: 9px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(227, 230, 235, 0.18)),
+      var(--hardware-surface, #f5f6f7);
+  }
+
+  .filter-creature-preset,
+  .filter-creature-name,
+  .filter-creature-descriptor,
+  .filter-creature-state,
+  .filter-preset-values {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    line-height: 1.1;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .filter-creature-preset {
+    flex: none;
+    color: var(--hardware-muted, #515860);
+    font-size: 0.44rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .filter-creature-name {
+    flex: none;
+    color: var(--hardware-ink, #171a1f);
+    font-size: clamp(0.54rem, 0.66vw, 0.64rem);
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .filter-preset-pedal[data-creature="dragon"] .filter-creature-name {
+    font-size: clamp(0.46rem, 0.58vw, 0.56rem);
+    line-height: 1;
+    white-space: normal;
+  }
+
+  .filter-creature-descriptor {
+    flex: none;
+    color: var(--hardware-muted, #5f6870);
+    font-size: clamp(0.43rem, 0.52vw, 0.52rem);
+  }
+
+  .filter-creature-portrait {
+    display: block;
+    width: 100%;
+    min-height: 36px;
+    flex: 1 1 auto;
+    overflow: visible;
+    color: var(--hardware-ink, #171a1f);
+  }
+
+  .filter-creature-portrait path,
+  .filter-creature-portrait circle,
+  .filter-creature-portrait ellipse {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .filter-creature-response {
+    display: block;
+    width: 100%;
+    height: 6px;
+    flex: none;
+    overflow: visible;
+  }
+
+  .filter-creature-response path {
+    fill: none;
+    stroke: var(--hardware-muted, #5f6870);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.64;
+  }
+
+  .creature-accent {
+    color: var(--creature-accent);
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  .creature-rabbit-pulse {
+    fill: currentColor !important;
+    stroke: none !important;
+    opacity: 0;
+  }
+
+  .creature-chameleon-patch {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+  }
+
+  .creature-dragon .creature-dragon-silhouette {
+    fill: var(--hardware-ink, #171a1f);
+    stroke: var(--hardware-ink, #171a1f);
+    stroke-width: 1.8;
+  }
+
+  .creature-dragon .creature-dragon-tail,
+  .creature-dragon .creature-dragon-horns {
+    fill: none;
+    stroke: var(--hardware-ink, #171a1f);
+    stroke-width: 3.2;
+  }
+
+  .creature-dragon .creature-dragon-cutout {
+    fill: var(--hardware-surface, #f5f6f7);
+    stroke: var(--hardware-surface, #f5f6f7);
+    stroke-width: 2;
+  }
+
+  .creature-dragon .creature-dragon-eyes-quiet,
+  .creature-dragon .creature-dragon-brows,
+  .creature-dragon .creature-dragon-nostril {
+    fill: none;
+    stroke-width: 1.5;
+  }
+
+  .creature-dragon .creature-dragon-brows {
+    opacity: 0;
+    transform: translateY(1px);
+  }
+
+  .creature-dragon-flame .creature-flame-outer {
+    fill: var(--signal-playback, #f05a28);
+    stroke: var(--signal-playback, #f05a28);
+  }
+
+  .creature-dragon-flame .creature-flame-inner {
+    fill: var(--hardware-surface, #f5f6f7);
+    stroke: var(--signal-playback, #f05a28);
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-accent {
+    opacity: 0.9;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-rabbit-pulse {
+    opacity: 0.17;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-rabbit-pulse {
+    animation: creature-rabbit-pulse 340ms ease-out 1 both;
+    transform-origin: 50% 55%;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-bear {
+    animation: creature-bear-sway 520ms ease-in-out 1 both;
+    transform-origin: 50% 80%;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-bird {
+    animation: creature-bird-perk 300ms ease-out 1 both;
+    transform-origin: 54% 72%;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-snake-head {
+    animation: creature-snake-sweep 480ms ease-in-out 1 both;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-snake-sweep {
+    stroke-dasharray: 90;
+    stroke-dashoffset: 0;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-dragon-flame {
+    animation: creature-dragon-flame 520ms ease-out 1 both;
+    transform-origin: 86% 45%;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-dragon-eyes-quiet {
+    opacity: 0;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-dragon-brows {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-dragon-wing {
+    transform: scaleX(1.06) translateY(-1px);
+    transform-origin: 50% 58%;
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .creature-chameleon-patch {
+    animation: creature-chameleon-color 420ms ease-out 1 both;
+  }
+
+  .filter-creature-state {
+    min-height: 12px;
+    flex: none;
+    color: var(--hardware-muted, #5f6870);
+    font-size: 0.46rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .filter-preset-pedal[data-filter-selected="true"] .filter-creature-state::before {
+    content: "Bypassed";
+  }
+
+  .filter-preset-pedal[data-filter-active="true"] .filter-creature-state::before {
+    content: "On";
+    color: var(--signal-effect, #00b578);
+  }
+
+  .filter-fx-panel[data-available="false"]
+    .filter-preset-pedal[data-filter-selected="true"]
+    .filter-creature-state::before {
+    content: "Unavailable";
+    color: var(--hardware-muted, #5f6870);
+  }
+
+  .filter-fx-panel[data-available="false"] .creature-accent {
+    opacity: 0;
+  }
+
+  .filter-fx-panel[data-available="false"] .creature-dragon-brows {
+    opacity: 0;
+    transform: none;
+  }
+
+  .filter-fx-panel[data-available="false"] .creature-dragon-eyes-quiet {
+    opacity: 1;
+  }
+
+  .filter-fx-panel[data-available="false"] .creature-dragon-wing {
+    transform: none;
+  }
+
+  .filter-fx-panel[data-available="false"] .creature-gesture,
+  .filter-fx-panel[data-available="false"] .creature-accent {
+    animation: none;
+    transform: none;
+  }
+
+  .filter-preset-values {
+    flex: none;
+    color: var(--hardware-muted, #5f6870);
+    font-size: 0.43rem;
+    letter-spacing: -0.01em;
+  }
+
+  @keyframes creature-rabbit-pulse {
+    0% { opacity: 0; transform: scale(0.65); }
+    55% { opacity: 0.2; transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes creature-bear-sway {
+    0%, 100% { transform: rotate(0); }
+    38% { transform: rotate(-2deg); }
+    70% { transform: rotate(2deg); }
+  }
+
+  @keyframes creature-bird-perk {
+    0% { transform: translateY(2px) rotate(-1deg); }
+    60% { transform: translateY(-3px) rotate(2deg); }
+    100% { transform: translateY(0) rotate(0); }
+  }
+
+  @keyframes creature-snake-sweep {
+    0% { transform: translate(-8px, 5px); }
+    55% { transform: translate(4px, -3px); }
+    100% { transform: translate(0); }
+  }
+
+  @keyframes creature-snake-trace {
+    0% { stroke-dashoffset: 90; opacity: 0; }
+    70%, 100% { stroke-dashoffset: 0; opacity: 0.9; }
+  }
+
+  @keyframes creature-dragon-wake {
+    0% { transform: translateY(2px) scaleY(0.96); }
+    60% { transform: translateY(-2px) scaleY(1.03); }
+    100% { transform: translateY(0) scaleY(1); }
+  }
+
+  @keyframes creature-dragon-flame {
+    0%, 15% { opacity: 0; transform: scale(0.1); }
+    55% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.72); }
+  }
+
+  @keyframes creature-chameleon-color {
+    0% { opacity: 0; }
+    65%, 100% { opacity: 0.9; }
+  }
+  .filter-fx-shared-controls {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid rgba(110, 231, 162, 0.28);
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(22, 29, 25, 0.96), rgba(9, 14, 11, 0.98));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .filter-fx-shared-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .filter-fx-shared-kicker,
+  .filter-fx-selected-preset {
+    display: block;
+  }
+
+  .filter-fx-shared-kicker {
+    color: #a7f3d0;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+  }
+
+  .filter-fx-selected-preset {
+    margin-top: 2px;
+    color: #d6e8dc;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .filter-fx-shared-controls .filter-fx-layout {
+    position: relative;
+    display: grid;
+    width: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    grid-template-columns: minmax(210px, 0.8fr) minmax(0, 2fr) minmax(150px, 0.55fr);
+    gap: 12px;
+    align-items: stretch;
+    padding: 0;
+    overflow: visible;
+    color: #d8e8de;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-layout::before,
+  .filter-fx-shared-controls .filter-fx-layout::after {
+    display: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-graphic {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: auto;
+    min-height: 136px;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .filter-fx-shared-controls .filter-fx-graphic svg {
+    width: 100%;
+    height: auto;
+    min-height: 92px;
+  }
+
+  .filter-fx-shared-controls .filter-fx-graphic-state {
+    position: static;
+    margin: 0;
+    padding: 0 12px 10px;
+    overflow: visible;
+    font-size: 0.65rem;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .filter-fx-shared-controls .filter-fx-macros {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: 1fr;
+    gap: 8px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 10px;
+    color: #d8e8de;
+    border: 1px solid rgba(110, 231, 162, 0.32);
+    border-radius: 8px;
+    background: rgba(18, 47, 33, 0.44);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro-heading {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    font-family: inherit;
+    text-transform: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro-heading label,
+  .filter-fx-shared-controls .filter-fx-macro-heading output {
+    color: inherit;
+    font-size: 0.63rem;
+    line-height: 1.15;
+  }
+
+  .filter-fx-shared-controls .filter-fx-knob {
+    width: 48px;
+    height: 48px;
+    border-color: #090c0a;
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro input[type="range"] {
+    position: static;
+    z-index: auto;
+    width: 100%;
+    min-width: 44px;
+    height: auto;
+    min-height: 44px;
+    margin: -7px 0;
+    opacity: 1;
+    accent-color: var(--pedal-led);
+    transform: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro:has(input[type="range"]:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro input:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px #111111;
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro-hint {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    color: #b7cbbf;
+    font-size: 0.57rem;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .filter-fx-shared-controls .filter-fx-footswitch {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    display: flex;
+    width: 100%;
+    height: auto;
+    min-height: 84px;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    padding: 12px;
+  }
+
   #playBtn,
   #shareBtn,
   #loopPatternBtn,
@@ -1232,6 +3234,16 @@ import "@fontsource-variable/open-sans";
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
       inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  #playBtn:disabled,
+  #shareBtn:disabled,
+  #loopPatternBtn:disabled,
+  #clearProjectBtn:disabled,
+  #mobileHelpBtn:disabled,
+  .retry-samples-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.52;
   }
 
   .btn-icon {
@@ -1362,6 +3374,11 @@ import "@fontsource-variable/open-sans";
     background: linear-gradient(180deg, rgba(74, 56, 42, 0.28), rgba(40, 30, 23, 0.26));
     border-radius: 6px;
     padding: 8px;
+  }
+
+  .sequence-row[data-sample-state="failed"] .instrument-panel {
+    outline: 1px solid rgba(248, 113, 113, 0.75);
+    outline-offset: -1px;
   }
 
   .instrument-panel {
@@ -1613,10 +3630,14 @@ import "@fontsource-variable/open-sans";
     background: linear-gradient(180deg, #fdba74, #f97316);
   }
 
-  :global(.pitch-roll-cell:hover),
+  :global(.pitch-roll-cell:hover) {
+    border-color: rgba(251, 146, 60, 0.9);
+  }
+
   :global(.pitch-roll-cell:focus-visible) {
     border-color: rgba(251, 146, 60, 0.9);
-    outline: none;
+    outline: 2px solid #fff7ed;
+    outline-offset: 1px;
   }
 
   .pitch-roll-actions {
@@ -1691,10 +3712,41 @@ import "@fontsource-variable/open-sans";
       0 0 22px rgba(249, 115, 22, 0.55);
   }
 
-  @media (max-width: 900px) {
+  .step:focus-visible,
+  .step.playing:focus-visible {
+    outline: 2px solid #fff7ed;
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 899px) {
     .header-grid {
       grid-template-columns: 1fr;
       gap: 0.6rem;
+    }
+
+    .filter-preset-pedal {
+      flex: 0 1 calc(33.333% - 8px);
+    }
+
+    .filter-fx-pedalboard {
+      max-width: 480px;
+      margin-inline: auto;
+    }
+
+    .filter-fx-shared-controls .filter-fx-layout {
+      width: 100%;
+      max-width: none;
+      grid-template-columns: minmax(170px, 0.7fr) minmax(0, 1.3fr);
+    }
+
+    .filter-fx-shared-controls .filter-fx-macros {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, auto);
+    }
+
+    .filter-fx-shared-controls .filter-fx-footswitch {
+      grid-column: 1 / -1;
+      min-height: 64px;
     }
   }
 
@@ -1709,6 +3761,109 @@ import "@fontsource-variable/open-sans";
 
     .container {
       padding: 4px 4px 8px;
+    }
+
+    .audio-status-row {
+      align-items: flex-start;
+      margin: 2px 2px 6px;
+    }
+
+    .filter-fx-panel {
+      margin: 0 0 8px;
+      border-radius: 6px;
+    }
+
+    .filter-fx-bar {
+      gap: 6px;
+      padding: 4px 5px 4px 9px;
+    }
+
+    .filter-fx-heading,
+    .filter-fx-bar-actions {
+      gap: 5px;
+    }
+
+    .filter-fx-action {
+      min-width: 58px;
+      padding: 7px 9px;
+      font-size: 0.66rem;
+    }
+
+    .filter-fx-body {
+      padding: 0 7px 8px;
+    }
+
+    .filter-fx-pedalboard {
+      gap: 8px;
+      max-width: 320px;
+      padding: 7px;
+      border-radius: 6px;
+    }
+
+    .filter-preset-pedal {
+      flex: 0 1 calc(50% - 4px);
+      width: min(42vw, 148px);
+      min-width: min(112px, calc(50% - 4px));
+      max-width: 148px;
+    }
+
+    .filter-fx-preset-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 7px;
+    }
+
+    .filter-fx-preset-row select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .filter-fx-shared-controls {
+      padding: 9px;
+    }
+
+    .filter-fx-shared-controls .filter-fx-layout {
+      display: grid;
+      width: 100%;
+      max-width: none;
+      grid-template-columns: 1fr;
+      gap: 9px;
+      padding: 0;
+    }
+
+    .filter-fx-shared-controls .filter-fx-macros {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .filter-fx-shared-controls .filter-fx-macro {
+      padding: 8px;
+    }
+
+    .filter-fx-pedal-identity {
+      padding-inline: 5px;
+    }
+
+    .filter-fx-shared-controls .filter-fx-graphic {
+      min-height: 104px;
+      height: auto;
+    }
+
+    .filter-fx-shared-controls .filter-fx-footswitch {
+      grid-column: 1;
+      width: auto;
+      min-height: 64px;
+    }
+
+    .filter-fx-macro-heading {
+      align-items: baseline;
+      flex-direction: row;
+      gap: 3px;
+    }
+
+    .filter-fx-macro-heading output {
+      width: auto;
+      text-align: right;
     }
 
     .op1-drum-machine {
@@ -1934,17 +4089,1495 @@ import "@fontsource-variable/open-sans";
       border: 0;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .filter-fx-curve,
+    .filter-fx-action,
+    .filter-fx-knob-indicator {
+      transition: none;
+    }
+
+    .filter-preset-shell,
+    .filter-preset-mini-knob::after,
+    .filter-preset-footplate {
+      transition: none;
+    }
+
+    .filter-fx-layout::before,
+    .filter-fx-footswitch::before {
+      transition: none;
+    }
+  }
+
+  /* Minimal hardware system: a quiet chassis with color reserved for state. */
+  :root {
+    color-scheme: light;
+    --hardware-canvas: #e3e6eb;
+    --hardware-surface: #f5f6f7;
+    --hardware-ink: #171a1f;
+    --hardware-muted: #515860;
+    --hardware-hairline: #a8adb5;
+    --signal-playback: #f05a28;
+    --signal-selection: #00a6d6;
+    --signal-alert: #c83d3d;
+    --signal-effect: #00b578;
+    --daw-bg: var(--hardware-canvas);
+    --daw-panel: var(--hardware-surface);
+    --daw-panel-2: #d8dce2;
+    --daw-border: var(--hardware-hairline);
+    --daw-text: var(--hardware-ink);
+    --daw-muted: var(--hardware-muted);
+    --daw-accent: var(--signal-playback);
+    --daw-accent-2: var(--signal-selection);
+    --daw-accent-3: var(--signal-effect);
+    --pad-off: #d8dce2;
+    --pad-off-hi: #f5f6f7;
+    --pad-active: var(--signal-selection);
+    --pad-active-hi: #54c6e5;
+  }
+
+  body {
+    background: var(--hardware-canvas);
+    color: var(--hardware-ink);
+  }
+
+  .container {
+    max-width: 1440px;
+    padding: 6px 10px 16px;
+  }
+
+  .op1-drum-machine {
+    padding: 8px 20px 20px;
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 14px;
+    background: var(--hardware-surface);
+    box-shadow:
+      0 12px 32px rgba(23, 26, 31, 0.1),
+      inset 0 1px 0 #ffffff;
+  }
+
+  p,
+  a,
+  label,
+  .instrument-label {
+    color: var(--hardware-muted);
+  }
+
+  .header-grid {
+    grid-template-columns: minmax(132px, 0.45fr) minmax(220px, 0.8fr) auto;
+    gap: 8px;
+    padding: 0;
+    margin-bottom: 4px;
+  }
+
+  .app-title {
+    color: var(--hardware-ink);
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    font-weight: 760;
+    letter-spacing: -0.035em;
+    text-transform: none;
+  }
+
+  .app-title::after {
+    content: "step sequencer";
+    display: block;
+    margin-top: 3px;
+    color: var(--hardware-muted);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .instrument-screen {
+    --screen-position: 0%;
+    position: relative;
+    display: grid;
+    min-width: 0;
+    height: 82px;
+    grid-template-rows: auto 1fr auto;
+    gap: 5px;
+    padding: 8px 10px;
+    overflow: hidden;
+    color: #f5f6f7;
+    border: 2px solid var(--hardware-ink);
+    border-radius: 10px;
+    background: #171a1f;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  .instrument-screen-head,
+  .instrument-screen-readout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.54rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .instrument-screen-head {
+    color: var(--hardware-hairline);
+  }
+
+  .instrument-screen-readout span:first-child {
+    color: var(--signal-playback);
+  }
+
+  .instrument-screen-readout span:last-child {
+    overflow: hidden;
+    color: var(--signal-effect);
+    text-overflow: ellipsis;
+  }
+
+  .instrument-screen-scope {
+    position: relative;
+    min-height: 30px;
+    overflow: hidden;
+    border-block: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .instrument-screen-baseline,
+  .instrument-screen-trace,
+  .instrument-screen-edit-context,
+  .instrument-screen-playhead,
+  .instrument-screen-pulse {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+  }
+
+  .instrument-screen-baseline {
+    right: 0;
+    bottom: 8px;
+    left: 0;
+    height: 1px;
+    background: var(--hardware-hairline);
+  }
+
+  .instrument-screen-trace {
+    inset: 3px 2px 6px;
+    background: var(--hardware-hairline);
+    clip-path: polygon(0 74%, 7% 60%, 13% 70%, 20% 32%, 27% 63%, 34% 50%, 41% 68%, 48% 21%, 55% 58%, 62% 43%, 69% 65%, 76% 31%, 83% 55%, 90% 46%, 96% 66%, 100% 52%, 100% 58%, 96% 72%, 90% 52%, 83% 61%, 76% 37%, 69% 71%, 62% 49%, 55% 64%, 48% 27%, 41% 74%, 34% 56%, 27% 69%, 20% 38%, 13% 76%, 7% 66%, 0 80%);
+    opacity: 0.82;
+  }
+
+  .instrument-screen[data-filter-active="true"] .instrument-screen-trace {
+    background: var(--signal-effect);
+  }
+
+  .instrument-screen-edit-context {
+    right: 18%;
+    bottom: 3px;
+    left: 18%;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--signal-selection);
+    opacity: 0.9;
+  }
+
+  .instrument-screen-playhead {
+    top: 2px;
+    bottom: 2px;
+    left: var(--screen-position);
+    width: 2px;
+    border-radius: 999px;
+    background: var(--signal-playback);
+    box-shadow: 0 0 0 2px rgba(240, 90, 40, 0.15);
+    transform: translateX(-1px);
+    transition: left 70ms linear;
+  }
+
+  .instrument-screen-pulse {
+    top: 50%;
+    left: var(--screen-position);
+    width: 18px;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--signal-playback);
+    opacity: 0;
+    transform: translate(-50%, -50%) scaleX(0.3);
+  }
+
+  .instrument-screen[data-playing="true"][data-tick="even"] .instrument-screen-pulse {
+    animation: groove-pulse-even 210ms ease-out;
+  }
+
+  .instrument-screen[data-playing="true"][data-tick="odd"] .instrument-screen-pulse {
+    animation: groove-pulse-odd 210ms ease-out;
+  }
+
+  @keyframes groove-pulse-even {
+    0% { opacity: 0.9; transform: translate(-50%, -50%) scaleX(0.35); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scaleX(1); }
+  }
+
+  @keyframes groove-pulse-odd {
+    0% { opacity: 0.9; transform: translate(-50%, -50%) scaleX(0.35); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scaleX(1); }
+  }
+
+  .bpm-control {
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 10px;
+    background: var(--hardware-canvas);
+    box-shadow: none;
+  }
+
+  .bpm-control label {
+    color: var(--hardware-muted);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.65rem;
+  }
+
+  #bpm {
+    width: 60px;
+    min-height: 44px;
+    padding: 7px 4px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 6px;
+    background: var(--hardware-surface);
+    box-shadow: inset 0 -1px 0 rgba(23, 26, 31, 0.08);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-weight: 760;
+  }
+
+  #bpm:focus,
+  #playBtn:focus-visible,
+  #shareBtn:focus-visible,
+  #loopPatternBtn:focus-visible,
+  #clearProjectBtn:focus-visible,
+  #mobileHelpBtn:focus-visible,
+  .retry-samples-btn:focus-visible,
+  .instrument-volume-trigger:focus-visible,
+  .instrument-pitch-trigger:focus-visible,
+  #pitchRollCloseBtn:focus-visible,
+  #pitchRollResetBtn:focus-visible,
+  .step:focus-visible,
+  .step.playing:focus-visible {
+    outline: 3px solid var(--hardware-ink, #171a1f);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--signal-effect, #00b578);
+  }
+
+  #playBtn,
+  #shareBtn,
+  #loopPatternBtn,
+  #clearProjectBtn,
+  #mobileHelpBtn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 11px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 6px;
+    background: var(--hardware-surface);
+    box-shadow: 0 1px 0 rgba(23, 26, 31, 0.08);
+    transition: transform 100ms ease, border-color 120ms ease, background 120ms ease;
+  }
+
+  #playBtn[data-mode="play"] {
+    color: var(--hardware-ink);
+    border-color: var(--signal-playback);
+    background: var(--signal-playback);
+  }
+
+  #playBtn[data-mode="stop"] {
+    color: var(--hardware-ink);
+    border-color: var(--hardware-hairline);
+    background: var(--hardware-hairline);
+  }
+
+  #playBtn:hover,
+  #shareBtn:hover,
+  #loopPatternBtn:hover,
+  #mobileHelpBtn:hover {
+    color: var(--hardware-ink);
+    border-color: var(--hardware-muted);
+    background: var(--hardware-canvas);
+    box-shadow: 0 1px 0 rgba(23, 26, 31, 0.08);
+    filter: none;
+    transform: translateY(-1px);
+  }
+
+  #playBtn[data-mode="play"]:hover {
+    border-color: var(--hardware-ink);
+    background: var(--signal-playback);
+  }
+
+  #loopPatternBtn {
+    margin-left: 4px;
+    border-left-width: 3px;
+  }
+
+  #loopPatternBtn.is-active,
+  #loopPatternBtn.is-active:hover {
+    color: var(--hardware-ink);
+    border-color: var(--signal-selection);
+    background: var(--signal-selection);
+  }
+
+  #shareBtn {
+    margin-left: 4px;
+  }
+
+  #clearProjectBtn,
+  #clearProjectBtn:hover {
+    color: #8a3432;
+    border-color: #ddb1ae;
+    background: #fff5f3;
+  }
+
+  .mobile-help-tooltip,
+  .instrument-volume-tooltip {
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    background: var(--hardware-surface);
+    box-shadow: 0 12px 28px rgba(23, 26, 31, 0.16);
+  }
+
+  .audio-status-row {
+    min-height: 34px;
+    margin: 0 0 4px;
+    padding: 5px 8px;
+    border-left: 3px solid var(--hardware-hairline);
+  }
+
+  :global(.pattern-manager) {
+    margin: 0 0 4px;
+  }
+
+  .audio-status {
+    color: var(--hardware-muted);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  .audio-status[data-state="error"] { color: #9c3d39; }
+  .audio-status[data-state="warning"] { color: var(--hardware-muted); }
+
+  .retry-samples-btn {
+    min-height: 44px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    background: var(--hardware-surface);
+  }
+
+  .filter-fx-panel {
+    --filter-green: var(--signal-effect);
+    --filter-green-bright: #367d58;
+    margin-bottom: 10px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 10px;
+    background: var(--hardware-surface);
+    box-shadow: none;
+  }
+
+  .filter-fx-bar {
+    min-height: 48px;
+    padding: 2px 5px 2px 12px;
+  }
+
+  .filter-fx-title,
+  .filter-fx-status,
+  .filter-fx-help,
+  .filter-fx-shared-kicker,
+  .filter-fx-selected-preset {
+    color: var(--hardware-ink);
+  }
+
+  .filter-fx-title,
+  .filter-fx-shared-kicker {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    letter-spacing: 0.1em;
+  }
+
+  .filter-fx-status {
+    color: var(--hardware-muted);
+  }
+
+  .filter-fx-status-dot {
+    background: #a7aca7;
+    box-shadow: none;
+  }
+
+  .filter-fx-panel[data-enabled="true"] .filter-fx-status-dot {
+    background: var(--signal-effect);
+    box-shadow: 0 0 0 3px rgba(0, 181, 120, 0.14);
+  }
+
+  .filter-fx-action {
+    min-width: 76px;
+    min-height: 44px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--signal-effect);
+    border-radius: 6px;
+    background: var(--hardware-surface);
+  }
+
+  .filter-fx-action:hover:not(:disabled) {
+    border-color: var(--signal-effect);
+    background: var(--signal-effect);
+    filter: none;
+  }
+
+  .filter-fx-action:focus-visible,
+  .filter-fx-macro input:focus-visible,
+  .filter-preset-pedal:focus-visible,
+  .filter-fx-shared-controls .filter-fx-macro input:focus-visible {
+    outline: 3px solid var(--hardware-ink, #171a1f);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--signal-effect, #00b578);
+  }
+
+  .filter-fx-body {
+    display: grid;
+    grid-template-rows: 1fr;
+    padding: 0;
+    overflow: hidden;
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      grid-template-rows 180ms ease,
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  .filter-fx-body[data-expanded="false"] {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  .filter-fx-body-inner {
+    min-height: 0;
+    padding: 0 12px 12px;
+    overflow: hidden;
+  }
+
+  .filter-fx-body[hidden] {
+    display: none;
+  }
+
+  .filter-fx-help {
+    margin: 8px 0 10px;
+    color: var(--hardware-muted);
+    line-height: 1.45;
+  }
+
+  .filter-fx-pedalboard {
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 8px;
+    background: var(--hardware-canvas);
+  }
+
+  .filter-fx-shared-controls {
+    margin-top: 10px;
+    padding: 10px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 8px;
+    background: var(--hardware-surface);
+    box-shadow: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-layout {
+    position: static;
+    display: grid;
+    width: auto;
+    max-width: none;
+    aspect-ratio: auto;
+    isolation: auto;
+    grid-template-columns: minmax(170px, 0.7fr) minmax(0, 2fr) minmax(120px, 0.5fr);
+    gap: 10px;
+    padding: 0;
+    overflow: visible;
+    color: var(--hardware-ink);
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-layout::before,
+  .filter-fx-shared-controls .filter-fx-layout::after {
+    display: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-graphic {
+    min-height: 110px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 7px;
+    background: var(--hardware-surface);
+  }
+
+  .filter-fx-shared-controls .filter-fx-graphic svg {
+    min-height: 72px;
+  }
+
+  .filter-fx-grid-line { stroke: var(--hardware-hairline); }
+  .filter-fx-curve { stroke: var(--signal-effect); }
+  .filter-fx-curve-halo { stroke: rgba(0, 181, 120, 0.18); }
+
+  .filter-fx-shared-controls .filter-fx-macro {
+    gap: 4px;
+    padding: 8px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 7px;
+    background: var(--hardware-surface);
+    box-shadow: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-knob {
+    width: 40px;
+    height: 40px;
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro input[type="range"] {
+    min-height: 44px;
+    accent-color: var(--signal-effect);
+  }
+
+  .filter-fx-shared-controls .filter-fx-macro-hint,
+  .filter-fx-shared-controls .filter-fx-graphic-state {
+    color: var(--hardware-muted);
+  }
+
+  .filter-fx-shared-controls .filter-fx-footswitch {
+    position: static;
+    width: 100%;
+    height: auto;
+    min-height: 56px;
+    padding: 8px 12px;
+    overflow: visible;
+    color: var(--hardware-ink);
+    border: 1px solid var(--signal-effect);
+    border-radius: 7px;
+    background: var(--hardware-surface);
+    box-shadow: none;
+    transform: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-footswitch::before {
+    display: none;
+  }
+
+  .filter-fx-shared-controls .filter-fx-footswitch[aria-pressed="true"] {
+    color: var(--hardware-ink);
+    border-color: var(--signal-effect);
+    background: var(--signal-effect);
+    box-shadow: none;
+    transform: none;
+  }
+
+  .sequencer {
+    gap: 6px;
+    padding: 9px;
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 10px;
+    background: var(--hardware-canvas);
+    box-shadow: none;
+  }
+
+  .sequence-row {
+    grid-template-columns: minmax(184px, 204px) minmax(0, 1fr);
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: var(--hardware-surface);
+  }
+
+  .sequence-row:nth-child(2n) {
+    background: #eef0f3;
+  }
+
+  .sequence-row[data-sample-state="failed"] .instrument-panel {
+    outline-color: var(--signal-alert);
+  }
+
+  .instrument-panel {
+    padding: 5px 7px;
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 6px;
+    background: var(--hardware-canvas);
+    box-shadow: none;
+  }
+
+  .instrument-header {
+    grid-template-columns: minmax(0, 1fr) 44px 44px;
+    gap: 5px;
+  }
+
+  .instrument-label {
+    color: var(--hardware-ink);
+    font-size: 0.67rem;
+    font-weight: 760;
+    letter-spacing: 0.025em;
+    text-transform: none;
+  }
+
+  .instrument-volume-trigger,
+  .instrument-pitch-trigger {
+    width: 44px;
+    height: 44px;
+    color: var(--hardware-muted);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 6px;
+    background: var(--hardware-surface);
+    transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+  }
+
+  .instrument-volume-trigger:hover,
+  .instrument-volume-trigger[aria-expanded="true"],
+  .instrument-pitch-trigger:hover {
+    color: var(--signal-selection);
+    border-color: var(--signal-selection);
+    background: var(--signal-selection);
+  }
+
+  .instrument-volume-slider {
+    accent-color: var(--signal-selection);
+  }
+
+  .instrument-volume-value {
+    color: var(--hardware-ink);
+  }
+
+  .steps {
+    gap: 5px;
+  }
+
+  .step,
+  .step:nth-child(4n + 1) {
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 4px;
+    background: var(--pad-off-hi);
+    box-shadow: inset 0 -2px 0 rgba(23, 26, 31, 0.1);
+    transition: transform 90ms ease, border-color 100ms ease, background 100ms ease;
+  }
+
+  .step:nth-child(4n + 1) {
+    border-left: 3px solid var(--hardware-muted);
+    background: var(--hardware-canvas);
+  }
+
+  .step:hover {
+    border-color: var(--signal-selection);
+    background: var(--hardware-surface);
+    filter: none;
+  }
+
+  .step.active,
+  .step.active:nth-child(4n + 1) {
+    border-color: var(--signal-selection);
+    background: var(--signal-selection);
+    box-shadow: inset 0 -2px 0 rgba(23, 26, 31, 0.24);
+  }
+
+  .step.playing,
+  .step.active.playing {
+    outline: 3px solid var(--signal-playback);
+    outline-offset: 1px;
+    box-shadow: 0 0 0 2px rgba(240, 90, 40, 0.2);
+  }
+
+  .pitch-roll-dialog {
+    background: rgba(23, 26, 31, 0.48);
+  }
+
+  .pitch-roll-sheet {
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    background: var(--hardware-surface);
+    box-shadow: 0 22px 55px rgba(23, 26, 31, 0.2);
+  }
+
+  .pitch-roll-header h2,
+  .pitch-roll-hint,
+  :global(.pitch-roll-row-label) {
+    color: var(--hardware-ink);
+  }
+
+  #pitchRollCloseBtn,
+  #pitchRollResetBtn {
+    min-height: 44px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    background: var(--hardware-canvas);
+  }
+
+  :global(.pitch-roll-cell) {
+    border-color: var(--hardware-hairline);
+    background: var(--hardware-canvas);
+  }
+
+  :global(.pitch-roll-cell.is-quarter) {
+    border-left-color: var(--hardware-muted);
+  }
+
+  :global(.pitch-roll-cell.is-active) {
+    border-color: var(--signal-selection);
+    background: var(--signal-selection);
+  }
+
+  :global(.pitch-roll-cell:focus-visible) {
+    border-color: var(--signal-effect);
+    outline: 3px solid var(--hardware-ink, #171a1f);
+    outline-offset: 1px;
+    box-shadow: 0 0 0 6px var(--signal-effect, #00b578);
+  }
+
+  :global(.arrange-row) {
+    color: var(--hardware-ink);
+  }
+
+  :global(.arrange-drag-handle),
+  :global(.arrange-times-label) {
+    color: var(--hardware-muted);
+  }
+
+  :global(.arrange-pattern-card) {
+    min-height: 44px;
+    color: var(--hardware-ink);
+    border-color: var(--hardware-hairline);
+    background: var(--hardware-surface);
+  }
+
+  :global(.arrange-pattern-card.is-selected) {
+    color: var(--hardware-ink);
+    border-color: var(--signal-selection);
+    background: var(--signal-selection);
+    box-shadow: inset 3px 0 0 var(--signal-selection);
+  }
+
+  :global(.arrange-pattern-button) {
+    min-height: 44px;
+  }
+
+  :global(.arrange-row-action) {
+    width: 44px;
+    height: 44px;
+    color: var(--hardware-muted);
+  }
+
+  :global(.arrange-row-action:hover) {
+    color: var(--hardware-ink);
+    background: var(--hardware-canvas);
+  }
+
+  :global(.arrange-row-action.is-delete) {
+    color: #9c3d39;
+  }
+
+  :global(.arrange-pattern-button:focus-visible),
+  :global(.arrange-row-action:focus-visible),
+  :global(.arrange-repeat-input:focus-visible) {
+    outline: 3px solid var(--pattern-ink, #171a1f);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--pattern-green, #00b578);
+  }
+
+  :global(.arrange-repeat-input) {
+    min-height: 44px;
+    color: var(--hardware-ink);
+    border-color: var(--hardware-hairline);
+    background: var(--hardware-surface);
+  }
+
+  /* Slice 4 Space bay: additive hardware layer only. */
+  .tone-fx-panel,
+  .space-fx-panel {
+    margin-top: 10px;
+    padding: 10px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 8px;
+    background: var(--hardware-canvas);
+  }
+
+  .tone-fx-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tone-fx-header h2 {
+    margin: 2px 0 0;
+    font-size: 1rem;
+  }
+
+  .tone-fx-kicker,
+  #toneFxStatus {
+    color: var(--hardware-muted);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  .space-fx-header,
+  .space-fx-macro label,
+  .space-fx-macro output {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .space-fx-header h2 {
+    margin: 2px 0 0;
+    font-size: 1rem;
+  }
+
+  .space-fx-kicker,
+  .space-fx-status,
+  .space-fx-summary,
+  .space-fx-macro span {
+    color: var(--hardware-muted);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  .space-fx-help,
+  .space-fx-summary {
+    margin: 7px 0;
+  }
+
+  .space-fx-presets {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .space-fx-presets button,
+  .space-fx-bypass {
+    min-height: 44px;
+    color: var(--hardware-ink);
+    border: 1px solid var(--hardware-hairline);
+    border-radius: 6px;
+    background: var(--hardware-surface);
+  }
+
+  .space-fx-presets button {
+    display: grid;
+    place-items: center;
+    gap: 2px;
+    padding: 7px;
+  }
+
+  .space-fx-presets svg {
+    width: 72px;
+    max-width: 100%;
+    height: 46px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  .space-creature-gesture {
+    visibility: hidden;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .space-mole-dust { stroke: #f05a28; }
+  .space-whale-sonar { stroke: #00b578; }
+  .space-jellyfish-ripple { fill: #f05a28; stroke: #00a6d6; }
+  .space-snail-crescent { fill: none; stroke: #00b578; }
+
+  .space-fx-panel[data-enabled="true"][data-available="true"]
+    .space-fx-presets button:is([data-space-selected="true"]) .space-mole-dust {
+    animation: space-mole-dust 620ms ease-out 1 both;
+  }
+
+  .space-fx-panel[data-enabled="true"][data-available="true"]
+    .space-fx-presets button:is([data-space-selected="true"]) .space-whale-sonar {
+    animation: space-whale-sonar 760ms ease-out 1 both;
+  }
+
+  .space-fx-panel[data-enabled="true"][data-available="true"]
+    .space-fx-presets button:is([data-space-selected="true"]) .space-jellyfish-ripple {
+    animation: space-jellyfish-ripple 700ms ease-out 1 both;
+  }
+
+  .space-fx-panel[data-enabled="true"][data-available="true"]
+    .space-fx-presets button:is([data-space-selected="true"]) .space-snail-crescent {
+    animation: space-snail-crescent 680ms ease-out 1 both;
+  }
+
+  .space-fx-panel[data-enabled="false"] .space-creature-gesture,
+  .space-fx-panel[data-available="false"] .space-creature-gesture {
+    animation: none;
+    visibility: hidden;
+  }
+
+  @keyframes space-mole-dust {
+    0% { visibility: visible; opacity: 0; transform: translateY(4px) scale(0.7); }
+    45% { opacity: 1; }
+    100% { visibility: hidden; opacity: 0; transform: translateY(-3px) scale(1.08); }
+  }
+
+  @keyframes space-whale-sonar {
+    0% { visibility: visible; opacity: 0; transform: scale(0.55); }
+    45% { opacity: 1; }
+    100% { visibility: hidden; opacity: 0; transform: scale(1.18); }
+  }
+
+  @keyframes space-jellyfish-ripple {
+    0% { visibility: visible; opacity: 0; transform: scale(0.7); }
+    50% { opacity: 0.9; }
+    100% { visibility: hidden; opacity: 0; transform: scale(1.15); }
+  }
+
+  @keyframes space-snail-crescent {
+    0% { visibility: visible; opacity: 0; transform: rotate(-18deg) scale(0.72); }
+    55% { opacity: 1; }
+    100% { visibility: visible; opacity: 1; transform: rotate(12deg) scale(1.05); }
+  }
+
+  .space-fx-presets button[data-space-selected="true"] {
+    border-color: var(--hardware-ink);
+    box-shadow:
+      inset 0 -4px 0 var(--hardware-ink),
+      inset 0 -7px 0 var(--signal-effect);
+  }
+
+  .space-fx-custom-preset {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+
+  .space-fx-macros {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin: 10px 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .space-fx-macro {
+    display: grid;
+    gap: 5px;
+  }
+
+  .space-fx-macro input {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .space-fx-bypass {
+    width: 100%;
+    border-color: var(--signal-effect);
+  }
+
+  .space-fx-presets button:focus-visible,
+  .space-fx-macro input:focus-visible,
+  .space-fx-bypass:focus-visible {
+    outline: 3px solid var(--hardware-ink);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px var(--signal-effect);
+  }
+
+  .space-fx-panel[data-available="false"] .space-fx-presets button,
+  .space-fx-panel[data-available="false"] .space-fx-macro input,
+  .space-fx-panel[data-available="false"] .space-fx-bypass,
+  .space-fx-panel[data-available="false"] .space-fx-presets svg {
+    opacity: 0.72;
+  }
+
+  @media (min-width: 900px) {
+    .op1-drum-machine {
+      --desktop-lane-row: 44px;
+    }
+
+    .header-grid {
+      height: 56px;
+      grid-template-columns: minmax(118px, 0.36fr) minmax(260px, 0.84fr) auto;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .app-title {
+      max-height: 48px;
+      font-size: clamp(1.2rem, 1.8vw, 1.65rem);
+    }
+
+    .instrument-screen {
+      height: 56px;
+      gap: 2px;
+      padding: 4px 8px;
+    }
+
+    .instrument-screen-scope {
+      min-height: 20px;
+    }
+
+    .bpm-control {
+      height: 56px;
+      flex-wrap: nowrap;
+      gap: 4px;
+      padding: 4px;
+    }
+
+    .audio-status-row {
+      min-height: 24px;
+      margin: 0 0 4px;
+      padding: 2px 6px;
+    }
+
+    .filter-fx-panel {
+      margin: 0 0 10px;
+      overflow: visible;
+    }
+
+    .filter-fx-body-inner {
+      display: block;
+    }
+
+    .filter-fx-help,
+    .filter-fx-pedalboard {
+      grid-column: 1 / -1;
+    }
+
+    .tone-fx-panel,
+    .space-fx-panel {
+      margin-top: 0;
+    }
+
+    .filter-fx-bar {
+      height: 36px;
+      min-height: 36px;
+      padding: 0 4px 0 10px;
+    }
+
+    .sequencer {
+      gap: 0;
+      padding: 4px;
+    }
+
+    .sequence-row {
+      position: relative;
+      height: var(--desktop-lane-row);
+      min-height: var(--desktop-lane-row);
+      grid-template-columns: minmax(140px, 176px) minmax(0, 1fr);
+      gap: 4px;
+      padding: 0;
+      border: 0;
+    }
+
+    .sequence-row:not(:last-child)::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 1px;
+      background: var(--hardware-hairline);
+      content: "";
+      pointer-events: none;
+    }
+
+    .instrument-panel {
+      height: 44px;
+      padding: 0 6px;
+      border: 0;
+      box-shadow: inset 0 0 0 1px var(--hardware-hairline);
+    }
+
+    .instrument-header {
+      height: 44px;
+      gap: 2px;
+    }
+
+    .all-steps {
+      overflow-x: auto;
+    }
+
+    .steps {
+      height: 44px;
+      grid-template-columns: repeat(16, minmax(44px, 56px));
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .step,
+    .step:nth-child(4n + 1) {
+      height: 44px;
+      min-height: 44px;
+      aspect-ratio: auto;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .filter-fx-body-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+      gap: 10px;
+      align-items: start;
+    }
+
+    .filter-fx-help,
+    .filter-fx-pedalboard {
+      grid-column: 1 / -1;
+    }
+
+    .filter-fx-shared-controls .filter-fx-macros {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 899px) {
+    .header-grid {
+      grid-template-columns: minmax(110px, 0.35fr) minmax(210px, 0.65fr);
+    }
+
+    .bpm-control {
+      grid-column: 1 / -1;
+      justify-content: center;
+    }
+
+    .filter-fx-pedalboard {
+      flex-wrap: wrap;
+      max-width: 390px;
+    }
+
+    .filter-preset-pedal {
+      flex: 0 0 clamp(88px, 14vw, 116px);
+      width: clamp(88px, 14vw, 116px);
+      height: clamp(112px, 18vw, 152px);
+    }
+
+    .filter-fx-shared-controls .filter-fx-layout {
+      grid-template-columns: minmax(160px, 0.7fr) minmax(0, 1.3fr);
+    }
+
+    .space-fx-presets {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 600px) {
+    .container {
+      padding: 4px;
+    }
+
+    .op1-drum-machine {
+      padding: 8px;
+      border-radius: 12px;
+    }
+
+    .header-grid {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 4px;
+      margin-bottom: 4px;
+      padding: 0;
+    }
+
+    .app-title {
+      align-self: center;
+      font-size: 1.15rem;
+    }
+
+    .app-title::after {
+      font-size: 0.45rem;
+    }
+
+    .instrument-screen {
+      width: 100%;
+      height: 70px;
+      padding: 6px 8px;
+    }
+
+    .instrument-screen-head,
+    .instrument-screen-readout {
+      font-size: 0.46rem;
+    }
+
+    .bpm-control {
+      display: grid;
+      grid-template-columns: 54px repeat(5, 44px);
+      width: 100%;
+      max-width: 284px;
+      justify-content: center;
+      margin-left: 0;
+      margin-inline: auto;
+      gap: 2px;
+      padding: 0;
+      overflow: visible;
+    }
+
+    .bpm-control label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    #bpm {
+      width: 54px;
+      min-height: 44px;
+      padding: 5px 2px;
+    }
+
+    #playBtn,
+    #shareBtn,
+    #loopPatternBtn,
+    #clearProjectBtn,
+    #mobileHelpBtn {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 7px;
+    }
+
+    #loopPatternBtn,
+    #shareBtn {
+      margin-left: 0;
+    }
+
+    .audio-status-row {
+      margin: 0 0 4px;
+    }
+
+    .filter-fx-panel {
+      border-radius: 8px;
+    }
+
+    .filter-fx-bar {
+      min-height: 48px;
+      padding: 2px 4px 2px 8px;
+    }
+
+    .filter-fx-action {
+      min-width: 72px;
+      min-height: 44px;
+      padding: 7px 8px;
+    }
+
+    .filter-fx-body-inner {
+      padding: 0 7px 8px;
+    }
+
+    .filter-fx-pedalboard {
+      gap: 8px;
+      max-width: 264px;
+      padding: 8px;
+    }
+
+    .filter-preset-pedal {
+      flex: 0 0 min(40vw, 116px);
+      width: min(40vw, 116px);
+      min-width: 0;
+      max-width: 116px;
+      height: clamp(112px, 48vw, 152px);
+    }
+
+    .filter-fx-shared-controls {
+      padding: 8px;
+    }
+
+    .filter-fx-shared-controls .filter-fx-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-fx-shared-controls .filter-fx-footswitch {
+      min-height: 56px;
+    }
+
+    .space-fx-panel {
+      margin-top: 8px;
+      padding: 8px;
+    }
+
+    .space-fx-presets,
+    .space-fx-macros {
+      grid-template-columns: 1fr;
+    }
+
+    .sequencer {
+      gap: 4px;
+      padding: 4px;
+      border-radius: 8px;
+    }
+
+    .sequence-row {
+      grid-template-columns: 96px minmax(0, 1fr);
+      gap: 5px;
+      padding: 4px 0;
+      border-radius: 5px;
+      align-items: center;
+    }
+
+    .instrument-panel {
+      min-height: 62px;
+      padding: 3px;
+      border-radius: 5px;
+    }
+
+    .instrument-header {
+      display: grid;
+      width: 100%;
+      grid-template-columns: repeat(2, 44px);
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .instrument-label {
+      grid-column: 1 / -1;
+      font-size: 0.55rem;
+      line-height: 1;
+      text-align: center;
+      writing-mode: horizontal-tb;
+      transform: none;
+      white-space: nowrap;
+    }
+
+    .instrument-volume-trigger,
+    .instrument-pitch-trigger {
+      width: 44px;
+      height: 44px;
+    }
+
+    .steps {
+      width: max-content;
+      grid-template-columns: repeat(8, 44px);
+      gap: 3px;
+    }
+
+    .all-steps {
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+    }
+
+    .step,
+    .step:nth-child(4n + 1) {
+      width: 44px;
+      height: 44px;
+      min-height: 44px;
+      aspect-ratio: auto;
+    }
+
+    .pitch-roll-sheet {
+      border-radius: 12px 12px 0 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .instrument-screen-playhead,
+    .instrument-screen-pulse,
+    .filter-fx-body,
+    .creature-gesture,
+    .creature-accent,
+    #playBtn,
+    #shareBtn,
+    #loopPatternBtn,
+    #clearProjectBtn,
+    #mobileHelpBtn,
+    .step {
+      animation: none;
+      transition: none;
+    }
+
+    .filter-preset-pedal {
+      animation: none;
+      transition: none;
+    }
+
+    .filter-preset-pedal:hover:not(:disabled) {
+      transform: none;
+    }
+
+    .filter-preset-pedal[data-filter-active="true"] .creature-bear {
+      transform: rotate(1deg);
+    }
+
+    .filter-preset-pedal[data-filter-active="true"] .creature-bird {
+      transform: translateY(-2px);
+    }
+
+    .filter-preset-pedal[data-filter-active="true"] .creature-snake-head {
+      transform: translate(2px, -1px);
+    }
+
+    .filter-preset-pedal[data-filter-active="true"] .creature-dragon-flame {
+      opacity: 0;
+    }
+
+    .space-fx-presets svg,
+    .space-fx-presets button,
+    .space-fx-macro input,
+    .space-fx-bypass {
+      animation: none;
+      transition: none;
+    }
+
+    .space-fx-panel[data-enabled="true"][data-available="true"]
+      .space-fx-presets button:is([data-space-selected="true"]) .space-creature-gesture {
+      animation: none;
+      visibility: visible;
+      transform: none;
+    }
+  }
 </style>
 
 <script>
+  import {
+    DEFAULT_BPM,
+    getSixteenthNoteDurationSeconds,
+    normalizeBpm,
+  } from "../lib/sequencer-safety.js";
+  import {
+    FILTER_SONG_SCHEMA_VERSION,
+    createDefaultFilterEffectState,
+    deserializeFilterEffectState,
+    formatFilterMacroValue,
+    getFilterEffectPresetState,
+    getFilterGraphicSummary,
+    normalizeFilterEffectState,
+    serializeFilterEffectState,
+  } from "../lib/filter-effect.js";
+  import { createMasterEffectsChain } from "../lib/master-effects-chain.js";
+  import {
+    createDefaultSpaceEffectState,
+    deserializeSpaceEffectState,
+    formatSpaceMacroValue,
+    getSpaceEffectSummary,
+    getSpaceEffectPresetState,
+    normalizeSpaceEffectState,
+    serializeSpaceEffectState,
+  } from "../lib/space-effect.js";
+
   /************************************************
    * Drum machine
    ************************************************/
-  let audioCtx;
+  let audioCtx = null;
+  let audioInitializationError = null;
   try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextConstructor) {
+      throw new Error("Web Audio API is not supported in this browser.");
+    }
+    audioCtx = new AudioContextConstructor();
   } catch (e) {
-    alert("Web Audio API not supported in this browser");
+    audioInitializationError = e;
   }
 
   const instrumentsOrder = [
@@ -1995,8 +5628,117 @@ import "@fontsource-variable/open-sans";
     }
   );
   const scheduleInterval = 25; // ms
+  const MAX_SCHEDULER_STEPS_PER_TICK = 64;
+  const MAX_SCHEDULER_LAG_SECONDS = 0.1;
+  const SAMPLE_FETCH_TIMEOUT_MS = 15000;
 
   const audioBuffers = {};
+  const sampleLoadStates = {};
+  const sampleLoadPromises = {};
+  const scheduledSources = new Map();
+  const retiringSources = new Map();
+  const scheduledHighlightTimers = new Set();
+  let masterGainNode = null;
+  let masterProtectionNode = null;
+  let masterOutputDestination = null;
+  let masterFilterGraph = null;
+  let masterEffectsChain = null;
+  let blockedMasterEffectsChain = null;
+  let filterTransportClosePromise = Promise.resolve(true);
+  let filterEffectState = createDefaultFilterEffectState();
+  let spaceEffectState = createDefaultSpaceEffectState();
+  let spaceEffectAvailable = true;
+  function refreshEffectsAvailability() {
+    if (!masterEffectsChain) {
+      filterEffectAvailable = false;
+      spaceEffectAvailable = false;
+      return;
+    }
+    const availability = masterEffectsChain.getAvailability();
+    filterEffectAvailable = availability.tone;
+    spaceEffectAvailable = availability.space;
+    masterFilterGraph = masterEffectsChain.toneGraph;
+  }
+  function retireMasterEffectsChain(failedChain) {
+    try { masterGainNode?.disconnect(); } catch (_disconnectError) {}
+    try { masterProtectionNode?.disconnect(); } catch (_disconnectError) {}
+    try {
+      failedChain?.disconnect();
+      if (blockedMasterEffectsChain === failedChain) blockedMasterEffectsChain = null;
+    } catch (_disconnectError) {
+      blockedMasterEffectsChain = failedChain;
+    }
+    if (masterEffectsChain === failedChain) masterEffectsChain = null;
+    masterFilterGraph = null;
+    masterGainNode = null;
+    masterProtectionNode = null;
+    masterOutputDestination = null;
+    filterEffectAvailable = false;
+    spaceEffectAvailable = false;
+  }
+  const spaceController = Object.freeze({
+    setState(nextState, options) {
+      spaceEffectState = normalizeSpaceEffectState(nextState);
+      if (masterEffectsChain) {
+        const applyingChain = masterEffectsChain;
+        void applyingChain.applySpaceState(spaceEffectState, {
+          immediate: Boolean(options && options.immediate),
+        }).then(function (result) {
+          if (masterEffectsChain !== applyingChain) return;
+          refreshEffectsAvailability();
+          renderFilterEffectUi();
+          renderSpaceEffectUi();
+          return result;
+        }).catch(function () {
+          if (masterEffectsChain !== applyingChain) return;
+          retireMasterEffectsChain(applyingChain);
+          renderFilterEffectUi();
+          renderSpaceEffectUi();
+        });
+      }
+      renderSpaceEffectUi();
+      return { ...spaceEffectState };
+    },
+    replaceWithDefault(options) {
+      return this.setState(createDefaultSpaceEffectState(), options);
+    },
+    selectPreset(presetId, options) {
+      return this.setState(getSpaceEffectPresetState(presetId), options);
+    },
+    setMacro(control, value, options) {
+      if (!["size", "decay", "air", "mix"].includes(control)) return this.getState();
+      return this.setState({ ...spaceEffectState, [control]: value, preset: "custom" }, options);
+    },
+    setEnabled(enabled, options) {
+      return this.setState({ ...spaceEffectState, enabled: Boolean(enabled) }, options);
+    },
+    makeUnavailable() {
+      spaceEffectAvailable = false;
+      let result = null;
+      try {
+        result = masterEffectsChain ? masterEffectsChain.makeSpaceUnavailable() : null;
+      } catch (_error) {
+        const failedChain = masterEffectsChain;
+        retireMasterEffectsChain(failedChain);
+      }
+      refreshEffectsAvailability();
+      renderSpaceEffectUi();
+      return result;
+    },
+    getState() { return { ...spaceEffectState }; },
+    render() {
+      refreshEffectsAvailability();
+      renderSpaceEffectUi();
+      return this.getState();
+    },
+  });
+  let filterEffectAvailable = true;
+  let filterPanelExpanded = false;
+  let filterPanelTransitionGeneration = 0;
+  let filterPanelHideTimerId = null;
+  let filterPanelTransitionEndHandler = null;
+  let filterControlsBound = false;
+  const FILTER_PANEL_TRANSITION_MS = 180;
   const DUPLICATE_PATTERN_ICON =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
   const DELETE_PATTERN_ICON =
@@ -2013,6 +5755,43 @@ import "@fontsource-variable/open-sans";
   const clearProjectBtn = document.getElementById("clearProjectBtn");
   const mobileHelpBtn = document.getElementById("mobileHelpBtn");
   const mobileHelpWrap = document.querySelector(".mobile-help-wrap");
+  const audioStatus = document.getElementById("audioStatus");
+  const retrySamplesBtn = document.getElementById("retrySamplesBtn");
+  const instrumentScreen = document.getElementById("instrumentScreen");
+  const instrumentScreenBpm = document.querySelector("[data-screen-bpm]");
+  const instrumentScreenMode = document.querySelector("[data-screen-mode]");
+  const instrumentScreenFilter = document.querySelector("[data-screen-filter]");
+  const filterFxPanel = document.getElementById("filterFxPanel");
+  const filterFxToggle = document.getElementById("filterFxToggle");
+  const filterFxToggleLabel = document.querySelector("[data-filter-toggle-label]");
+  const filterFxBody = document.getElementById("filterFxBody");
+  const filterFxStatus = document.getElementById("filterFxStatus");
+  const toneFxStatus = document.getElementById("toneFxStatus");
+  const filterFxActionStatus = document.getElementById("filterFxActionStatus");
+  const filterFxBypassBtn = document.getElementById("filterFxBypassBtn");
+  const filterFxPreset = document.getElementById("filterFxPreset");
+  const filterFxPresetCards = Array.from(
+    document.querySelectorAll("[data-filter-preset-card]")
+  );
+  const filterFxSelectedLabel = document.querySelector("[data-filter-selected-label]");
+  const filterFxResetBtn = document.getElementById("filterFxResetBtn");
+  const filterFxGraphic = document.getElementById("filterFxGraphic");
+  const filterFxCurve = document.getElementById("filterFxCurve");
+  const filterFxCurveHalo = document.querySelector("[data-filter-curve-halo]");
+  const filterFxGraphicState = document.getElementById("filterFxGraphicState");
+  const filterFxMacroInputs = Array.from(
+    document.querySelectorAll("[data-filter-macro]")
+  );
+  const filterFxMacroOutputs = Array.from(
+    document.querySelectorAll("[data-filter-output]")
+  );
+  const spaceFxPanel = document.getElementById("spaceFxPanel");
+  const spaceFxStatus = document.getElementById("spaceFxStatus");
+  const spaceFxSummary = document.querySelector("[data-space-summary]");
+  const spaceFxBypassBtn = document.getElementById("spaceFxBypassBtn");
+  const spaceFxPresetCards = Array.from(document.querySelectorAll("[data-space-preset]"));
+  const spaceFxMacroInputs = Array.from(document.querySelectorAll("[data-space-macro]"));
+  const spaceFxMacroOutputs = Array.from(document.querySelectorAll("[data-space-output]"));
   const pitchRollDialog = document.getElementById("pitchRollDialog");
   const pitchRollTitle = document.getElementById("pitchRollTitle");
   const pitchRollGrid = document.getElementById("pitchRollGrid");
@@ -2024,6 +5803,10 @@ import "@fontsource-variable/open-sans";
   let clearPatternBtn = null;
 
   let isPlaying = false;
+  let isStartingPlayback = false;
+  let isRetryingSamples = false;
+  let playbackStartRequestId = 0;
+  let playbackAudioError = null;
   let current16th = 0;
   let nextNoteTime = 0;
   let schedulerIntervalId = null;
@@ -2047,12 +5830,765 @@ import "@fontsource-variable/open-sans";
   let instrumentVolumeDismissBound = false;
   let pitchRollBound = false;
   let activePitchInstrument = null;
+  let pitchRollReturnFocusElement = null;
+
+  instrumentsOrder.forEach(function (instrument) {
+    sampleLoadStates[instrument] = "idle";
+  });
+
+  function getFilterCurvePath(state) {
+    const kneeX = 28 + (state.cutoff / 100) * 176;
+    const peakY = 36 - (state.resonance / 100) * 24;
+    const shoulderX = Math.min(220, kneeX + 18);
+    return [
+      "M12 36",
+      "L" + Math.max(12, kneeX - 16).toFixed(1) + " 36",
+      "Q" + (kneeX - 5).toFixed(1) + " 36 " + kneeX.toFixed(1) + " " + peakY.toFixed(1),
+      "Q" + (kneeX + 8).toFixed(1) + " 38 " + shoulderX.toFixed(1) + " 54",
+      "Q" + Math.min(226, shoulderX + 8).toFixed(1) + " 74 228 96",
+    ].join(" ");
+  }
+
+  function getFilterPresetDisplayName(presetId) {
+    if (presetId === "resonant-sweep") return "Resonant Sweep";
+    if (presetId === "custom") return "Custom";
+    return presetId.charAt(0).toUpperCase() + presetId.slice(1);
+  }
+
+  function renderInstrumentScreen(stepIndex) {
+    if (!instrumentScreen) return;
+    const bpm = normalizeBpm(bpmInput ? bpmInput.value : DEFAULT_BPM, DEFAULT_BPM);
+    const state = normalizeFilterEffectState(filterEffectState);
+    const screenStep = Number.isFinite(stepIndex)
+      ? Math.min(STEPS_PER_PATTERN - 1, Math.max(0, Math.trunc(stepIndex)))
+      : Number(instrumentScreen.dataset.step || 0);
+    const mode = isPlaying ? "PLAYING" : isStartingPlayback ? "STARTING" : "STOPPED";
+    const filterLabel = !filterEffectAvailable
+      ? "FILTER UNAVAILABLE"
+      : state.enabled
+        ? getFilterPresetDisplayName(state.preset).toUpperCase() + " FILTER ON"
+        : "FILTER BYPASSED";
+
+    instrumentScreen.dataset.playing = isPlaying ? "true" : "false";
+    instrumentScreen.dataset.filterActive =
+      filterEffectAvailable && state.enabled ? "true" : "false";
+    instrumentScreen.dataset.step = screenStep.toString();
+    instrumentScreen.dataset.tick = screenStep % 2 === 0 ? "even" : "odd";
+    instrumentScreen.style.setProperty("--screen-step", screenStep.toString());
+    instrumentScreen.style.setProperty(
+      "--screen-position",
+      ((screenStep / (STEPS_PER_PATTERN - 1)) * 100).toFixed(3) + "%"
+    );
+    instrumentScreen.setAttribute(
+      "aria-label",
+      (isPlaying ? "Playing" : isStartingPlayback ? "Starting" : "Stopped") +
+        ", " +
+        bpm +
+        " BPM, " +
+        filterLabel.toLowerCase() +
+        "."
+    );
+    if (instrumentScreenBpm) instrumentScreenBpm.textContent = bpm.toString();
+    if (instrumentScreenMode) instrumentScreenMode.textContent = mode;
+    if (instrumentScreenFilter) instrumentScreenFilter.textContent = filterLabel;
+    if (playBtn) playBtn.dataset.mode = isPlaying ? "stop" : "play";
+  }
+
+  function renderFilterEffectUi() {
+    const state = normalizeFilterEffectState(filterEffectState);
+    const controlsDisabled = !filterEffectAvailable;
+    const effectiveEnabled = filterEffectAvailable && state.enabled;
+    const graphicSummary = getFilterGraphicSummary({
+      ...state,
+      enabled: effectiveEnabled,
+    });
+
+    if (filterFxPanel) {
+      filterFxPanel.dataset.enabled = effectiveEnabled ? "true" : "false";
+      filterFxPanel.dataset.available = filterEffectAvailable ? "true" : "false";
+      filterFxPanel.dataset.preset = state.preset;
+      filterFxPanel.style.setProperty("--filter-drive", state.drive.toString());
+      filterFxPanel.style.setProperty("--filter-mix", state.mix.toString());
+      filterFxPanel.style.setProperty(
+        "--filter-dash",
+        effectiveEnabled && state.drive >= 60 ? "7 2" : "none"
+      );
+    }
+    const toneStatus = !filterEffectAvailable
+      ? "Unavailable"
+      : state.enabled ? "On" : "Bypassed";
+    if (toneFxStatus && toneFxStatus.textContent !== toneStatus) {
+      toneFxStatus.textContent = toneStatus;
+    }
+    if (filterFxStatus) {
+      const spaceStatus = !spaceEffectAvailable
+        ? "Unavailable"
+        : spaceEffectState.enabled ? "On" : "Bypassed";
+      const statusMessage = "Tone: " + toneStatus + " · Space: " + spaceStatus;
+      if (filterFxStatus.textContent !== statusMessage) {
+        filterFxStatus.textContent = statusMessage;
+      }
+    }
+    if (filterFxBypassBtn) {
+      filterFxBypassBtn.disabled = controlsDisabled;
+      filterFxBypassBtn.setAttribute("aria-pressed", effectiveEnabled ? "true" : "false");
+      filterFxBypassBtn.setAttribute(
+        "aria-label",
+        filterEffectAvailable
+          ? effectiveEnabled
+            ? "Bypass filter"
+            : "Enable filter"
+          : "Filter unavailable; audio is bypassed"
+      );
+      filterFxBypassBtn.textContent = filterEffectAvailable
+        ? effectiveEnabled
+          ? "Bypass filter"
+          : "Enable filter"
+        : "Filter unavailable";
+    }
+    if (filterFxPreset) {
+      filterFxPreset.disabled = controlsDisabled;
+      filterFxPreset.value = state.preset;
+    }
+    filterFxPresetCards.forEach(function (card) {
+      const presetId = card.dataset.filterPresetCard;
+      if (!presetId) return;
+
+      const selected = presetId === state.preset;
+      const active = selected && effectiveEnabled;
+      const previewState =
+        presetId === "custom" ? state : getFilterEffectPresetState(presetId);
+
+      card.disabled = controlsDisabled;
+      card.dataset.filterSelected = selected ? "true" : "false";
+      card.dataset.filterActive = active ? "true" : "false";
+      card.setAttribute("aria-pressed", selected ? "true" : "false");
+
+      if (!previewState) return;
+      card.querySelectorAll("[data-filter-preview-control]").forEach(function (knob) {
+        const control = knob.dataset.filterPreviewControl;
+        if (!control || !(control in previewState)) return;
+        knob.style.setProperty("--preview-value", previewState[control].toString());
+      });
+      const previewPath = card.querySelector("[data-filter-preview-path]");
+      if (previewPath) {
+        previewPath.setAttribute("d", getFilterCurvePath(previewState));
+      }
+      if (presetId === "custom") {
+        const customValues = card.querySelector("[data-filter-custom-values]");
+        if (customValues) {
+          customValues.textContent = [
+            previewState.cutoff,
+            previewState.resonance,
+            previewState.drive,
+            previewState.mix,
+          ].join(" · ");
+        }
+      }
+    });
+    if (filterFxSelectedLabel) {
+      filterFxSelectedLabel.textContent =
+        getFilterPresetDisplayName(state.preset) + " selected";
+    }
+    if (filterFxResetBtn) {
+      filterFxResetBtn.disabled = controlsDisabled;
+    }
+
+    filterFxMacroInputs.forEach(function (input) {
+      const control = input.dataset.filterMacro;
+      if (!control || !(control in state)) return;
+      const value = state[control];
+      input.disabled = controlsDisabled;
+      input.value = value.toString();
+      input.setAttribute(
+        "aria-valuetext",
+        formatFilterMacroValue(control, value, true) + ", " + value + " of 100"
+      );
+      const card = input.closest(".filter-fx-macro");
+      if (card) {
+        card.style.setProperty("--filter-value", value.toString());
+      }
+    });
+    filterFxMacroOutputs.forEach(function (output) {
+      const control = output.dataset.filterOutput;
+      if (!control || !(control in state)) return;
+      output.textContent = formatFilterMacroValue(control, state[control], false);
+    });
+
+    const curvePath = getFilterCurvePath(state);
+    if (filterFxCurve) filterFxCurve.setAttribute("d", curvePath);
+    if (filterFxCurveHalo) filterFxCurveHalo.setAttribute("d", curvePath);
+    if (filterFxGraphic) {
+      filterFxGraphic.setAttribute(
+        "aria-label",
+        filterEffectAvailable
+          ? graphicSummary.description
+          : "Filter unavailable. Audio is using the neutral protected path."
+      );
+    }
+    if (filterFxGraphicState) {
+      filterFxGraphicState.textContent = filterEffectAvailable
+        ? graphicSummary.label
+        : "Filter unavailable · Neutral audio";
+    }
+    renderInstrumentScreen();
+  }
+
+  function renderSpaceEffectUi() {
+    const state = normalizeSpaceEffectState(spaceEffectState);
+    const controlsDisabled = !spaceEffectAvailable;
+    const effectiveEnabled = spaceEffectAvailable && state.enabled;
+    if (spaceFxPanel) {
+      spaceFxPanel.dataset.enabled = effectiveEnabled ? "true" : "false";
+      spaceFxPanel.dataset.available = spaceEffectAvailable ? "true" : "false";
+      spaceFxPanel.dataset.preset = state.preset;
+    }
+    if (spaceFxStatus) {
+      spaceFxStatus.textContent = spaceEffectAvailable
+        ? effectiveEnabled ? "On" : "Bypassed"
+        : "Space unavailable; audio is bypassed.";
+    }
+    if (spaceFxSummary) spaceFxSummary.textContent = getSpaceEffectSummary(state);
+    if (spaceFxBypassBtn) {
+      spaceFxBypassBtn.disabled = controlsDisabled;
+      spaceFxBypassBtn.setAttribute("aria-pressed", effectiveEnabled ? "true" : "false");
+      spaceFxBypassBtn.setAttribute("aria-label", spaceEffectAvailable
+        ? effectiveEnabled ? "Bypass Space" : "Enable Space"
+        : "Space unavailable; audio is bypassed.");
+      spaceFxBypassBtn.textContent = spaceEffectAvailable
+        ? effectiveEnabled ? "Bypass Space" : "Enable Space"
+        : "Space unavailable; audio is bypassed.";
+    }
+    spaceFxPresetCards.forEach(function (card) {
+      const selected = card.dataset.spacePreset === state.preset;
+      card.disabled = controlsDisabled;
+      card.dataset.spaceSelected = selected ? "true" : "false";
+      card.setAttribute("aria-pressed", selected ? "true" : "false");
+    });
+    spaceFxMacroInputs.forEach(function (input) {
+      const control = input.dataset.spaceMacro;
+      if (!control || !(control in state)) return;
+      input.disabled = controlsDisabled;
+      input.value = state[control].toString();
+      input.setAttribute("aria-valuetext", formatSpaceMacroValue(control, state[control], true));
+    });
+    spaceFxMacroOutputs.forEach(function (output) {
+      const control = output.dataset.spaceOutput;
+      if (control && control in state) output.textContent = formatSpaceMacroValue(control, state[control]);
+    });
+    renderFilterEffectUi();
+  }
+
+  function setFilterEffectState(nextState, options) {
+    const normalized = normalizeFilterEffectState(nextState);
+    filterEffectState = normalized;
+    if (masterEffectsChain && filterEffectAvailable) {
+      try {
+        masterEffectsChain.applyToneState(normalized, {
+          immediate: Boolean(options && options.immediate),
+        });
+      } catch (error) {
+        disableFilterEffectGraph(error);
+      }
+    }
+    renderFilterEffectUi();
+    return { ...filterEffectState };
+  }
+
+  function applyFilterEffectPreset(presetId) {
+    const presetState = getFilterEffectPresetState(presetId);
+    if (!presetState) return false;
+    setFilterEffectState(presetState);
+    return true;
+  }
+
+  function announceFilterAction(message) {
+    if (!filterFxActionStatus) return;
+    filterFxActionStatus.textContent = "";
+    void Promise.resolve().then(function () {
+      filterFxActionStatus.textContent = message;
+    });
+  }
+
+  function resetFilterEffectState() {
+    setFilterEffectState(createDefaultFilterEffectState());
+    announceFilterAction("Filter reset; bypassed.");
+  }
+
+  function prefersReducedFilterMotion() {
+    return Boolean(
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
+  function clearFilterPanelTransitionCompletion() {
+    if (filterPanelHideTimerId !== null) {
+      window.clearTimeout(filterPanelHideTimerId);
+      filterPanelHideTimerId = null;
+    }
+    if (filterFxBody && filterPanelTransitionEndHandler) {
+      filterFxBody.removeEventListener("transitionend", filterPanelTransitionEndHandler);
+      filterPanelTransitionEndHandler = null;
+    }
+  }
+
+  function finishFilterPanelCollapse(generation) {
+    if (
+      !filterFxBody ||
+      generation !== filterPanelTransitionGeneration ||
+      filterPanelExpanded
+    ) {
+      return;
+    }
+    clearFilterPanelTransitionCompletion();
+    filterFxBody.hidden = true;
+    filterFxBody.dataset.transitioning = "false";
+  }
+
+  function setFilterPanelExpanded(expanded, options) {
+    const nextExpanded = Boolean(expanded);
+    if (!filterFxBody || !filterFxToggle) return false;
+    const shouldAnimate =
+      !(options && options.animate === false) && !prefersReducedFilterMotion();
+    const generation = ++filterPanelTransitionGeneration;
+
+    clearFilterPanelTransitionCompletion();
+
+    if (
+      !nextExpanded &&
+      document.activeElement instanceof Element &&
+      filterFxBody.contains(document.activeElement)
+    ) {
+      filterFxToggle.focus();
+    }
+
+    filterPanelExpanded = nextExpanded;
+    filterFxBody.dataset.transitioning = shouldAnimate ? "true" : "false";
+    filterFxToggle.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
+    filterFxToggle.setAttribute(
+      "aria-label",
+      nextExpanded ? "Hide effects" : "Show effects"
+    );
+    if (filterFxToggleLabel) {
+      filterFxToggleLabel.textContent = nextExpanded ? "Hide effects" : "Show effects";
+    }
+
+    if (nextExpanded) {
+      filterFxBody.hidden = false;
+      filterFxBody.inert = false;
+      filterFxBody.removeAttribute("inert");
+      filterFxBody.removeAttribute("aria-hidden");
+      filterFxBody.dataset.expanded = "false";
+      if (shouldAnimate) {
+        void filterFxBody.offsetHeight;
+      }
+      filterFxBody.dataset.expanded = "true";
+      if (!shouldAnimate) filterFxBody.dataset.transitioning = "false";
+      return true;
+    }
+
+    filterFxBody.dataset.expanded = "false";
+    filterFxBody.inert = true;
+    filterFxBody.setAttribute("inert", "");
+    filterFxBody.setAttribute("aria-hidden", "true");
+    if (!shouldAnimate) {
+      finishFilterPanelCollapse(generation);
+      return true;
+    }
+
+    filterPanelTransitionEndHandler = function (event) {
+      if (
+        event.target !== filterFxBody ||
+        (event.propertyName && event.propertyName !== "grid-template-rows")
+      ) {
+        return;
+      }
+      finishFilterPanelCollapse(generation);
+    };
+    filterFxBody.addEventListener("transitionend", filterPanelTransitionEndHandler);
+    filterPanelHideTimerId = window.setTimeout(function () {
+      finishFilterPanelCollapse(generation);
+    }, FILTER_PANEL_TRANSITION_MS);
+    return true;
+  }
+
+  function bindFilterEffectControls() {
+    if (filterControlsBound) return;
+    filterControlsBound = true;
+
+    if (filterFxToggle) {
+      filterFxToggle.addEventListener("click", function () {
+        setFilterPanelExpanded(!filterPanelExpanded);
+      });
+    }
+    if (filterFxBypassBtn) {
+      filterFxBypassBtn.addEventListener("click", function () {
+        setFilterEffectState({ ...filterEffectState, enabled: !filterEffectState.enabled });
+      });
+    }
+    if (filterFxPreset) {
+      filterFxPreset.addEventListener("change", function () {
+        applyFilterEffectPreset(filterFxPreset.value);
+      });
+    }
+    filterFxPresetCards.forEach(function (card) {
+      card.addEventListener("click", function () {
+        const presetId = card.dataset.filterPresetCard;
+        if (!presetId) return;
+        if (presetId === "custom") {
+          setFilterEffectState({ ...filterEffectState, preset: "custom" });
+        } else {
+          applyFilterEffectPreset(presetId);
+        }
+        announceFilterAction(getFilterPresetDisplayName(presetId) + " Filter selected.");
+      });
+    });
+    if (filterFxResetBtn) {
+      filterFxResetBtn.addEventListener("click", function () {
+        resetFilterEffectState();
+      });
+    }
+    if (spaceFxBypassBtn) {
+      spaceFxBypassBtn.addEventListener("click", function () {
+        spaceController.setEnabled(!spaceEffectState.enabled);
+      });
+    }
+    spaceFxPresetCards.forEach(function (card) {
+      card.addEventListener("click", function () {
+        const presetId = card.dataset.spacePreset;
+        if (!presetId) return;
+        if (presetId === "custom") {
+          spaceController.setState({ ...spaceEffectState, preset: "custom" });
+        } else {
+          spaceController.selectPreset(presetId);
+        }
+      });
+    });
+    spaceFxMacroInputs.forEach(function (input) {
+      input.addEventListener("input", function () {
+        const control = input.dataset.spaceMacro;
+        if (!control) return;
+        spaceController.setMacro(control, Number(input.value));
+      });
+    });
+
+    filterFxMacroInputs.forEach(function (input) {
+      function commitInputValue() {
+        const control = input.dataset.filterMacro;
+        if (!control) return;
+        setFilterEffectState({
+          ...filterEffectState,
+          [control]: Number(input.value),
+          preset: "custom",
+        });
+      }
+
+      input.addEventListener("input", commitInputValue);
+      input.addEventListener("keydown", function (event) {
+        if (event.key !== "PageUp" && event.key !== "PageDown") return;
+        event.preventDefault();
+        const direction = event.key === "PageUp" ? 1 : -1;
+        const nextValue = Math.min(100, Math.max(0, Number(input.value) + direction * 10));
+        input.value = nextValue.toString();
+        commitInputValue();
+      });
+    });
+
+    setFilterPanelExpanded(false, { animate: false });
+    renderFilterEffectUi();
+    renderSpaceEffectUi();
+  }
+
+  function disableFilterEffectGraph(error) {
+    if (error) {
+      console.warn("Filter effect is unavailable; using neutral master audio:", error);
+    }
+    if (masterEffectsChain) masterEffectsChain.makeToneUnavailable();
+    masterFilterGraph = null;
+    filterEffectAvailable = false;
+    renderFilterEffectUi();
+  }
+
+  function trackFilterTransportClose(graph, closeOperation) {
+    const trackedClose = Promise.resolve(closeOperation).catch(function () {
+      return false;
+    });
+    filterTransportClosePromise = trackedClose;
+    void trackedClose.then(function (closed) {
+      if (masterEffectsChain === graph) refreshEffectsAvailability();
+      if (
+        !closed &&
+        filterTransportClosePromise === trackedClose &&
+        masterEffectsChain === graph &&
+        audioCtx &&
+        audioCtx.state !== "closed"
+      ) {
+        audioInitializationError = new Error("The terminal effects gate could not close safely.");
+      }
+    });
+    return trackedClose;
+  }
+
+  function initializeMasterOutput() {
+    if (masterEffectsChain) {
+      refreshEffectsAvailability();
+      renderFilterEffectUi();
+      return;
+    }
+    if (blockedMasterEffectsChain) {
+      try {
+        blockedMasterEffectsChain.disconnect();
+        blockedMasterEffectsChain = null;
+      } catch (_cleanupError) {
+        filterEffectAvailable = false;
+        spaceEffectAvailable = false;
+        renderFilterEffectUi();
+        return;
+      }
+    }
+    if (!audioCtx) {
+      filterEffectAvailable = false;
+      spaceEffectAvailable = false;
+      renderFilterEffectUi();
+      return;
+    }
+
+    try {
+      masterGainNode = audioCtx.createGain();
+      masterGainNode.gain.value = 0.25;
+
+      if (typeof audioCtx.createDynamicsCompressor === "function") {
+        masterProtectionNode = audioCtx.createDynamicsCompressor();
+        masterProtectionNode.threshold.value = -6;
+        masterProtectionNode.knee.value = 3;
+        masterProtectionNode.ratio.value = 12;
+        masterProtectionNode.attack.value = 0.003;
+        masterProtectionNode.release.value = 0.25;
+        masterProtectionNode.connect(audioCtx.destination);
+        masterOutputDestination = masterProtectionNode;
+      } else {
+        masterOutputDestination = audioCtx.destination;
+      }
+
+      try {
+        masterEffectsChain = createMasterEffectsChain(
+          audioCtx,
+          masterOutputDestination,
+          { toneState: filterEffectState, spaceState: spaceEffectState },
+          {
+            isLifecycleValid() {
+              return document.visibilityState !== "hidden" && masterEffectsChain !== null;
+            },
+          }
+        );
+        refreshEffectsAvailability();
+        masterGainNode.connect(masterEffectsChain.input);
+        filterEffectAvailable = Boolean(masterFilterGraph);
+      } catch (filterError) {
+        try {
+          masterGainNode.disconnect();
+        } catch (_disconnectError) {
+          // A failed final connection may not have attached the master input.
+        }
+        if (masterEffectsChain) {
+          try {
+            masterEffectsChain.disconnect();
+          } catch (_disconnectError) {
+            // The failed graph connection may already be torn down.
+          }
+        }
+        masterFilterGraph = null; masterEffectsChain = null;
+        filterEffectAvailable = false; spaceEffectAvailable = false;
+        throw filterError;
+      }
+    } catch (error) {
+      if (masterEffectsChain) {
+        try {
+          masterEffectsChain.disconnect();
+        } catch (_disconnectError) {
+          // The graph may have failed during its own cleanup.
+        }
+      }
+      if (masterGainNode) {
+        try {
+          masterGainNode.disconnect();
+        } catch (_disconnectError) {
+          // The master input may only be partially connected.
+        }
+      }
+      if (masterProtectionNode) {
+        try {
+          masterProtectionNode.disconnect();
+        } catch (_disconnectError) {
+          // The protection node may not have reached the destination.
+        }
+      }
+      audioInitializationError = error;
+      masterGainNode = null;
+      masterProtectionNode = null;
+      masterOutputDestination = null;
+      masterFilterGraph = null;
+      masterEffectsChain = null;
+      filterEffectAvailable = false;
+      spaceEffectAvailable = false;
+    }
+    renderFilterEffectUi();
+  }
+
+  function setAudioStatus(message, state) {
+    if (!audioStatus) return;
+    audioStatus.textContent = message;
+    audioStatus.dataset.state = state || "ready";
+  }
+
+  function getSampleLoadSummary() {
+    const summary = {
+      ready: [],
+      loading: [],
+      failed: [],
+      idle: [],
+    };
+
+    instrumentsOrder.forEach(function (instrument) {
+      const state = sampleLoadStates[instrument] || "idle";
+      summary[state].push(instrument);
+    });
+
+    return summary;
+  }
+
+  function updateInstrumentSampleState(instrument, state) {
+    const container = getInstrumentContainer(instrument);
+    const row = container ? container.closest(".sequence-row") : null;
+    if (!row) return;
+
+    row.dataset.sampleState = state;
+    if (state === "failed") {
+      row.title = formatInstrumentName(instrument) + " sound is unavailable";
+    } else {
+      row.removeAttribute("title");
+    }
+  }
+
+  function updateAudioReadinessUi() {
+    if (audioCtx && audioCtx.state === "closed") {
+      setAudioStatus("Audio is no longer available. Reload the page to restore playback.", "error");
+      playBtn.disabled = true;
+      if (retrySamplesBtn) retrySamplesBtn.hidden = true;
+      return;
+    }
+
+    if (!audioCtx || !masterGainNode) {
+      const message =
+        audioInitializationError instanceof Error
+          ? audioInitializationError.message
+          : "Audio could not be initialized in this browser.";
+      setAudioStatus(message, "error");
+      playBtn.disabled = true;
+      if (retrySamplesBtn) retrySamplesBtn.hidden = true;
+      return;
+    }
+
+    const summary = getSampleLoadSummary();
+    const total = instrumentsOrder.length;
+    const failedNames = summary.failed.map(formatInstrumentName).join(", ");
+
+    if (playbackAudioError) {
+      setAudioStatus(playbackAudioError, "error");
+    } else if (summary.loading.length) {
+      setAudioStatus(
+        "Loading sounds: " + summary.ready.length + " of " + total + " ready…",
+        summary.failed.length ? "warning" : "loading"
+      );
+    } else if (summary.failed.length && summary.ready.length) {
+      setAudioStatus(
+        summary.ready.length +
+          " of " +
+          total +
+          " sounds ready. Unavailable: " +
+          failedNames +
+          ".",
+        "warning"
+      );
+    } else if (summary.failed.length) {
+      setAudioStatus(
+        "No sounds loaded. Unavailable: " + failedNames + ". Retry to restore playback.",
+        "error"
+      );
+    } else if (summary.ready.length === total) {
+      setAudioStatus(total + " sounds ready.", "ready");
+    } else {
+      setAudioStatus("Preparing sounds…", "loading");
+    }
+
+    playBtn.disabled = isStartingPlayback || summary.ready.length === 0;
+    if (retrySamplesBtn) {
+      retrySamplesBtn.hidden = summary.failed.length === 0 && !isRetryingSamples;
+      retrySamplesBtn.disabled = isRetryingSamples;
+      retrySamplesBtn.textContent = isRetryingSamples
+        ? "Retrying sounds…"
+        : "Retry failed sounds";
+    }
+  }
+
+  function getValidatedBpm(value) {
+    const bpm = normalizeBpm(value, DEFAULT_BPM);
+    if (bpmInput.value !== bpm.toString()) {
+      bpmInput.value = bpm.toString();
+    }
+    return bpm;
+  }
+
+  function setStepActiveState(step, active) {
+    step.classList.toggle("active", Boolean(active));
+    step.setAttribute("aria-pressed", active ? "true" : "false");
+  }
 
   function toggleStep(step) {
-    step.classList.toggle("active");
+    setStepActiveState(step, !step.classList.contains("active"));
     saveSelectedPatternFromGrid();
     renderPitchRollGrid();
   }
+
+  initializeMasterOutput();
+  if (audioCtx && typeof audioCtx.addEventListener === "function") {
+    audioCtx.addEventListener("statechange", function () {
+      if (audioCtx.state === "running") return;
+
+      if (audioCtx.state === "closed") {
+        playbackAudioError = "Audio closed unexpectedly. Reload the page to restore playback.";
+      } else if (isPlaying || isStartingPlayback) {
+        playbackAudioError = "Audio was interrupted. Press Play to restart it.";
+      }
+
+      if (isPlaying || isStartingPlayback) {
+        stopSequencer();
+      } else {
+        cancelScheduledSources({ forceImmediate: true });
+        clearScheduledHighlightTimers();
+        clearPlayingHighlight();
+        if (masterEffectsChain) {
+          const graph = masterEffectsChain;
+          try {
+            trackFilterTransportClose(
+              graph,
+              graph.silence({ immediate: true })
+            );
+          } catch (filterError) {
+            disableFilterEffectGraph(filterError);
+          }
+        }
+        updateAudioReadinessUi();
+      }
+    });
+  }
+  bpmInput.addEventListener("change", function () {
+    getValidatedBpm(bpmInput.value);
+    renderInstrumentScreen();
+  });
+  bpmInput.addEventListener("input", function () {
+    renderInstrumentScreen();
+  });
 
   function closeMobileHelpTooltip() {
     if (!mobileHelpWrap || !mobileHelpBtn) {
@@ -2099,8 +6635,20 @@ import "@fontsource-variable/open-sans";
     if (!pitchRollDialog || pitchRollDialog.hidden) {
       return;
     }
+
+    const focusTarget = pitchRollReturnFocusElement;
+    if (focusTarget instanceof HTMLElement) {
+      focusTarget.setAttribute("aria-expanded", "false");
+    }
     pitchRollDialog.hidden = true;
     activePitchInstrument = null;
+    pitchRollReturnFocusElement = null;
+
+    if (focusTarget instanceof HTMLElement && focusTarget.isConnected) {
+      window.requestAnimationFrame(function () {
+        focusTarget.focus();
+      });
+    }
   }
 
   function setInstrumentStepActiveInGrid(instrument, stepIndex, active) {
@@ -2108,7 +6656,7 @@ import "@fontsource-variable/open-sans";
     if (!container) return;
     const stepDiv = container.querySelector("[data-step='" + stepIndex + "']");
     if (!stepDiv) return;
-    stepDiv.classList.toggle("active", Boolean(active));
+    setStepActiveState(stepDiv, active);
   }
 
   function applyPitchCellSelection(stepIndex, pitchOffset) {
@@ -2146,6 +6694,13 @@ import "@fontsource-variable/open-sans";
     ensureSongState();
     const instrumentIndex = instrumentsOrder.indexOf(activePitchInstrument);
     const currentPattern = patterns[selectedPatternIndex];
+    const focusedCell =
+      document.activeElement instanceof HTMLElement &&
+      pitchRollGrid.contains(document.activeElement)
+        ? document.activeElement
+        : null;
+    const focusedStep = focusedCell ? focusedCell.dataset.pitchStep : null;
+    const focusedPitch = focusedCell ? focusedCell.dataset.pitchOffset : null;
     pitchRollTitle.textContent = formatInstrumentName(activePitchInstrument) + " Pitch Roll";
 
     pitchRollGrid.innerHTML = "";
@@ -2162,6 +6717,8 @@ import "@fontsource-variable/open-sans";
         const cell = document.createElement("button");
         cell.type = "button";
         cell.className = "pitch-roll-cell";
+        cell.dataset.pitchStep = stepIndex.toString();
+        cell.dataset.pitchOffset = pitchOffset.toString();
         const isQuarter = stepIndex % 4 === 0;
         if (isQuarter) {
           cell.classList.add("is-quarter");
@@ -2179,6 +6736,10 @@ import "@fontsource-variable/open-sans";
         if (isActive && stepPitchOffset === pitchOffset) {
           cell.classList.add("is-active");
         }
+        cell.setAttribute(
+          "aria-pressed",
+          isActive && stepPitchOffset === pitchOffset ? "true" : "false"
+        );
 
         cell.setAttribute(
           "aria-label",
@@ -2196,14 +6757,48 @@ import "@fontsource-variable/open-sans";
 
       pitchRollGrid.appendChild(row);
     });
+
+    if (focusedStep !== null && focusedPitch !== null) {
+      const nextFocusedCell = pitchRollGrid.querySelector(
+        "[data-pitch-step='" +
+          focusedStep +
+          "'][data-pitch-offset='" +
+          focusedPitch +
+          "']"
+      );
+      if (nextFocusedCell instanceof HTMLElement) {
+        nextFocusedCell.focus();
+      }
+    }
   }
 
-  function openPitchRoll(instrument) {
+  function openPitchRoll(instrument, trigger) {
     if (!pitchRollDialog) return;
     closeAllInstrumentVolumePanels();
+    document.querySelectorAll("[data-pitch-trigger]").forEach(function (pitchTrigger) {
+      pitchTrigger.setAttribute("aria-expanded", "false");
+    });
     activePitchInstrument = instrument;
+    pitchRollReturnFocusElement = trigger instanceof HTMLElement ? trigger : null;
+    if (pitchRollReturnFocusElement) {
+      pitchRollReturnFocusElement.setAttribute("aria-expanded", "true");
+    }
     pitchRollDialog.hidden = false;
     renderPitchRollGrid();
+    window.requestAnimationFrame(function () {
+      if (pitchRollCloseBtn) pitchRollCloseBtn.focus();
+    });
+  }
+
+  function getPitchRollFocusableElements() {
+    if (!pitchRollDialog) return [];
+    return Array.from(
+      pitchRollDialog.querySelectorAll(
+        "button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex='-1'])"
+      )
+    ).filter(function (element) {
+      return element instanceof HTMLElement && !element.hidden;
+    });
   }
 
   function bindPitchRollControls() {
@@ -2212,6 +6807,9 @@ import "@fontsource-variable/open-sans";
     }
 
     document.querySelectorAll("[data-pitch-trigger]").forEach(function (trigger) {
+      trigger.setAttribute("aria-haspopup", "dialog");
+      trigger.setAttribute("aria-controls", "pitchRollDialog");
+      trigger.setAttribute("aria-expanded", "false");
       trigger.addEventListener("click", function () {
         const instrument = trigger.getAttribute("data-pitch-trigger");
         if (!instrument) return;
@@ -2220,7 +6818,7 @@ import "@fontsource-variable/open-sans";
           closePitchRoll();
           return;
         }
-        openPitchRoll(instrument);
+        openPitchRoll(instrument, trigger);
       });
     });
 
@@ -2246,74 +6844,102 @@ import "@fontsource-variable/open-sans";
           closePitchRoll();
         }
       });
-    }
 
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        closePitchRoll();
-      }
-    });
+      pitchRollDialog.addEventListener("keydown", function (event) {
+        if (pitchRollDialog.hidden) return;
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closePitchRoll();
+          return;
+        }
+
+        if (event.key !== "Tab") return;
+        const focusableElements = getPitchRollFocusableElements();
+        if (!focusableElements.length) {
+          event.preventDefault();
+          return;
+        }
+
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      });
+    }
 
     pitchRollBound = true;
   }
 
   window.addEventListener("load", async function () {
-    playBtn.disabled = true;
-    shareBtn.disabled = true;
-    loopPatternBtn.disabled = true;
-    clearProjectBtn.disabled = true;
-
-    await loadAllSamples();
-
-    playBtn.disabled = false;
     shareBtn.disabled = false;
     loopPatternBtn.disabled = false;
     clearProjectBtn.disabled = false;
     updateLoopPatternButtonState();
 
     document.querySelectorAll(".step").forEach(function (step) {
-      let suppressClickUntil = 0;
+      const instrumentContainer = step.closest("[data-instrument]");
+      const instrument = instrumentContainer
+        ? instrumentContainer.getAttribute("data-instrument")
+        : "instrument";
+      const stepIndex = Number(step.getAttribute("data-step")) + 1;
+
+      step.setAttribute("role", "button");
+      step.tabIndex = 0;
+      step.setAttribute(
+        "aria-label",
+        formatInstrumentName(instrument || "instrument") + " step " + stepIndex.toString()
+      );
+      setStepActiveState(step, step.classList.contains("active"));
 
       step.addEventListener("click", function () {
-        if (Date.now() < suppressClickUntil) {
-          return;
-        }
         toggleStep(step);
       });
 
-      if (window.PointerEvent) {
-        step.addEventListener("pointerdown", function (event) {
-          if (event.pointerType === "mouse") {
-            return;
-          }
-          event.preventDefault();
-          suppressClickUntil = Date.now() + 400;
-          toggleStep(step);
-        });
-      }
+      step.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        if (event.repeat) return;
+        toggleStep(step);
+      });
     });
 
     bindMobileHelpTooltip();
     bindPitchRollControls();
     bindInstrumentVolumeControls();
+    bindFilterEffectControls();
+    if (retrySamplesBtn) {
+      retrySamplesBtn.addEventListener("click", function () {
+        void retryFailedSamples();
+      });
+    }
     loadFromURLParams();
     ensureSongState();
     loadSelectedPatternIntoGrid();
+    updatePatternMeta();
     tryWireArrangementControlsWithRetry(30, 100);
-    window.addEventListener(
-      "arrangement:ready",
-      function () {
-        tryWireArrangementControlsWithRetry(30, 100);
-      },
-      { once: true }
-    );
+    window.renderPatternManager = function () {
+      updatePatternMeta();
+      return tryWireArrangementControlsWithRetry(30, 100);
+    };
+    window.addEventListener("arrangement:ready", function () {
+      window.renderPatternManager();
+    });
+
+    updateAudioReadinessUi();
+    await loadSamples(instrumentsOrder);
   });
 
   /************************************************
    * Visibility => stop sequencer if hidden
    ************************************************/
   document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "hidden" && isPlaying) {
+    if (document.visibilityState === "hidden" && (isPlaying || isStartingPlayback)) {
       stopSequencer();
     }
   });
@@ -2702,24 +7328,113 @@ import "@fontsource-variable/open-sans";
   }
 
   /************************************************
-   * Load all samples
+   * Load samples independently so one failure does not block playback
    ************************************************/
-  async function loadAllSamples() {
-    for (let instr of instrumentsOrder) {
-      const url = sampleURLs[instr];
+  function loadSample(instrument, options) {
+    if (!audioCtx || !sampleURLs[instrument]) {
+      updateAudioReadinessUi();
+      return Promise.resolve(false);
+    }
+
+    if (sampleLoadPromises[instrument]) {
+      return sampleLoadPromises[instrument];
+    }
+
+    const reload = Boolean(options && options.reload);
+    if (!reload && sampleLoadStates[instrument] === "ready") {
+      return Promise.resolve(true);
+    }
+
+    sampleLoadStates[instrument] = "loading";
+    updateInstrumentSampleState(instrument, "loading");
+    updateAudioReadinessUi();
+
+    const abortController =
+      typeof AbortController === "function" ? new AbortController() : null;
+    const abortTimeoutId = abortController
+      ? window.setTimeout(function () {
+          abortController.abort();
+        }, SAMPLE_FETCH_TIMEOUT_MS)
+      : null;
+
+    const loadPromise = (async function () {
       try {
-        const resp = await fetch(url);
-        if (!resp.ok) {
-          throw new Error("Failed to fetch " + url + ": " + resp.statusText);
+        const response = await fetch(sampleURLs[instrument], {
+          cache: reload ? "reload" : "default",
+          signal: abortController ? abortController.signal : undefined,
+        });
+        if (!response.ok) {
+          throw new Error(
+            "Failed to fetch " + sampleURLs[instrument] + ": " + response.status
+          );
         }
-        const audioData = await resp.arrayBuffer();
-        audioBuffers[instr] = await audioCtx.decodeAudioData(audioData);
-        console.log("Loaded sample for " + instr);
+
+        const audioData = await response.arrayBuffer();
+        audioBuffers[instrument] = await audioCtx.decodeAudioData(audioData);
+        sampleLoadStates[instrument] = "ready";
+        return true;
       } catch (error) {
-        console.error("Error loading sample for " + instr + ":", error);
+        delete audioBuffers[instrument];
+        sampleLoadStates[instrument] = "failed";
+        console.error("Error loading sample for " + instrument + ":", error);
+        return false;
+      } finally {
+        if (abortTimeoutId !== null) {
+          window.clearTimeout(abortTimeoutId);
+        }
+      }
+    })();
+
+    sampleLoadPromises[instrument] = loadPromise;
+    void loadPromise.finally(function () {
+      if (sampleLoadPromises[instrument] === loadPromise) {
+        delete sampleLoadPromises[instrument];
+      }
+      updateInstrumentSampleState(instrument, sampleLoadStates[instrument]);
+      updateAudioReadinessUi();
+    });
+
+    return loadPromise;
+  }
+
+  async function loadSamples(instruments, options) {
+    if (!audioCtx) {
+      updateAudioReadinessUi();
+      return;
+    }
+
+    await Promise.allSettled(
+      instruments.map(function (instrument) {
+        return loadSample(instrument, options);
+      })
+    );
+    updateAudioReadinessUi();
+  }
+
+  async function retryFailedSamples() {
+    const failedInstruments = getSampleLoadSummary().failed;
+    if (!failedInstruments.length) return;
+    const shouldMoveFocusToStatus = document.activeElement === retrySamplesBtn;
+    if (shouldMoveFocusToStatus && audioStatus) {
+      audioStatus.focus();
+    }
+    isRetryingSamples = true;
+    playbackAudioError = null;
+    updateAudioReadinessUi();
+
+    try {
+      await loadSamples(failedInstruments, { reload: true });
+    } finally {
+      isRetryingSamples = false;
+      updateAudioReadinessUi();
+      if (shouldMoveFocusToStatus && retrySamplesBtn) {
+        if (retrySamplesBtn.hidden && audioStatus) {
+          audioStatus.focus();
+        } else {
+          retrySamplesBtn.focus();
+        }
       }
     }
-    console.log("All samples loaded.");
   }
 
   /************************************************
@@ -2868,11 +7583,7 @@ import "@fontsource-variable/open-sans";
       for (let i = 0; i < STEPS_PER_PATTERN; i++) {
         const stepDiv = container.querySelector("[data-step='" + i + "']");
         if (!stepDiv) continue;
-        if (patternStr[i] === "1") {
-          stepDiv.classList.add("active");
-        } else {
-          stepDiv.classList.remove("active");
-        }
+        setStepActiveState(stepDiv, patternStr[i] === "1");
       }
     }
   }
@@ -2948,6 +7659,14 @@ import "@fontsource-variable/open-sans";
     }
   }
 
+  function getPatternListDragAxis() {
+    if (!patternList || !patternList.isConnected) return "y";
+    const styles = window.getComputedStyle(patternList);
+    return styles.display === "flex" && styles.flexDirection.startsWith("row")
+      ? "x"
+      : "y";
+  }
+
   function showPatternDropIndicator(insertIndex) {
     if (!patternList || !patternList.isConnected) return;
 
@@ -2957,24 +7676,41 @@ import "@fontsource-variable/open-sans";
 
     if (!patternDropIndicator) {
       patternDropIndicator = document.createElement("div");
-      patternDropIndicator.className = "h-0.5 w-full bg-orange-300/95";
+      patternDropIndicator.className = "pattern-drop-indicator";
+      patternDropIndicator.style.background = "var(--pattern-orange, #f05a28)";
       patternDropIndicator.style.pointerEvents = "none";
+    }
+
+    if (getPatternListDragAxis() === "x") {
+      patternDropIndicator.style.width = "3px";
+      patternDropIndicator.style.height = "44px";
+      patternDropIndicator.style.flex = "0 0 3px";
+    } else {
+      patternDropIndicator.style.width = "100%";
+      patternDropIndicator.style.height = "3px";
+      patternDropIndicator.style.flex = "0 0 3px";
     }
 
     const refNode = nextInsertIndex >= rows.length ? null : rows[nextInsertIndex];
     patternList.insertBefore(patternDropIndicator, refNode);
   }
 
-  function getDropInsertIndexFromClientY(clientY) {
+  function getDropInsertIndexFromPointer(clientX, clientY) {
     if (!patternList || !patternList.isConnected) return 0;
 
     const rows = Array.from(patternList.querySelectorAll(".arrange-row"));
     if (!rows.length) return 0;
 
+    const axis = getPatternListDragAxis();
+
     for (let i = 0; i < rows.length; i++) {
       const rect = rows[i].getBoundingClientRect();
-      const midpointY = rect.top + rect.height / 2;
-      if (clientY < midpointY) {
+      const pointer = axis === "x" ? clientX : clientY;
+      const midpoint =
+        axis === "x"
+          ? rect.left + rect.width / 2
+          : rect.top + rect.height / 2;
+      if (pointer < midpoint) {
         return i;
       }
     }
@@ -3011,6 +7747,39 @@ import "@fontsource-variable/open-sans";
     loadSelectedPatternIntoGrid();
     renderPatternList();
     updatePatternMeta();
+  }
+
+  function movePatternByOffset(fromIndex, offset) {
+    const targetIndex = clampInt(
+      fromIndex + offset,
+      0,
+      patterns.length - 1,
+      fromIndex
+    );
+    if (targetIndex === fromIndex) return;
+
+    const insertIndex = targetIndex > fromIndex ? targetIndex + 1 : targetIndex;
+    movePattern(fromIndex, insertIndex);
+
+    const movedRow = patternList
+      ? patternList.querySelectorAll(".arrange-row")[targetIndex]
+      : null;
+    if (!movedRow) return;
+
+    const preferredSelector = offset < 0 ? ".is-move-up" : ".is-move-down";
+    const fallbackSelector = offset < 0 ? ".is-move-down" : ".is-move-up";
+    const preferredControl = movedRow.querySelector(preferredSelector);
+    const fallbackControl = movedRow.querySelector(fallbackSelector);
+    let focusTarget = preferredControl;
+    if (!focusTarget || focusTarget.disabled) {
+      focusTarget = fallbackControl;
+    }
+    if (!focusTarget || focusTarget.disabled) {
+      focusTarget = movedRow.querySelector(".arrange-pattern-button");
+    }
+    if (focusTarget) {
+      focusTarget.focus();
+    }
   }
 
   function duplicatePatternAtIndex(sourceIndex) {
@@ -3092,6 +7861,11 @@ import "@fontsource-variable/open-sans";
 
   function updatePatternMeta() {
     ensureSongState();
+    const patternSummary = document.querySelector(".pattern-manager-summary");
+    if (patternSummary) {
+      patternSummary.textContent =
+        "Pattern " + (selectedPatternIndex + 1) + " · " + patterns.length + " total";
+    }
   }
 
   function renderPatternList() {
@@ -3126,26 +7900,24 @@ import "@fontsource-variable/open-sans";
 
       const dragHandle = document.createElement("span");
       dragHandle.className =
-        "w-5 cursor-grab select-none text-center text-xs text-zinc-500 transition group-hover:text-zinc-300";
+        "arrange-drag-handle w-5 cursor-grab select-none text-center text-xs transition";
       dragHandle.textContent = ":::";
       dragHandle.setAttribute("aria-hidden", "true");
       row.appendChild(dragHandle);
 
       const patternCard = document.createElement("div");
       patternCard.className =
-        "flex flex-1 items-center gap-1 rounded-sm border px-2 py-1 transition";
+        "arrange-pattern-card flex flex-1 items-center gap-1 rounded-sm border px-2 py-1 transition";
       if (index === selectedPatternIndex) {
-        patternCard.className +=
-          " border-orange-400 bg-orange-500/20 text-orange-100 shadow-[0_0_0_1px_rgba(249,115,22,0.35)]";
+        patternCard.className += " is-selected";
       } else {
-        patternCard.className +=
-          " border-zinc-600 bg-zinc-800/80 text-zinc-100 hover:bg-zinc-700";
+        patternCard.className += " is-idle";
       }
 
       const patternBtn = document.createElement("button");
       patternBtn.type = "button";
       patternBtn.className =
-        "min-w-0 flex-1 truncate rounded-sm px-1 py-1 text-left text-sm font-semibold tracking-wide transition focus:outline-none focus:ring-2 focus:ring-orange-400";
+        "arrange-pattern-button min-w-0 flex-1 truncate rounded-sm px-1 py-1 text-left text-sm font-semibold tracking-wide transition focus:outline-none";
       patternBtn.textContent = "Pattern " + (index + 1);
       patternBtn.addEventListener("click", function () {
         selectPatternForEditing(index);
@@ -3153,12 +7925,57 @@ import "@fontsource-variable/open-sans";
       patternCard.appendChild(patternBtn);
 
       const rowActions = document.createElement("div");
-      rowActions.className = "flex items-center gap-0.5";
+      rowActions.className = "arrange-row-actions flex items-center gap-0.5";
+
+      const moveUpBtn = document.createElement("button");
+      moveUpBtn.type = "button";
+      moveUpBtn.className =
+        "arrange-row-action is-move-up inline-flex items-center justify-center rounded-sm transition focus:outline-none";
+      moveUpBtn.textContent = "↑";
+      moveUpBtn.setAttribute("aria-label", "Move pattern " + (index + 1) + " up");
+      moveUpBtn.setAttribute("draggable", "false");
+      moveUpBtn.disabled = index === 0;
+      moveUpBtn.addEventListener("mousedown", function (event) {
+        event.stopPropagation();
+      });
+      moveUpBtn.addEventListener("dragstart", function (event) {
+        event.preventDefault();
+      });
+      moveUpBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        movePatternByOffset(index, -1);
+      });
+      rowActions.appendChild(moveUpBtn);
+
+      const moveDownBtn = document.createElement("button");
+      moveDownBtn.type = "button";
+      moveDownBtn.className =
+        "arrange-row-action is-move-down inline-flex items-center justify-center rounded-sm transition focus:outline-none";
+      moveDownBtn.textContent = "↓";
+      moveDownBtn.setAttribute(
+        "aria-label",
+        "Move pattern " + (index + 1) + " down"
+      );
+      moveDownBtn.setAttribute("draggable", "false");
+      moveDownBtn.disabled = index === patterns.length - 1;
+      moveDownBtn.addEventListener("mousedown", function (event) {
+        event.stopPropagation();
+      });
+      moveDownBtn.addEventListener("dragstart", function (event) {
+        event.preventDefault();
+      });
+      moveDownBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        movePatternByOffset(index, 1);
+      });
+      rowActions.appendChild(moveDownBtn);
 
       const duplicateRowBtn = document.createElement("button");
       duplicateRowBtn.type = "button";
       duplicateRowBtn.className =
-        "inline-flex h-7 w-7 items-center justify-center rounded-sm text-zinc-200 transition hover:bg-zinc-700/80 hover:text-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-400";
+        "arrange-row-action is-duplicate inline-flex items-center justify-center rounded-sm transition focus:outline-none";
       duplicateRowBtn.innerHTML = DUPLICATE_PATTERN_ICON;
       duplicateRowBtn.setAttribute("aria-label", "Duplicate pattern " + (index + 1));
       duplicateRowBtn.setAttribute("draggable", "false");
@@ -3178,7 +7995,7 @@ import "@fontsource-variable/open-sans";
       const deleteRowBtn = document.createElement("button");
       deleteRowBtn.type = "button";
       deleteRowBtn.className =
-        "inline-flex h-7 w-7 items-center justify-center rounded-sm text-red-200 transition hover:bg-red-900/55 hover:text-red-100 focus:outline-none focus:ring-2 focus:ring-red-400";
+        "arrange-row-action is-delete inline-flex items-center justify-center rounded-sm transition focus:outline-none";
       deleteRowBtn.innerHTML = DELETE_PATTERN_ICON;
       deleteRowBtn.setAttribute("aria-label", "Delete pattern " + (index + 1));
       deleteRowBtn.setAttribute("draggable", "false");
@@ -3192,6 +8009,10 @@ import "@fontsource-variable/open-sans";
       deleteRowBtn.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
+        const confirmed = window.confirm(
+          "Delete pattern " + (index + 1) + "? This cannot be undone."
+        );
+        if (!confirmed) return;
         deletePatternAtIndex(index);
       });
       rowActions.appendChild(deleteRowBtn);
@@ -3205,7 +8026,7 @@ import "@fontsource-variable/open-sans";
       repeatInput.max = MAX_PATTERN_REPEATS.toString();
       repeatInput.value = getRepeatsForPattern(index).toString();
       repeatInput.className =
-        "w-20 rounded-sm border border-zinc-600 bg-zinc-800 px-2 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-orange-400";
+        "arrange-repeat-input w-20 rounded-sm border px-2 py-2 text-sm focus:outline-none";
       repeatInput.setAttribute(
         "aria-label",
         "How many times pattern " + (index + 1) + " should play"
@@ -3224,7 +8045,7 @@ import "@fontsource-variable/open-sans";
       row.appendChild(repeatInput);
 
       const timesLabel = document.createElement("span");
-      timesLabel.className = "w-12 text-xs text-zinc-400";
+      timesLabel.className = "arrange-times-label w-12 text-xs";
       timesLabel.textContent = "times";
       row.appendChild(timesLabel);
 
@@ -3253,7 +8074,10 @@ import "@fontsource-variable/open-sans";
         return;
       }
 
-      const insertIndex = getDropInsertIndexFromClientY(event.clientY);
+      const insertIndex = getDropInsertIndexFromPointer(
+        event.clientX,
+        event.clientY
+      );
       showPatternDropIndicator(insertIndex);
     });
 
@@ -3274,7 +8098,10 @@ import "@fontsource-variable/open-sans";
       }
 
       if (pendingDropInsertIndex === null) {
-        pendingDropInsertIndex = getDropInsertIndexFromClientY(event.clientY);
+        pendingDropInsertIndex = getDropInsertIndexFromPointer(
+          event.clientX,
+          event.clientY
+        );
       }
 
       const insertIndex = pendingDropInsertIndex;
@@ -3309,58 +8136,176 @@ import "@fontsource-variable/open-sans";
   /************************************************
    * PLAY / STOP
    ************************************************/
-  playBtn.addEventListener("click", function () {
+  playBtn.addEventListener("click", async function () {
     if (!isPlaying) {
-      startSequencer();
+      await startSequencer();
     } else {
       stopSequencer();
     }
   });
 
-  function startSequencer() {
-    if (audioCtx.state === "suspended") {
-      audioCtx.resume();
-    }
-    saveSelectedPatternFromGrid();
-    ensureSongState();
+  async function startSequencer() {
+    if (isPlaying || isStartingPlayback) return;
 
-    isPlaying = true;
-    playBtnLabel.textContent = "Stop";
-    playBtnIconPlay.classList.add("btn-icon-hidden");
-    playBtnIconStop.classList.remove("btn-icon-hidden");
-    current16th = 0;
-    playbackPatternIndex = loopPatternMode
-      ? clampInt(selectedPatternIndex, 0, patterns.length - 1, 0)
-      : 0;
-    stepsInPlaybackPattern = 0;
-    nextNoteTime = audioCtx.currentTime;
-    if (loopPatternMode) {
-      loadSelectedPatternIntoGrid();
-      renderPatternList();
-      updatePatternMeta();
-    } else {
-      syncEditingPatternToPlayback();
+    const sampleSummary = getSampleLoadSummary();
+    if (!audioCtx || !masterGainNode || sampleSummary.ready.length === 0) {
+      updateAudioReadinessUi();
+      return;
     }
-    schedulerLoop();
-    console.log("Sequencer started.");
+
+    const requestId = ++playbackStartRequestId;
+    isStartingPlayback = true;
+    playbackAudioError = null;
+    getValidatedBpm(bpmInput.value);
+    renderInstrumentScreen();
+    updateAudioReadinessUi();
+
+    try {
+      if (audioCtx.state !== "running") {
+        await audioCtx.resume();
+      }
+
+      if (
+        requestId !== playbackStartRequestId ||
+        document.visibilityState === "hidden"
+      ) {
+        return;
+      }
+
+      if (audioCtx.state !== "running") {
+        throw new Error("Audio could not start. Check browser audio permissions and retry.");
+      }
+
+      saveSelectedPatternFromGrid();
+      ensureSongState();
+
+      if (masterEffectsChain) {
+        const graph = masterEffectsChain;
+        let filterReady = false;
+        const trackedClose = filterTransportClosePromise;
+        const closeCompleted = await trackedClose;
+
+        if (requestId !== playbackStartRequestId) {
+          return;
+        }
+
+        purgeRetiringSources();
+        if (!closeCompleted && graph === masterEffectsChain) {
+          throw new Error("The terminal effects gate could not close safely.");
+        }
+
+        try {
+          if (graph === masterEffectsChain) {
+            filterReady = await graph.wake();
+            refreshEffectsAvailability();
+          }
+        } catch (filterError) {
+          if (graph === masterEffectsChain) {
+            audioInitializationError = filterError;
+          }
+        }
+
+        if (requestId !== playbackStartRequestId) {
+          return;
+        }
+
+        if (
+          document.visibilityState === "hidden" ||
+          audioCtx.state !== "running"
+        ) {
+          if (graph === masterEffectsChain) {
+            trackFilterTransportClose(
+              graph,
+              graph.silence({ immediate: true })
+            );
+          }
+          return;
+        }
+
+        if (!filterReady && graph === masterEffectsChain) {
+          throw new Error("The effects transport gate could not reopen safely.");
+        }
+      } else {
+        purgeRetiringSources();
+      }
+
+      if (!masterGainNode) {
+        throw new Error("Audio output is unavailable. Reload the page and retry.");
+      }
+
+      isPlaying = true;
+      playBtnLabel.textContent = "Stop";
+      playBtnIconPlay.classList.add("btn-icon-hidden");
+      playBtnIconStop.classList.remove("btn-icon-hidden");
+      current16th = 0;
+      renderInstrumentScreen(current16th);
+      playbackPatternIndex = loopPatternMode
+        ? clampInt(selectedPatternIndex, 0, patterns.length - 1, 0)
+        : 0;
+      stepsInPlaybackPattern = 0;
+      nextNoteTime = audioCtx.currentTime;
+      if (loopPatternMode) {
+        loadSelectedPatternIntoGrid();
+        renderPatternList();
+        updatePatternMeta();
+      } else {
+        syncEditingPatternToPlayback();
+      }
+      schedulerLoop();
+    } catch (error) {
+      if (requestId === playbackStartRequestId) {
+        playbackAudioError =
+          error instanceof Error
+            ? error.message
+            : "Audio could not start. Please retry playback.";
+        stopSequencer();
+      }
+    } finally {
+      if (requestId === playbackStartRequestId) {
+        isStartingPlayback = false;
+        renderInstrumentScreen();
+        updateAudioReadinessUi();
+      }
+    }
   }
 
   function stopSequencer() {
+    playbackStartRequestId += 1;
+    isStartingPlayback = false;
     isPlaying = false;
     playBtnLabel.textContent = "Play";
     playBtnIconPlay.classList.remove("btn-icon-hidden");
     playBtnIconStop.classList.add("btn-icon-hidden");
+    renderInstrumentScreen();
     if (schedulerIntervalId) {
       clearInterval(schedulerIntervalId);
       schedulerIntervalId = null;
     }
+    let closeOperation = Promise.resolve(true);
+    if (masterEffectsChain) {
+      const graph = masterEffectsChain;
+      try {
+        closeOperation = trackFilterTransportClose(
+          graph,
+          graph.silence({
+            immediate: !audioCtx || audioCtx.state !== "running",
+          })
+        );
+      } catch (error) {
+        audioInitializationError = error;
+        closeOperation = Promise.resolve(false);
+      }
+    }
+    cancelScheduledSources();
+    clearScheduledHighlightTimers();
     clearPlayingHighlight();
     updatePatternMeta();
-    console.log("Sequencer stopped.");
+    updateAudioReadinessUi();
+    return closeOperation;
   }
 
   function resetProjectState() {
-    if (isPlaying) {
+    if (isPlaying || isStartingPlayback) {
       stopSequencer();
     }
 
@@ -3378,7 +8323,11 @@ import "@fontsource-variable/open-sans";
     stepsInPlaybackPattern = 0;
     current16th = 0;
 
-    bpmInput.value = "120";
+    playbackAudioError = null;
+    bpmInput.value = DEFAULT_BPM.toString();
+    resetFilterEffectState();
+    spaceController.replaceWithDefault({ immediate: true });
+    renderInstrumentScreen(0);
     ensureSongState();
     loadSelectedPatternIntoGrid();
     renderPatternList();
@@ -3387,6 +8336,7 @@ import "@fontsource-variable/open-sans";
     if (window.history && window.history.replaceState) {
       window.history.replaceState(null, "", window.location.pathname);
     }
+    updateAudioReadinessUi();
   }
 
   /************************************************
@@ -3396,9 +8346,45 @@ import "@fontsource-variable/open-sans";
     if (schedulerIntervalId) return;
 
     schedulerIntervalId = setInterval(function () {
-      while (nextNoteTime < audioCtx.currentTime + 0.1) {
+      let scheduledStepCount = 0;
+      const lookaheadLimit = audioCtx.currentTime + 0.1;
+
+      if (!Number.isFinite(nextNoteTime)) {
+        playbackAudioError = "Playback stopped because its timing became invalid.";
+        stopSequencer();
+        return;
+      }
+
+      if (audioCtx.currentTime - nextNoteTime > MAX_SCHEDULER_LAG_SECONDS) {
+        playbackAudioError =
+          "Playback stopped after falling too far behind to recover safely.";
+        stopSequencer();
+        return;
+      }
+
+      while (nextNoteTime < lookaheadLimit && scheduledStepCount < MAX_SCHEDULER_STEPS_PER_TICK) {
+        if (!Number.isFinite(nextNoteTime)) {
+          playbackAudioError = "Playback stopped because its timing became invalid.";
+          stopSequencer();
+          return;
+        }
+
+        const previousNoteTime = nextNoteTime;
         scheduleStep(current16th, nextNoteTime);
         nextNote();
+        scheduledStepCount += 1;
+
+        if (!(nextNoteTime > previousNoteTime)) {
+          playbackAudioError = "Playback stopped because the tempo could not advance safely.";
+          stopSequencer();
+          return;
+        }
+      }
+
+      if (nextNoteTime < lookaheadLimit) {
+        playbackAudioError =
+          "Playback stopped after falling too far behind to recover safely.";
+        stopSequencer();
       }
     }, scheduleInterval);
   }
@@ -3407,10 +8393,7 @@ import "@fontsource-variable/open-sans";
    * nextNote & scheduleStep
    ************************************************/
   function nextNote() {
-    const bpmVal = parseInt(bpmInput.value, 10) || 120;
-    const secPerBeat = 60.0 / bpmVal;
-    const secPer16th = secPerBeat / 4;
-    nextNoteTime += secPer16th;
+    nextNoteTime += getSixteenthNoteDurationSeconds(bpmInput.value);
     current16th = (current16th + 1) % STEPS_PER_PATTERN;
     stepsInPlaybackPattern += 1;
 
@@ -3459,26 +8442,126 @@ import "@fontsource-variable/open-sans";
     });
 
     const delay = (time - audioCtx.currentTime) * 1000;
-    setTimeout(
-      function () {
+    const timeoutId = window.setTimeout(function () {
+      scheduledHighlightTimers.delete(timeoutId);
+      if (isPlaying) {
         highlightStep(stepIndex);
-      },
-      Math.max(0, delay)
-    );
+      }
+    }, Math.max(0, delay));
+    scheduledHighlightTimers.add(timeoutId);
+  }
+
+  function disconnectScheduledSource(source, gainNode) {
+    try {
+      source.disconnect();
+    } catch (_error) {
+      // The source may already be disconnected by the browser.
+    }
+    try {
+      gainNode.disconnect();
+    } catch (_error) {
+      // The gain may already be disconnected by the browser.
+    }
+  }
+
+  function releaseScheduledSource(source) {
+    const scheduledSource =
+      scheduledSources.get(source) || retiringSources.get(source);
+    if (!scheduledSource) return;
+    scheduledSources.delete(source);
+    retiringSources.delete(source);
+    disconnectScheduledSource(source, scheduledSource.gainNode);
+  }
+
+  function stopAndDisconnectScheduledSource(source, scheduledSource) {
+    scheduledSources.delete(source);
+    retiringSources.delete(source);
+    try {
+      source.stop();
+    } catch (_error) {
+      // A naturally ended or previously stopped source still needs disconnection.
+    }
+    disconnectScheduledSource(source, scheduledSource.gainNode);
+  }
+
+  function purgeRetiringSources() {
+    Array.from(retiringSources.entries()).forEach(function ([source, scheduledSource]) {
+      stopAndDisconnectScheduledSource(source, scheduledSource);
+    });
+  }
+
+  function cancelScheduledSources(options) {
+    const forceImmediate = Boolean(options && options.forceImmediate);
+    if (!audioCtx) {
+      const allSources = new Map([...scheduledSources, ...retiringSources]);
+      allSources.forEach(function (scheduledSource, source) {
+        stopAndDisconnectScheduledSource(source, scheduledSource);
+      });
+      scheduledSources.clear();
+      retiringSources.clear();
+      return;
+    }
+
+    const now = audioCtx.currentTime;
+    const contextIsRunning = audioCtx.state === "running" && !forceImmediate;
+    Array.from(scheduledSources.entries()).forEach(function ([source, scheduledSource]) {
+      scheduledSources.delete(source);
+      if (!contextIsRunning || scheduledSource.startTime > now) {
+        stopAndDisconnectScheduledSource(source, scheduledSource);
+        return;
+      }
+
+      retiringSources.set(source, scheduledSource);
+      try {
+          const fadeEndTime = now + 0.012;
+          scheduledSource.gainNode.gain.cancelScheduledValues(now);
+          scheduledSource.gainNode.gain.setValueAtTime(
+            scheduledSource.gainNode.gain.value,
+            now
+          );
+          scheduledSource.gainNode.gain.linearRampToValueAtTime(0, fadeEndTime);
+          source.stop(fadeEndTime + 0.003);
+      } catch (_error) {
+        stopAndDisconnectScheduledSource(source, scheduledSource);
+      }
+    });
+
+    if (!contextIsRunning) {
+      purgeRetiringSources();
+    }
+  }
+
+  function clearScheduledHighlightTimers() {
+    scheduledHighlightTimers.forEach(function (timeoutId) {
+      window.clearTimeout(timeoutId);
+    });
+    scheduledHighlightTimers.clear();
   }
 
   function playSound(instrument, when, pitchOffset) {
     const buf = audioBuffers[instrument];
-    if (!buf) return;
+    if (!buf || !audioCtx || !masterGainNode) return;
     const source = audioCtx.createBufferSource();
     const gainNode = audioCtx.createGain();
     source.buffer = buf;
     source.playbackRate.value = Math.pow(2, clampPitchOffset(pitchOffset) / 12);
     gainNode.gain.value = getInstrumentVolumeGain(instrument);
     source.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    source.start(when);
-    console.log("Playing " + instrument + " at " + when.toFixed(2) + "s");
+    gainNode.connect(masterGainNode);
+    scheduledSources.set(source, {
+      gainNode: gainNode,
+      startTime: when,
+    });
+    source.onended = function () {
+      releaseScheduledSource(source);
+    };
+
+    try {
+      source.start(when);
+    } catch (error) {
+      releaseScheduledSource(source);
+      console.error("Could not schedule " + instrument + " sample:", error);
+    }
   }
 
   /************************************************
@@ -3486,6 +8569,7 @@ import "@fontsource-variable/open-sans";
    ************************************************/
   function highlightStep(stepIndex) {
     clearPlayingHighlight();
+    renderInstrumentScreen(stepIndex);
     document
       .querySelectorAll("[data-step='" + stepIndex + "']")
       .forEach(function (el) {
@@ -3522,6 +8606,17 @@ import "@fontsource-variable/open-sans";
     if (hasPitchData) {
       payload.t = serializedPitch;
     }
+    const serializedFilter = serializeFilterEffectState(filterEffectState);
+    const serializedSpace = serializeSpaceEffectState(spaceEffectState);
+    if (serializedFilter || serializedSpace) {
+      payload.v = FILTER_SONG_SCHEMA_VERSION;
+    }
+    if (serializedFilter) {
+      payload.f = serializedFilter;
+    }
+    if (serializedSpace) {
+      payload.s = serializedSpace;
+    }
     return btoa(JSON.stringify(payload));
   }
 
@@ -3553,6 +8648,15 @@ import "@fontsource-variable/open-sans";
       if (!loadedPatterns.length) {
         return false;
       }
+
+      const loadedFilterEffectState =
+        payload.v === FILTER_SONG_SCHEMA_VERSION
+          ? deserializeFilterEffectState(payload.f)
+          : createDefaultFilterEffectState();
+      const loadedSpaceEffectState =
+        payload.v === FILTER_SONG_SCHEMA_VERSION
+          ? deserializeSpaceEffectState(payload.s)
+          : createDefaultSpaceEffectState();
 
       let loadedRepeats = [];
       let nextPatterns = loadedPatterns;
@@ -3613,6 +8717,8 @@ import "@fontsource-variable/open-sans";
       setAllInstrumentVolumes(payload.m);
       selectedPatternIndex = 0;
       ensureSongState();
+      setFilterEffectState(loadedFilterEffectState, { immediate: true });
+      spaceController.setState(loadedSpaceEffectState, { immediate: true });
       renderPitchRollGrid();
       return true;
     } catch (err) {
@@ -3634,6 +8740,8 @@ import "@fontsource-variable/open-sans";
       setAllInstrumentVolumes(createDefaultInstrumentVolumes());
       selectedPatternIndex = 0;
       ensureSongState();
+      setFilterEffectState(createDefaultFilterEffectState(), { immediate: true });
+      spaceController.replaceWithDefault({ immediate: true });
       renderPitchRollGrid();
       return true;
     } catch (err) {
@@ -3659,14 +8767,13 @@ import "@fontsource-variable/open-sans";
 
   shareBtn.addEventListener("click", async function () {
     try {
-      if (isPlaying) {
+      if (isPlaying || isStartingPlayback) {
         stopSequencer();
       }
       saveSelectedPatternFromGrid();
       ensureSongState();
 
-      const bpmVal = clampInt(bpmInput.value, 40, 300, 120);
-      bpmInput.value = bpmVal.toString();
+      const bpmVal = getValidatedBpm(bpmInput.value);
 
       const selectedPattern = patterns[selectedPatternIndex];
       const b64 = arrayBufferToBase64(selectedPattern);
@@ -3704,9 +8811,9 @@ import "@fontsource-variable/open-sans";
   function loadFromURLParams() {
     const query = new URLSearchParams(window.location.search);
 
-    if (query.has("bpm")) {
-      bpmInput.value = query.get("bpm");
-    }
+    bpmInput.value = normalizeBpm(query.get("bpm"), DEFAULT_BPM).toString();
+    setFilterEffectState(createDefaultFilterEffectState(), { immediate: true });
+    spaceController.replaceWithDefault({ immediate: true });
 
     let loaded = false;
     let mixLoaded = false;
