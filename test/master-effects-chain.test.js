@@ -114,6 +114,20 @@ test("runtime fallback preserves an active surviving route and truthful state", 
   assert.equal(sample.chain.getTransportState().closed, false);
 });
 
+test("wake accepts current-time gate automation when AudioParam value is the base value", async () => {
+  const sample = setup();
+  const gate = sample.chain.terminalGate.gain;
+  gate.setValueAtTime = function (value, time) {
+    this.events.push(["scheduled-value", value, time]);
+  };
+  gate.value = 1;
+
+  assert.equal(await sample.chain.silence({ immediate: true }), true);
+  assert.equal(await sample.chain.wake(), true);
+  assert.equal(sample.chain.getTransportState().closed, false);
+  assert.equal(sample.chain.terminalGate.gain.value, 1);
+});
+
 test("runtime fallback never reopens a gate while it is closing", async () => {
   const sample = setup(); assert.equal(await sample.chain.wake(), true);
   sample.chain.terminalGate.gain.linearRampToValueAtTime = function (value, time) {

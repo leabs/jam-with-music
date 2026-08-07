@@ -23,6 +23,7 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
   let input = null;
   let toneGraph = null;
   let spaceGraph = null;
+  let terminalGateValue = 0;
   let disconnected = false;
   let generation = 0;
   let closeOperation = null;
@@ -36,6 +37,10 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
   function disconnectStrict(node, destination) {
     if (!node) return;
     if (destination) node.disconnect(destination); else node.disconnect();
+  }
+  function setTerminalGate(value) {
+    force(terminalGate.gain, value, audioContext.currentTime);
+    terminalGateValue = value;
   }
   function failClosed(error) {
     transportPhase = "closed";
@@ -57,7 +62,7 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
   }
   try {
     terminalGate = audioContext.createGain();
-    force(terminalGate.gain, 0, audioContext.currentTime);
+    setTerminalGate(0);
     terminalGate.connect(protectionDestination);
     input = audioContext.createGain();
     try { spaceGraph = makeSpace(audioContext, terminalGate, spaceState); } catch (_error) { spaceGraph = null; }
@@ -73,7 +78,7 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
     assertConnected();
     const shouldOpen = transportPhase === "open";
     try {
-      force(terminalGate.gain, 0, audioContext.currentTime);
+      setTerminalGate(0);
       disconnectStrict(input);
       disconnectStrict(toneGraph?.output);
       disconnectStrict(spaceGraph?.output);
@@ -90,7 +95,7 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
       if (spaceGraph) spaceGraph.output.connect(terminalGate);
       if (toneGraph) toneGraph.output.connect(spaceGraph?.input || terminalGate);
       input.connect(toneGraph?.input || spaceGraph?.input || terminalGate);
-      if (shouldOpen) force(terminalGate.gain, 1, audioContext.currentTime);
+      if (shouldOpen) setTerminalGate(1);
     } catch (error) { failClosed(error); }
     return getAvailability();
   }
@@ -107,26 +112,26 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
   }
   function validAfterAwait(myGeneration, graph) {
     return !disconnected && generation === myGeneration && graph === spaceGraph &&
-      terminalGate && terminalGate.gain.value === 0 && audioContext.state === "running" &&
+      terminalGate && terminalGateValue === 0 && audioContext.state === "running" &&
       isLifecycleValid();
   }
   async function finishClose(operation, toneClose) {
     if (disconnected || generation !== operation.generation || closeOperation !== operation) return false;
-    force(terminalGate.gain, 0, audioContext.currentTime);
+    setTerminalGate(0);
     try { await toneClose; } catch (_error) {}
     if (disconnected || generation !== operation.generation || closeOperation !== operation ||
-        terminalGate.gain.value !== 0) return false;
+        terminalGateValue !== 0) return false;
     const graph = spaceGraph;
     if (graph) {
       try {
         const reset = graph.resetWetPath();
         if (disconnected || generation !== operation.generation || closeOperation !== operation ||
-            graph !== spaceGraph || terminalGate.gain.value !== 0) return false;
+            graph !== spaceGraph || terminalGateValue !== 0) return false;
         if (!reset) removeModule("space");
       } catch (_error) { if (graph === spaceGraph) removeModule("space"); }
     }
     if (disconnected || generation !== operation.generation || closeOperation !== operation ||
-        terminalGate.gain.value !== 0) return false;
+        terminalGateValue !== 0) return false;
     transportPhase = "closed";
     return true;
   }
@@ -159,7 +164,7 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
       spaceGraph?.markTailResetNeeded();
       toneClose = Promise.resolve(toneGraph?.silence(silenceOptions));
     } catch (error) {
-      try { force(terminalGate.gain, 0, audioContext.currentTime); transportPhase = "closed"; }
+      try { setTerminalGate(0); transportPhase = "closed"; }
       catch (_fallbackError) { try { failClosed(error); } catch (_closedError) {} }
       closePromise = Promise.resolve(false);
       return closePromise;
@@ -185,7 +190,7 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
         operation.timer = schedule(() => { operation.timer = null; void complete(); }, MASTER_GATE_SETTLE_MILLISECONDS);
       } catch (_error) {
         closeOperation = null; operation.pending = false;
-        try { force(terminalGate.gain, 0, audioContext.currentTime); transportPhase = "closed"; }
+        try { setTerminalGate(0); transportPhase = "closed"; }
         catch (error) { try { failClosed(error); } catch (_closedError) {} }
         resolve(false);
       }
@@ -202,7 +207,7 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
     generation += 1;
     const myGeneration = generation;
     if (disconnected || audioContext.state !== "running" || !isLifecycleValid()) return false;
-    force(terminalGate.gain, 0, audioContext.currentTime);
+    setTerminalGate(0);
     const space = spaceGraph;
     if (space) {
       let awake = false;
@@ -210,19 +215,19 @@ export function createMasterEffectsChain(audioContext, protectionDestination,
       if (!validAfterAwait(myGeneration, space)) return false;
       if (!awake) removeModule("space");
     }
-    if (disconnected || generation !== myGeneration || terminalGate.gain.value !== 0 ||
+    if (disconnected || generation !== myGeneration || terminalGateValue !== 0 ||
         audioContext.state !== "running" || !isLifecycleValid()) return false;
     const tone = toneGraph;
     if (tone) {
       let awake = false;
       try { awake = await tone.wake(); } catch (_error) {}
       if (disconnected || generation !== myGeneration || tone !== toneGraph ||
-          audioContext.state !== "running" || terminalGate.gain.value !== 0 || !isLifecycleValid()) return false;
+          audioContext.state !== "running" || terminalGateValue !== 0 || !isLifecycleValid()) return false;
       if (!awake) removeModule("tone");
     }
     if (disconnected || generation !== myGeneration || audioContext.state !== "running" ||
-        terminalGate.gain.value !== 0 || !isLifecycleValid()) return false;
-    force(terminalGate.gain, 1, audioContext.currentTime);
+        terminalGateValue !== 0 || !isLifecycleValid()) return false;
+    setTerminalGate(1);
     transportPhase = "open";
     return true;
   }
