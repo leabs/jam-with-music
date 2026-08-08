@@ -55,30 +55,28 @@ function createSearch(params) {
   return query ? `?${query}` : "";
 }
 
-function getFilterPanelCollapseTimers(harness) {
-  return [...harness.timeouts.entries()].filter(([, timer]) => timer.delay === 180);
-}
-
-function getTransitionListenerCount(body) {
-  return body.listeners.get("transitionend")?.length ?? 0;
-}
-
-function assertFilterDisclosure(
-  harness,
-  expanded,
-  label,
-  { hidden = !expanded, transitioning } = {},
-) {
+function assertFilterDisclosure(harness, expanded, label) {
   const { dialog, body, toggle, toggleLabel } = harness.filterElements;
+  const command = harness.document.getElementById("effects-menu-trigger");
+  const snapshot = harness.hostSnapshot();
 
   assert.equal(
-    harness.hostSnapshot().filterPanelExpanded,
+    snapshot.filterPanelExpanded,
     expanded,
-    `${label}: controller state`,
+    `${label}: native dialog state`,
+  );
+  assert.equal(
+    snapshot.filterPanelAriaExpanded,
+    expanded ? "true" : "false",
+    `${label}: close-control ARIA snapshot`,
+  );
+  assert.equal(
+    snapshot.effectsCommandAriaExpanded,
+    expanded ? "true" : "false",
+    `${label}: command ARIA snapshot`,
   );
   assert.equal(dialog.open, expanded, `${label}: dialog open`);
   assert.equal(body.hidden, false, `${label}: body remains mounted`);
-  assert.equal(body.dataset.expanded, "true", `${label}: body data`);
   assert.equal(body.inert, false, `${label}: body remains interactive`);
   assert.equal(body.getAttribute("inert"), null, `${label}: inert attr`);
   assert.equal(body.getAttribute("aria-hidden"), null, `${label}: aria-hidden`);
@@ -86,6 +84,11 @@ function assertFilterDisclosure(
     toggle.getAttribute("aria-expanded"),
     expanded ? "true" : "false",
     `${label}: aria-expanded`,
+  );
+  assert.equal(
+    command.getAttribute("aria-expanded"),
+    expanded ? "true" : "false",
+    `${label}: command aria-expanded`,
   );
   assert.equal(
     toggle.getAttribute("aria-label"),
@@ -97,13 +100,6 @@ function assertFilterDisclosure(
     "Close effects",
     `${label}: visible label`,
   );
-  if (transitioning !== undefined) {
-    assert.equal(
-      body.dataset.transitioning,
-      transitioning ? "true" : "false",
-      `${label}: transitioning`,
-    );
-  }
 }
 
 function disclosureAuthoritySnapshot(harness) {
@@ -610,7 +606,6 @@ test("whole-project reset restores neutral Filter state, UI, graph, and v4 codec
   assertFilterDisclosure(harness, false, "project reset");
   assert.deepEqual(snapshot.masterFilterGraphState, FILTER_EFFECT_DEFAULT_STATE);
   assert.equal(harness.filterElements.body.hidden, false);
-  assert.equal(harness.filterElements.body.dataset.expanded, "true");
   assert.equal(harness.filterElements.panel.dataset.enabled, "false");
   assert.equal(payload.v, 4);
   assert.equal(Object.hasOwn(payload, "f"), false);
@@ -761,8 +756,6 @@ test("Effects dialog opens and closes without changing audio or song authority",
   assert.deepEqual(disclosureAuthoritySnapshot(harness), canonicalAuthority);
   assert.deepEqual(spaceAudioAuthoritySnapshot(harness, audioIdentity), canonicalSpaceAudio);
 
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
-  assert.equal(getTransitionListenerCount(body), 0);
   assert.equal(harness.api.getMasterFilterGraph(), graph);
   assert.deepEqual(disclosureAuthoritySnapshot(harness), canonicalAuthority);
   assert.deepEqual(spaceAudioAuthoritySnapshot(harness, audioIdentity), canonicalSpaceAudio);
@@ -778,32 +771,73 @@ test("Pattern takeover cancels a queued Effects open before the next frame", () 
   const effectsTrigger = harness.document.getElementById("effects-menu-trigger");
   const patternsTrigger = harness.document.getElementById("patterns-menu-trigger");
   effectsTrigger.focus();
-  const nativeRestoreCountBefore = effectsTrigger.focusCalls;
   harness.window.addEventListener("open-beats:patterns-ready", () => {
     patternsTrigger.focus();
   });
 
   harness.api.setFilterPanelExpanded(true);
   assert.equal(harness.filterElements.dialog.open, true);
-  harness.window.__queueEffectsFrame = true;
+  const nativeRestoreCountBefore = effectsTrigger.focusCalls;
   harness.window.dispatchEvent({ type: "open-beats:effects" });
   harness.window.dispatchEvent({ type: "open-beats:patterns" });
 
-  assert.equal(harness.filterElements.dialog.open, false);
+  assertFilterDisclosure(harness, false, "immediate Pattern takeover");
   assert.equal(effectsTrigger.focusCalls, nativeRestoreCountBefore + 1);
   assert.equal(harness.document.activeElement, patternsTrigger);
 
   harness.flushAnimationFrames();
 
-  assert.equal(harness.filterElements.dialog.open, false);
-  assert.equal(harness.hostSnapshot().filterPanelExpanded, true);
-  assert.equal(harness.filterElements.toggle.getAttribute("aria-expanded"), "true");
+  assertFilterDisclosure(harness, false, "canceled Effects frame");
   harness.flushDeferredDialogClose();
 
-  assert.equal(harness.filterElements.dialog.open, false);
-  assert.equal(harness.hostSnapshot().filterPanelExpanded, false);
-  assert.equal(harness.filterElements.toggle.getAttribute("aria-expanded"), "false");
+  assertFilterDisclosure(harness, false, "deferred native close");
   assert.equal(harness.document.activeElement, patternsTrigger);
+});
+
+test("a normal Effects command opens through the queued production frame", () => {
+  const harness = createInlineHarness();
+  harness.api.bindFilterEffectControls();
+
+  harness.window.dispatchEvent({ type: "open-beats:effects" });
+  assertFilterDisclosure(harness, false, "before Effects frame");
+
+  harness.flushAnimationFrames();
+  assertFilterDisclosure(harness, true, "after Effects frame");
+});
+
+test("Patterns to Effects takeover records and restores only the Effects trigger", () => {
+  const harness = createInlineHarness({ deferredEffectsClose: true });
+  const effectsTrigger = harness.document.getElementById("effects-menu-trigger");
+  const patternsTrigger = harness.document.getElementById("patterns-menu-trigger");
+  let patternModalOpen = true;
+
+  patternsTrigger.setAttribute("aria-expanded", "true");
+  patternsTrigger.focus();
+  harness.window.addEventListener("open-beats:effects", () => {
+    patternModalOpen = false;
+    patternsTrigger.setAttribute("aria-expanded", "false");
+    patternsTrigger.focus();
+  });
+  harness.api.bindFilterEffectControls();
+
+  harness.window.dispatchEvent({ type: "open-beats:effects" });
+  const patternFocusAfterRadixClose = patternsTrigger.focusCalls;
+  harness.flushAnimationFrames();
+
+  assert.equal(patternModalOpen, false);
+  assertFilterDisclosure(harness, true, "Effects takeover");
+  assert.equal(harness.filterElements.dialog.__openerId, "effects-menu-trigger");
+  assert.equal(harness.document.activeElement, effectsTrigger);
+  assert.equal(patternsTrigger.getAttribute("aria-expanded"), "false");
+
+  harness.filterElements.dialog.close();
+  harness.flushDeferredDialogClose();
+  harness.flushAnimationFrames();
+
+  assertFilterDisclosure(harness, false, "Effects takeover close");
+  assert.equal(patternsTrigger.getAttribute("aria-expanded"), "false");
+  assert.equal(harness.document.activeElement, effectsTrigger);
+  assert.equal(patternsTrigger.focusCalls, patternFocusAfterRadixClose);
 });
 
 test("a delayed native Effects close cannot collapse a replacement open", () => {
@@ -897,11 +931,13 @@ test("Tone bay exposes its own live status alongside the combined Effects summar
   assert.equal(toneStatus.textContent, "Unavailable");
 });
 
-test("Space controls retain focus and closing Effects returns focus to the menu", () => {
+test("Space controls retain focus and closing Effects returns focus to the command", () => {
   const harness = createInlineHarness();
   harness.api.bindFilterEffectControls();
   const { toggle } = harness.filterElements;
   harness.api.setFilterPanelExpanded(true);
+  const effectsTrigger = harness.ids.get("effects-menu-trigger");
+  const focusCallsBeforeClose = effectsTrigger.focusCalls;
 
   const preset = harness.spaceElements.presetCards.find(
     (card) => card.dataset.spacePreset === "warm-hall",
@@ -917,8 +953,8 @@ test("Space controls retain focus and closing Effects returns focus to the menu"
   assert.equal(harness.document.activeElement, decay);
 
   toggle.dispatchEvent({ type: "click" });
-  assert.equal(harness.document.activeElement, harness.ids.get("effects-menu-trigger"));
-  assert.equal(harness.ids.get("effects-menu-trigger").focusCalls, 1);
+  assert.equal(harness.document.activeElement, effectsTrigger);
+  assert.equal(effectsTrigger.focusCalls, focusCallsBeforeClose + 1);
   assert.equal(toggle.getAttribute("aria-label"), "Close effects");
 });
 
@@ -1012,12 +1048,10 @@ test("rapid Effects dialog close-open-close remains synchronous and bounded", ()
 
   harness.api.setFilterPanelExpanded(true);
   assertFilterDisclosure(harness, true, "rapid reopen");
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
   assert.equal(harness.filterElements.dialog.open, true);
 
   toggle.dispatchEvent({ type: "click" });
   assertFilterDisclosure(harness, false, "rapid reclose");
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
 });
 
 test("same-state Effects dialog requests stay bounded", () => {
@@ -1025,17 +1059,15 @@ test("same-state Effects dialog requests stay bounded", () => {
   harness.api.bindFilterEffectControls();
   const { toggle } = harness.filterElements;
 
-  harness.api.setFilterPanelExpanded(true, { animate: false });
+  harness.api.setFilterPanelExpanded(true);
   const canonicalAuthority = disclosureAuthoritySnapshot(harness);
-  harness.api.setFilterPanelExpanded(true, { animate: false });
+  harness.api.setFilterPanelExpanded(true);
   assertFilterDisclosure(harness, true, "repeated settled open");
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
   assert.deepEqual(disclosureAuthoritySnapshot(harness), canonicalAuthority);
 
   harness.api.setFilterPanelExpanded(false);
   harness.api.setFilterPanelExpanded(false);
   assertFilterDisclosure(harness, false, "repeated close");
-  assert.equal(getFilterPanelCollapseTimers(harness).length, 0);
 });
 
 test("state, load, Share, and playback paths preserve the disclosure choice", async () => {
@@ -1111,7 +1143,7 @@ test("state, load, Share, and playback paths preserve the disclosure choice", as
       const harness = createInlineHarness();
       harness.api.bindFilterEffectControls();
       if (expanded) {
-        harness.api.setFilterPanelExpanded(true, { animate: false });
+        harness.api.setFilterPanelExpanded(true);
       }
 
       await action.run(harness);

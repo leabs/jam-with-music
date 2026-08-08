@@ -1,43 +1,33 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FiLayers, FiSliders } from "react-icons/fi";
-import {
-  Menubar,
-  MenubarContent,
-  MenubarItem,
-  MenubarMenu,
-  MenubarTrigger,
-} from "./ui/menubar";
-import {
-  focusNextMatchingMenubarTrigger,
-  isTypeaheadPrintableKey,
-} from "./menubar-typeahead";
 
-function ShellMenu({ label, icon, triggerId, action, children, disabled }) {
-  const [pendingAction, setPendingAction] = useState(null);
+const commandButtonClasses =
+  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-panel)] px-3 text-sm font-semibold text-[var(--color-text)] transition-colors hover:border-[var(--color-blue)] hover:bg-[var(--color-blue)] hover:text-[var(--color-page)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue)] disabled:pointer-events-none disabled:border-[var(--color-border)] disabled:bg-[var(--color-panel)] disabled:text-[var(--color-disabled)]";
 
-  function handleOpenChangeComplete(open) {
-    if (open || !pendingAction) return;
-    const eventName = pendingAction;
-    setPendingAction(null);
-    window.dispatchEvent(new CustomEvent(eventName));
+function ShellButton({ label, icon, id, action, controls, disabled }) {
+  function handleClick() {
+    window.dispatchEvent(new CustomEvent(action));
   }
 
   return (
-    <MenubarMenu onOpenChangeComplete={handleOpenChangeComplete}>
-      <MenubarTrigger id={triggerId} disabled={disabled}>
-        {icon}
-        {label}
-      </MenubarTrigger>
-      <MenubarContent>
-        <MenubarItem onClick={() => setPendingAction(action)}>{children}</MenubarItem>
-      </MenubarContent>
-    </MenubarMenu>
+    <button
+      id={id}
+      className={commandButtonClasses}
+      type="button"
+      aria-haspopup="dialog"
+      aria-controls={controls}
+      aria-expanded="false"
+      disabled={disabled}
+      onClick={handleClick}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }
 
 export default function AppMenu() {
   const [ready, setReady] = useState(false);
-  const menubarRef = useRef(null);
 
   useEffect(function bindShellReadiness() {
     const readiness = (window.__openBeatsShellReadiness ||= {
@@ -54,44 +44,28 @@ export default function AppMenu() {
     };
   }, []);
 
-  function handleMenubarKeyDown(event) {
-    if (!isTypeaheadPrintableKey(event)) return;
-    const trigger = event.target.closest?.('button[id$="-menu-trigger"]');
-    if (!trigger || !menubarRef.current?.contains(trigger)) return;
-    if (focusNextMatchingMenubarTrigger(menubarRef.current, trigger, event.key)) {
-      event.preventDefault();
-    }
-  }
-
   return (
-    <nav className="app-menu" aria-label="Application menu">
-      <Menubar
-        ref={menubarRef}
-        modal={false}
-        aria-label="Application menu"
-        onKeyDown={handleMenubarKeyDown}
-      >
-        <ShellMenu
-          label="Patterns"
-          triggerId="patterns-menu-trigger"
-          action="open-beats:patterns"
-          disabled={!ready}
-          icon={<FiLayers className="mr-2 h-4 w-4" aria-hidden="true" />}
-        >
-          <FiLayers className="mr-2 h-4 w-4" aria-hidden="true" />
-          Open Patterns
-        </ShellMenu>
-        <ShellMenu
-          label="Effects"
-          triggerId="effects-menu-trigger"
-          action="open-beats:effects"
-          disabled={!ready}
-          icon={<FiSliders className="mr-2 h-4 w-4" aria-hidden="true" />}
-        >
-          <FiSliders className="mr-2 h-4 w-4" aria-hidden="true" />
-          Open Effects
-        </ShellMenu>
-      </Menubar>
-    </nav>
+    <div
+      className="app-menu flex items-center gap-1"
+      role="group"
+      aria-label="Application commands"
+    >
+      <ShellButton
+        label="Patterns"
+        id="patterns-menu-trigger"
+        controls="patternsDialog"
+        action="open-beats:patterns"
+        disabled={!ready}
+        icon={<FiLayers className="h-4 w-4" aria-hidden="true" />}
+      />
+      <ShellButton
+        label="Effects"
+        id="effects-menu-trigger"
+        controls="effectsDialog"
+        action="open-beats:effects"
+        disabled={!ready}
+        icon={<FiSliders className="h-4 w-4" aria-hidden="true" />}
+      />
+    </div>
   );
 }

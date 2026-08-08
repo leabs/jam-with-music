@@ -10,10 +10,10 @@ import {
 } from "./ui/dialog";
 
 const cancelBtn =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[#A8ADB5] bg-[#F5F6F7] px-3 py-2 text-sm font-semibold tracking-wide text-[#171A1F] transition-colors hover:border-[#00A6D6] hover:bg-[#00A6D6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171A1F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00B578]";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-2 text-sm font-semibold tracking-wide text-[var(--color-text)] transition-colors hover:border-[var(--color-blue)] hover:bg-[var(--color-blue)] hover:text-[var(--color-page)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue)]";
 
 const clearBtn =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[#C83D3D] bg-[#C83D3D] px-3 py-2 text-sm font-semibold tracking-wide text-white shadow-[0_2px_0_rgba(23,26,31,0.16)] transition-colors hover:border-[#171A1F] hover:bg-[#9C302F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171A1F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00B578]";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--color-orange-strong)] bg-[var(--color-orange-strong)] px-3 py-2 text-sm font-semibold tracking-wide text-[var(--color-page)] shadow-[0_2px_0_rgba(17,17,17,0.5)] transition-colors hover:border-[var(--color-orange)] hover:bg-[var(--color-orange)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-orange-strong)]";
 
 export default function ClearProjectDialog() {
   const [open, setOpen] = useState(false);
@@ -36,10 +36,10 @@ export default function ClearProjectDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-md border-[#A8ADB5] bg-[#F5F6F7] p-5 text-[#171A1F]">
+      <DialogContent className="max-w-md border-[var(--color-border)] bg-[var(--color-panel)] p-5 text-[var(--color-text)]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FiAlertTriangle className="h-5 w-5 text-[#C83D3D]" aria-hidden="true" />
+            <FiAlertTriangle className="h-5 w-5 text-[var(--color-orange-strong)]" aria-hidden="true" />
             <span>Clear Project?</span>
           </DialogTitle>
           <DialogDescription>

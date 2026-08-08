@@ -45,6 +45,20 @@ function compact(source) {
   return source.replace(/\s+/g, " ").trim();
 }
 
+function assertPatternConsumerReadinessOrder(source) {
+  const flag = "readiness.patterns = true;";
+  const event =
+    'window.dispatchEvent(new CustomEvent("open-beats:patterns-consumer-ready"));';
+  const flagIndex = source.indexOf(flag);
+  const eventIndex = source.indexOf(event);
+  assert.notEqual(flagIndex, -1, "Pattern readiness flag must exist");
+  assert.notEqual(eventIndex, -1, "Pattern readiness event must exist");
+  assert.ok(
+    flagIndex < eventIndex,
+    "Pattern readiness flag must precede its consumer-ready event",
+  );
+}
+
 function getJsxBlock(source, componentName) {
   const match = source.match(
     new RegExp(
@@ -91,6 +105,106 @@ function assertDeclaration(ruleBody, property, value) {
   );
 }
 
+function selectorSpecificity(selector) {
+  const normalized = selector.replace(/:where\([^)]*\)/g, "");
+  return [
+    (normalized.match(/#[\w-]+/g) || []).length,
+    (normalized.match(/\.[\w-]+|\[[^\]]+\]|:(?!:)[\w-]+(?:\([^)]*\))?/g) || []).length,
+    (normalized.match(/(?:^|[\s>+~])(?:[a-z][\w-]*|\*)/gi) || [])
+      .filter((token) => !token.trim().startsWith("*")).length,
+  ];
+}
+
+function compareSpecificity(left, right) {
+  for (let index = 0; index < left.length; index += 1) {
+    if (left[index] !== right[index]) return left[index] - right[index];
+  }
+  return 0;
+}
+
+function selectorMatchesPatternTarget(selector, target) {
+  const withoutNotDisabled = selector.replace(/:not\(:disabled\)/g, "");
+  if (selector.includes(":not(:disabled)") && target.disabled) return false;
+  if (withoutNotDisabled.includes(":disabled") && !target.disabled) return false;
+  if (selector.includes(":hover") && !target.hover) return false;
+  if (selector.includes(":focus-visible") && !target.focusVisible) return false;
+  for (const id of selector.match(/#[\w-]+/g) || []) {
+    if (id.slice(1) !== target.id) return false;
+  }
+  for (const className of selector.match(/\.[\w-]+/g) || []) {
+    if (!target.classes.has(className.slice(1))) return false;
+  }
+  return true;
+}
+
+function getEffectivePatternDeclaration(source, target, property) {
+  let winner = null;
+  let order = 0;
+  for (const match of source.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const declarations = Object.fromEntries(
+      Array.from(
+        match[2].matchAll(/(?:^|;)\s*([\w-]+)\s*:\s*([^;]+)(?=;|$)/g),
+        ([, name, value]) => [name, value.trim()],
+      ),
+    );
+    if (!(property in declarations)) continue;
+    for (const selector of match[1].split(",").map((value) => value.trim())) {
+      order += 1;
+      if (!selectorMatchesPatternTarget(selector, target)) continue;
+      const specificity = selectorSpecificity(selector);
+      if (
+        !winner ||
+        compareSpecificity(specificity, winner.specificity) > 0 ||
+        (compareSpecificity(specificity, winner.specificity) === 0 && order > winner.order)
+      ) {
+        winner = { value: declarations[property], specificity, order };
+      }
+    }
+  }
+  assert.ok(winner, `${property} must resolve for the Pattern target`);
+  return winner.value;
+}
+
+function assertPatternHoverContrast(source) {
+  const rowTarget = {
+    id: null,
+    classes: new Set(["pattern-manager-dialog", "pattern-manager-list", "arrange-row-action"]),
+    hover: true,
+    focusVisible: false,
+    disabled: false,
+  };
+  const newTarget = {
+    id: "newPatternBtn",
+    classes: new Set(["pattern-manager-dialog", "pattern-manager-action"]),
+    hover: true,
+    focusVisible: false,
+    disabled: false,
+  };
+  const disabledDeleteTarget = {
+    id: null,
+    classes: new Set([
+      "pattern-manager-dialog",
+      "pattern-manager-list",
+      "arrange-row-action",
+      "is-delete",
+    ]),
+    hover: true,
+    focusVisible: false,
+    disabled: true,
+  };
+  assert.equal(getEffectivePatternDeclaration(source, rowTarget, "color"), "var(--pattern-chassis)");
+  assert.equal(getEffectivePatternDeclaration(source, rowTarget, "background"), "var(--pattern-green)");
+  assert.equal(getEffectivePatternDeclaration(source, newTarget, "color"), "var(--pattern-chassis)");
+  assert.equal(getEffectivePatternDeclaration(source, newTarget, "background"), "var(--pattern-orange)");
+  assert.equal(
+    getEffectivePatternDeclaration(source, disabledDeleteTarget, "color"),
+    "var(--color-disabled, rgba(242, 242, 242, 0.68))",
+  );
+  assert.equal(getEffectivePatternDeclaration(source, disabledDeleteTarget, "background"), "transparent");
+  assert.ok(contrastRatio("111111", "27AE60") >= 4.5);
+  assert.ok(contrastRatio("111111", "F2994A") >= 4.5);
+}
+
 function getButtonById(source, id) {
   const idIndex = source.indexOf(`id="${id}"`);
   assert.notEqual(idIndex, -1, `#${id} must exist`);
@@ -102,17 +216,38 @@ function getButtonById(source, id) {
   return source.slice(startIndex, endIndex + "</button>".length);
 }
 
-test("Patterns is a 44px app-menu trigger with a readiness-gated consumer", () => {
+test("Patterns is a direct 44px command with a readiness-gated consumer", () => {
   const appMenuSource = readFileSync(
     new URL("../src/components/AppMenu.jsx", import.meta.url),
     "utf8",
   );
-  assert.match(appMenuSource, /triggerId="patterns-menu-trigger"/);
+  assert.match(appMenuSource, /id="patterns-menu-trigger"/);
+  assert.match(appMenuSource, /controls="patternsDialog"/);
   assert.match(appMenuSource, /action="open-beats:patterns"/);
+  assert.match(appMenuSource, /type="button"/);
+  assert.match(appMenuSource, /aria-haspopup="dialog"/);
+  assert.match(appMenuSource, /min-h-11 min-w-11/);
   assert.doesNotMatch(arrangeSource, /DialogTrigger/);
   assert.doesNotMatch(arrangeSource, /pattern-manager-trigger/);
   assert.match(arrangeSource, /open-beats:patterns-consumer-ready/);
   assert.match(arrangeSource, /open-beats:patterns-ready/);
+  assert.match(arrangeSource, /open-beats:effects/);
+  assert.match(arrangeSource, /function handleEffectsOpen\(\)[\s\S]*?setOpen\(false\)/);
+  assert.match(arrangeSource, /id="patternsDialog"/);
+  assert.match(arrangeSource, /setAttribute\("aria-expanded", open \? "true" : "false"\)/);
+});
+
+test("Patterns publishes its readiness flag before its consumer-ready event", () => {
+  assertPatternConsumerReadinessOrder(arrangeSource);
+  const eventBeforeFlag = arrangeSource.replace(
+    '      readiness.patterns = true;\n      window.dispatchEvent(new CustomEvent("open-beats:patterns-consumer-ready"));',
+    '      window.dispatchEvent(new CustomEvent("open-beats:patterns-consumer-ready"));\n      readiness.patterns = true;',
+  );
+  assert.notEqual(eventBeforeFlag, arrangeSource, "Pattern readiness ordering mutation must apply");
+  assert.throws(
+    () => assertPatternConsumerReadinessOrder(eventBeforeFlag),
+    /must precede/,
+  );
 });
 
 test("the complete pattern library and fixed actions live only in DialogContent", () => {
@@ -285,7 +420,7 @@ test("opening retries readiness after the portal mounts if the rendered list is 
   assert.match(effect, /typeof window\.renderPatternManager === "function"/);
   assert.match(
     effect,
-    /return function cleanup\(\) \{ window\.cancelAnimationFrame\(readinessFrame\); window\.removeEventListener\("open-beats:patterns-ready", handleOpen\); \};/,
+    /return function cleanup\(\) \{ window\.cancelAnimationFrame\(readinessFrame\); window\.removeEventListener\("open-beats:patterns-ready", handleOpen\); window\.removeEventListener\("open-beats:effects", handleEffectsOpen\); \};/,
   );
   assert.match(arrangeSource, /\},\s*\[open\]\s*\);/);
 });
@@ -323,9 +458,32 @@ test("Clear retains destructive confirmation in the capture phase", () => {
 
 test("Clear Project destructive action keeps normal text contrast above 4.5 to 1", () => {
   const clearClass = clearProjectSource.match(/const clearBtn\s*=\s*\n\s*"([^"]+)"/)?.[1] ?? "";
-  assert.match(clearClass, /bg-\[#C83D3D\]/);
-  assert.match(clearClass, /text-white/);
-  assert.ok(contrastRatio("FFFFFF", "C83D3D") >= 4.5);
+  assert.match(clearClass, /bg-\[var\(--color-orange-strong\)\]/);
+  assert.match(clearClass, /text-\[var\(--color-page\)\]/);
+  assert.ok(contrastRatio("111111", "F57C00") >= 4.5);
+});
+
+test("green and orange Pattern hover states keep dark normal-text contrast", () => {
+  assertPatternHoverContrast(arrangeSource);
+  for (const mutation of [
+    ".pattern-manager-dialog .pattern-manager-list .arrange-row-action:hover { color: var(--pattern-ink); }",
+    ".pattern-manager-dialog #newPatternBtn:hover { color: var(--pattern-ink); }",
+  ]) {
+    assert.throws(
+      () => assertPatternHoverContrast(`${arrangeSource}\n${mutation}`),
+      /Expected values to be strictly equal/,
+    );
+  }
+
+  const actionableDisabledDelete = arrangeSource.replace(
+    ".pattern-manager-list .arrange-row-action.is-delete:hover:not(:disabled)",
+    ".pattern-manager-list .arrange-row-action.is-delete:hover",
+  );
+  assert.notEqual(actionableDisabledDelete, arrangeSource, "disabled Delete mutation must apply");
+  assert.throws(
+    () => assertPatternHoverContrast(actionableDisabledDelete),
+    /Expected values to be strictly equal/,
+  );
 });
 
 test("modal visibility is local UI state with no song, audio, URL, codec, or transport authority", () => {
@@ -377,7 +535,7 @@ test("modal visibility is local UI state with no song, audio, URL, codec, or tra
   }
 });
 
-test("Radix content remains authoritative and the menu event owns modal focus handoff", () => {
+test("Radix content remains authoritative and the command event owns modal focus handoff", () => {
   const rootMarkup = getJsxBlock(arrangeSource, "Dialog");
   const uiContentStart = dialogSource.indexOf("const DialogContent =");
   const uiContentEnd = dialogSource.indexOf(
@@ -428,13 +586,14 @@ test("the modal uses exact instrument tokens and real 44px actions", () => {
   const managerRule = getCssRuleBody(arrangeSource, ".pattern-manager");
   const dialogRule = getCssRuleBody(arrangeSource, ".pattern-manager-dialog");
   const exactTokens = {
-    "--pattern-chassis": "#e3e6eb",
-    "--pattern-surface": "#f5f6f7",
-    "--pattern-ink": "#171a1f",
-    "--pattern-gray": "#a8adb5",
-    "--pattern-green": "#00b578",
-    "--pattern-blue": "#00a6d6",
-    "--pattern-orange": "#f05a28",
+    "--pattern-chassis": "var(--color-page, #111)",
+    "--pattern-surface": "var(--color-panel, #333333)",
+    "--pattern-ink": "var(--color-text, #f2f2f2)",
+    "--pattern-gray": "var(--color-border, rgba(242, 242, 242, 0.38))",
+    "--pattern-green": "var(--color-green, #27ae60)",
+    "--pattern-blue": "var(--color-blue, #2f80ed)",
+    "--pattern-orange": "var(--color-orange, #f2994a)",
+    "--pattern-destructive": "var(--color-orange-strong, #f57c00)",
   };
   for (const [token, value] of Object.entries(exactTokens)) {
     assertDeclaration(managerRule, token, value);
@@ -445,12 +604,12 @@ test("the modal uses exact instrument tokens and real 44px actions", () => {
     /\.pattern-manager-action:focus-visible,[\s\S]*?\.arrange-repeat-input:focus-visible\s*\{([^}]*)\}/,
   );
   assert.ok(focusRule, "all static and generated pattern controls need one focus rule");
-  assertDeclaration(focusRule[1], "outline", "3px solid var(--pattern-ink, #171a1f)");
+  assertDeclaration(focusRule[1], "outline", "3px solid var(--pattern-ink, #f2f2f2)");
   assertDeclaration(focusRule[1], "outline-offset", "2px");
   assertDeclaration(
     focusRule[1],
     "box-shadow",
-    "0 0 0 6px var(--pattern-green, #00b578)",
+    "0 0 0 6px var(--pattern-blue, #2f80ed)",
   );
 
   const targetGroup = arrangeSource.match(

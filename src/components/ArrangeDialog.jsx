@@ -12,12 +12,28 @@ export default function ArrangeDialog() {
   const [open, setOpen] = useState(false);
 
   useEffect(
+    function mirrorPatternDialogState() {
+      const trigger = document.getElementById("patterns-menu-trigger");
+      trigger?.setAttribute("aria-expanded", open ? "true" : "false");
+      return function cleanup() {
+        trigger?.setAttribute("aria-expanded", "false");
+      };
+    },
+    [open]
+  );
+
+  useEffect(
     function bindArrangementEvents() {
       function handleOpen() {
         setOpen(true);
       }
 
+      function handleEffectsOpen() {
+        setOpen(false);
+      }
+
       window.addEventListener("open-beats:patterns-ready", handleOpen);
+      window.addEventListener("open-beats:effects", handleEffectsOpen);
       const readiness = (window.__openBeatsShellReadiness ||= {
         page: false,
         patterns: false,
@@ -28,6 +44,7 @@ export default function ArrangeDialog() {
       if (!open) {
         return function cleanupClosed() {
           window.removeEventListener("open-beats:patterns-ready", handleOpen);
+          window.removeEventListener("open-beats:effects", handleEffectsOpen);
         };
       }
 
@@ -59,6 +76,7 @@ export default function ArrangeDialog() {
       return function cleanup() {
         window.cancelAnimationFrame(readinessFrame);
         window.removeEventListener("open-beats:patterns-ready", handleOpen);
+        window.removeEventListener("open-beats:effects", handleEffectsOpen);
       };
     },
     [open]
@@ -87,6 +105,7 @@ export default function ArrangeDialog() {
     <section className="pattern-manager" aria-label="Pattern management">
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
+          id="patternsDialog"
           className="pattern-manager-dialog"
           onCloseAutoFocus={handleCloseAutoFocus}
         >
@@ -119,13 +138,14 @@ export default function ArrangeDialog() {
 
       <style>{`
         .pattern-manager {
-          --pattern-chassis: #e3e6eb;
-          --pattern-surface: #f5f6f7;
-          --pattern-ink: #171a1f;
-          --pattern-gray: #a8adb5;
-          --pattern-green: #00b578;
-          --pattern-blue: #00a6d6;
-          --pattern-orange: #f05a28;
+          --pattern-chassis: var(--color-page, #111);
+          --pattern-surface: var(--color-panel, #333333);
+          --pattern-ink: var(--color-text, #f2f2f2);
+          --pattern-gray: var(--color-border, rgba(242, 242, 242, 0.38));
+          --pattern-green: var(--color-green, #27ae60);
+          --pattern-blue: var(--color-blue, #2f80ed);
+          --pattern-orange: var(--color-orange, #f2994a);
+          --pattern-destructive: var(--color-orange-strong, #f57c00);
           min-width: 0;
           color: var(--pattern-ink);
         }
@@ -134,9 +154,9 @@ export default function ArrangeDialog() {
         .arrange-pattern-button:focus-visible,
         .arrange-row-action:focus-visible,
         .arrange-repeat-input:focus-visible {
-          outline: 3px solid var(--pattern-ink, #171a1f);
+          outline: 3px solid var(--pattern-ink, #f2f2f2);
           outline-offset: 2px;
-          box-shadow: 0 0 0 6px var(--pattern-green, #00b578);
+          box-shadow: 0 0 0 6px var(--pattern-blue, #2f80ed);
         }
 
         .pattern-manager-action {
@@ -146,13 +166,14 @@ export default function ArrangeDialog() {
         }
 
         .pattern-manager-dialog {
-          --pattern-chassis: #e3e6eb;
-          --pattern-surface: #f5f6f7;
-          --pattern-ink: #171a1f;
-          --pattern-gray: #a8adb5;
-          --pattern-green: #00b578;
-          --pattern-blue: #00a6d6;
-          --pattern-orange: #f05a28;
+          --pattern-chassis: var(--color-page, #111);
+          --pattern-surface: var(--color-panel, #333333);
+          --pattern-ink: var(--color-text, #f2f2f2);
+          --pattern-gray: var(--color-border, rgba(242, 242, 242, 0.38));
+          --pattern-green: var(--color-green, #27ae60);
+          --pattern-blue: var(--color-blue, #2f80ed);
+          --pattern-orange: var(--color-orange, #f2994a);
+          --pattern-destructive: var(--color-orange-strong, #f57c00);
           max-height: min(720px, calc(100dvh - 1.5rem));
           grid-template-rows: auto minmax(0, 1fr) auto;
           overflow: hidden;
@@ -207,6 +228,11 @@ export default function ArrangeDialog() {
           background: var(--pattern-blue);
         }
 
+        .pattern-manager-list .arrange-pattern-card.is-selected,
+        .pattern-manager-list .arrange-pattern-card.is-selected .arrange-pattern-button {
+          color: var(--pattern-chassis);
+        }
+
         .pattern-manager-list .arrange-pattern-button,
         .pattern-manager-list .arrange-row-action,
         .pattern-manager-list .arrange-repeat-input,
@@ -230,19 +256,20 @@ export default function ArrangeDialog() {
         }
 
         .pattern-manager-list .arrange-row-action:hover {
+          color: var(--pattern-chassis);
           background: var(--pattern-green);
         }
 
-        .pattern-manager-list .arrange-row-action.is-delete:hover,
+        .pattern-manager-list .arrange-row-action.is-delete:hover:not(:disabled),
         .pattern-manager-list .arrange-row-action.is-delete:focus-visible,
-        .pattern-manager-action.is-destructive:hover,
+        .pattern-manager-action.is-destructive:hover:not(:disabled),
         .pattern-manager-action.is-destructive:focus-visible {
-          color: white;
-          background: #c83d3d;
+          color: var(--pattern-chassis);
+          background: var(--pattern-destructive);
         }
 
         .pattern-manager-list .arrange-row-action:disabled {
-          color: #6e737b;
+          color: var(--color-disabled, rgba(242, 242, 242, 0.68));
           background: transparent;
           cursor: not-allowed;
         }
@@ -282,6 +309,7 @@ export default function ArrangeDialog() {
         }
 
         #newPatternBtn:hover {
+          color: var(--pattern-chassis);
           background: var(--pattern-orange);
         }
 

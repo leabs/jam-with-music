@@ -16,7 +16,7 @@ const DialogOverlay = React.forwardRef(function DialogOverlay(
     <DialogPrimitive.Overlay
       ref={ref}
       className={cn(
-        "fixed inset-0 z-50 bg-[#171A1F]/55 backdrop-blur-[3px]",
+        "fixed inset-0 z-50 bg-[rgba(17,17,17,0.78)] backdrop-blur-[3px]",
         className
       )}
       {...props}
@@ -35,13 +35,13 @@ const DialogContent = React.forwardRef(function DialogContent(
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed left-[50%] top-[50%] z-50 grid w-[min(960px,calc(100%-1.5rem))] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-[#A8ADB5] bg-[#F5F6F7] p-6 text-[#171A1F] shadow-[0_30px_90px_rgba(23,26,31,0.28)]",
+          "fixed left-[50%] top-[50%] z-50 grid w-[min(960px,calc(100%-1.5rem))] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-6 text-[var(--color-text)] shadow-[0_30px_90px_rgba(17,17,17,0.65)]",
           className
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-[#A8ADB5] bg-[#E3E6EB] p-1 text-[#171A1F] transition-colors hover:border-[#00A6D6] hover:bg-[#00A6D6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171A1F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#00B578]">
+        <DialogPrimitive.Close className="absolute right-4 top-4 inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-panel)] p-1 text-[var(--color-text)] transition-colors hover:border-[var(--color-blue)] hover:bg-[var(--color-blue)] hover:text-[var(--color-page)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue)]">
           <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
@@ -88,7 +88,7 @@ const DialogDescription = React.forwardRef(function DialogDescription(
   return (
     <DialogPrimitive.Description
       ref={ref}
-      className={cn("text-sm text-[#515860]", className)}
+      className={cn("text-sm text-[var(--color-text)]", className)}
       {...props}
     />
   );

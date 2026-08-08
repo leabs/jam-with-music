@@ -1,18 +1,26 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 :root {
-  color-scheme: light;
-  --background: #e3e6eb;
-  --foreground: #171a1f;
-  --card: #f5f6f7;
-  --card-foreground: #171a1f;
-  --muted-foreground: #515860;
-  --border: #a8adb5;
-  --playback: #f05a28;
-  --selection: #00a6d6;
-  --alert: #c83d3d;
-  --ring: #00b578;
+  color-scheme: dark;
+  --color-page: #111;
+  --color-panel: #333333;
+  --color-text: #f2f2f2;
+  --color-blue: #2f80ed;
+  --color-green: #27ae60;
+  --color-orange: #f2994a;
+  --color-orange-strong: #f57c00;
+  --color-border: rgba(242, 242, 242, 0.38);
+  --color-disabled: rgba(242, 242, 242, 0.68);
+  --background: var(--color-page);
+  --foreground: var(--color-text);
+  --card: var(--color-panel);
+  --card-foreground: var(--color-text);
+  --muted-foreground: var(--color-text);
+  --border: var(--color-border);
+  --playback: var(--color-blue);
+  --selection: var(--color-blue);
+  --alert: var(--color-orange-strong);
+  --ring: var(--color-blue);
 }
 
 body {
@@ -28,9 +36,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .pattern-manager-dialog,
-  .pattern-manager-dialog *,
-  .menu-popup,
-  .menu-popup * {
+  .pattern-manager-dialog * {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;

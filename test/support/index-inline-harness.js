@@ -514,6 +514,7 @@ export function createInlineHarness(options = {}) {
     step.ownerDocument = document;
   });
   document.getElementById("bpm").value = "120";
+  document.getElementById("effects-menu-trigger").setAttribute("aria-expanded", "false");
 
   // This is a behavior fixture. Raw markup assertions belong to
   // filter-page-contract.test.js rather than this synthetic DOM.
@@ -558,7 +559,6 @@ export function createInlineHarness(options = {}) {
   filterElements.curveHalo.dataset.filterCurveHalo = "";
   filterElements.body.hidden = false;
   filterElements.body.inert = false;
-  filterElements.body.dataset.expanded = "true";
   filterElements.toggle.setAttribute("aria-expanded", "false");
   filterElements.toggle.setAttribute("aria-label", "Close effects");
   filterElements.bypass.disabled = true;
@@ -914,9 +914,7 @@ export function createInlineHarness(options = {}) {
     },
     requestAnimationFrame(callback) {
       const id = nextAnimationFrameId++;
-      if (callback.name === "openEffectsFromMenu" && window.__queueEffectsFrame) {
-        animationFrames.set(id, callback);
-      }
+      animationFrames.set(id, callback);
       return id;
     },
     cancelAnimationFrame(id) {
@@ -1237,7 +1235,13 @@ globalThis.__jamTest = {
       spaceEffectState: { ...spaceEffectState },
       filterEffectAvailable: filterEffectAvailable,
       spaceEffectAvailable: spaceEffectAvailable,
-      filterPanelExpanded: filterPanelExpanded,
+      filterPanelExpanded: Boolean(effectsDialog && effectsDialog.open),
+      filterPanelAriaExpanded: filterFxToggle
+        ? filterFxToggle.getAttribute("aria-expanded")
+        : null,
+      effectsCommandAriaExpanded: document
+        .getElementById("effects-menu-trigger")
+        ?.getAttribute("aria-expanded") ?? null,
       filterControlsBound: filterControlsBound,
       masterFilterGraphPresent: Boolean(masterFilterGraph),
       masterEffectsChainPresent: Boolean(masterEffectsChain),

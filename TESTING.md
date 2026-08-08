@@ -51,8 +51,8 @@ node --test test/filter-effect.test.js test/master-filter-graph.test.js
 `test/filter-inline.test.js` exercises the real inline page controller through
 the source-backed VM harness. It covers canonical v4/v5 Filter URL encoding,
 load/share/reset cycles, neutral omission, malformed-state fallback, direct and
-Filter-graph audio fallback, Stop/Play retirement fences, the default-minimized
-native Effects drawer open/close, Custom promotion, shared bypass state, and
+Filter-graph audio fallback, Stop/Play retirement fences, the mounted native
+Effects workbench open/close, Custom promotion, shared bypass state, and
 the single shared four-macro control surface. Its synthetic document now represents all
 14 `.steps[data-instrument]` containers and their 16 children, so the canonical
 pattern reorder regression exercises a genuinely nonzero selected pattern and
@@ -60,7 +60,7 @@ proves bundled bytes/repeats/pitch, selection/playback identity, boundary
 no-ops, and encoded/reopened order.
 
 `test/filter-page-contract.test.js` provides static acceptance coverage for the
-native Effects drawer markup, one native visibility contract, focus return and
+native Effects workbench markup, one native visibility contract, focus return and
 interleave-safe reopen sequencing, the reduced-motion contract, real 44 px-or-larger targets, the
 text-backed non-authoritative micro-screen, preserved script hooks, and one
 shared Filter state/control surface. It also binds the final zero-gap 44 px
@@ -68,7 +68,32 @@ desktop cadence, internal non-interactive lane divider, and 44 px targets. Its
 624 px lane-stack reference is derived from the 14 rendered instrument rows,
 production lane height, and top/bottom sequencer padding; the absolutely
 positioned divider adds no layout height. Pre-grid fit remains computed-browser
-evidence. It also binds the high-contrast ink edge plus green focus halo.
+evidence. The contract additionally proves the semantic dark palette and its
+literal contrast, blue transport/selection, green Tone, orange Space, distinct
+disabled/bypass/unavailable/destructive states, the sole `#filterFxPanel`
+vertical scroller, exact two-card 320 px arithmetic with a classic 17 px
+scrollbar, the winning custom card basis plus effective flex/basis/width bounds
+at 320/390/600 px, live shorthand/logical-start/logical-end/physical Tone
+padding and border widths across shorthand, logical, and physical declarations,
+exact desktop bay tracks at 1200/1280/1440 px, and the live
+8 px desktop macro gap. The active preset pseudo-label retains normal-text
+contrast on its rendered creature tile after resolving both `background` and
+`background-color`; its effective `background-image` must remain `none` so an
+opaque image layer cannot invalidate that contrast. An active playing step keeps its off-white focus
+edge and blue halo after the later playing-state rule. Mutation sentries reject nested,
+tag-qualified, logical-overflow, or dialog-rooted scrollers under either
+`.effects-dialog` or `#effectsDialog`, a scrollable outer dialog, any stale or
+ID-specific phone-width, preset-cost, or scrollbar deduction, a later
+fixed 116 px phone card or custom basis, non-wrapping phone pedalboard, later
+30 px Tone shorthand, logical, or logical-edge padding or border, an opaque
+active-tile gradient, a later 40 px desktop macro gap,
+reversed desktop bay tracks, an
+ID-specific desktop two-bay collapse, and late non-sticky or non-elevated
+header overrides including at the 1200 px boundary.
+Effective later and more-specific declarations are
+resolved at the acceptance viewports before the unavailable Filter border or
+micro-screen label palette is accepted. Focus uses an off-white edge with a
+state-appropriate blue, green, or orange halo.
 
 `test/pattern-modal-contract.test.js` covers the single 44 px Patterns trigger,
 one portaled modal-owned list, preserved IDs/actions, Radix focus and close
@@ -76,64 +101,78 @@ structure, destructive confirmation, portal-root token inheritance, literal
 two-color focus fallback, 44 px Move up/down controls and disabled boundaries,
 canonical reorder delegation, and the 72 px border-box repeat track. Its 320 px
 source arithmetic proves the fixed tracks and wrapped action block fit the
-available row width; computed layout remains a browser check.
+available row width. Its green row-action and orange New hover states require
+dark chassis text and literal normal-text contrast, with later-specific
+mutation sentries for each selector. A disabled Delete stays disabled-looking
+on hover because destructive hover only applies to enabled controls; computed
+layout remains a browser check.
 
 ## UI overhaul seam
 
 The authoritative static/VM/build artifact is page
-`af762040bf611d5da81b1b035601e153679f5039251fc35a9ba076ffcf7f5b59`
+`c2862f61995b28032db9f55815c2e92b85727d8323ad0c6e89db3408a903fe29`
 with ArrangeDialog
-`124468b55394bae9b368101f9dcb80ffad873cc2b3957b513f4c307974be8ca1`,
+`3414894761967784dedf0d359453e51220580428d93462533a83bfba318f8293`,
 ClearProjectDialog
-`978947c70470ecf7f86b5346fecd545fe00dd6db133382eae94d4ff9a3000784`,
-page contract
-`4678daea298123ca7b698d5e60bbdce084f822753f7f190e5281897139ebf2f5`,
+`a4f79d6570c5169ce2119f7f7004710970c991ff9adf573e8d074eb70ac37665`,
+shared Dialog
+`07c3885b2e1770b5880f7f18fe5843762f6c9d2a0bd49e10c531ea612acbee77`,
+Filter page contract
+`16c2c493dabd2194c697841874533c7ebfda2da779958f9fb4900bc580103eb8`,
 Filter inline
-`9e057452ab12b2105a1c799d51803f5d76f8158d7e25750c982918f8e32a394c`,
+`32dbe9734e3bb2bef1ba8d1719018bbea4410ab188fda1a7d9b933f005c7b7c7`,
 harness
-`37d0b9f6e44bbbd24adb9289f751af05239119351ccba8ea8efb3ceb3cfed6ce`,
-and app-menubar contract
-`f477c46fe2c957e5696342bff22d6577653395e4ac48e6b4fe58943d502256e7`,
+`396e95e109b90e723041c773dd25698375b70840421c0d685b9fedb240eff64d`,
+and app-shell contract
+`1785eff933d49b48df19c99643a5f4a5e8378ada8cb07c0acc78c1d4140b9ba4`,
 AppMenu
-`88fabc5da8a92437f29aaf19aba8cc2d198f23b250de3217b7a56dbed5f0e3d7`,
-typeahead helper
-`f79f6c075ee0e2bf9491d62b7823adb9ec264d56dd25f767688398607ca258f7`,
-typeahead test
-`ec4f0f54deae18b6b130437a1fcb689483c9b877d44a07dd170174e8fde78a4d`,
-Menubar wrapper
-`011bcc73aa396051c3a00599ebc26b1b6418f329da8b78a6703063d1bd8fe780`,
+`3adc120bdc5c48120eeaf2c7f3aa9a4c29e830a8d6ad22fcdd7675fb7a3e5e84`,
 global styles
-`e3110614a0e653431fe844d52bbbb40058089aa7885114a66a8a8c33d9b00efa`,
+`6e7f8463fb34b267ca23b686951689553b73ba55f3ed5f2e0283ed049e6e37af`,
 Pattern contract
-`9419af71c5463d7a1565395fcd4465aa6a85b92d040fee3888c6930dca9554ac`,
+`af74780d1938c8e98129ecb694230c6d46e61ab53b019b7082d39831a9d0d92f`,
 package
-`6b460cbfb9b6aa956495d0b1c7179ee82be9f4d74810e77f73ec573b9abb4333`,
+`97c89235869bed7909bfadcad4d1c4c783c051a74b897184d37ae9ea91ba0ad3`,
 package lock
-`ce718858802d1ad23382ab9253ada82c509b056592138d3cd71d936455965d88`,
+`b7eb4eab7e65716f7444e86240f34b35f7e0a4838610143463b9e73cb288e4bc`,
 and shadcn config
-`b7bdf01339d62e6f2a433bf258449d8cb74df9696ca239143477c7b9cdc4d7dd`,
+`6c42b2e247fde5b71a94e965881f9e60b0b0e36e2c176cde1151422026b40daf`,
 tsconfig
 `6551e8fc79128cbc8b6a69d0babad0b354a3985a07598c5ff458e070acfa1457`, and
 Space graph contract
 `a3ab0d45d6b9d5914176966900be752e5496313824a316addac41ab243aebac4`.
-Its full package gate is 217 total, 215 pass, 0 fail, and the same 2 Phase 0B
+Its focused app-shell/Filter/Pattern gate is 90/90 pass. Its full package gate
+is 228 total, 226 pass, 0 fail, and the same 2 Phase 0B
 TODOs described above. Browser/device/assistive-technology/native-audio,
 interruption, and listening evidence remain separate and pending.
 
 The app-shell overhaul supersedes the prior standalone Patterns rail and
 Effects disclosure expectations above. The persistent shell keeps BPM,
 Play/Stop, Loop, Share, Clear All, and Step Scope visible. Patterns and Effects
-are non-modal Base UI Menubar commands gated until the page coordinator and
-Arrange island consumers are hydrated; menu item clicks record a pending action
-and dispatch only from the post-close completion callback. Printable keys without
-Alt/Ctrl/Meta chords move focus among enabled top-level triggers by accessible-label prefix
-without dispatching a command. Patterns keeps the
-Radix ArrangeDialog and its page-owned list, with the page coordinating a
-distinct ready event. Effects is permanently mounted in a native
-`#effectsDialog` drawer; native close restores its opener, while Pattern close
-uses one prevented Radix autofocus owner. Pattern takeover cancels stale Effects
-frames. Reduced motion covers the native drawer, Radix-portaled Pattern content,
-and the portaled menu popup through the global stylesheet.
+are direct native buttons gated until the page coordinator and Arrange island
+consumers are hydrated. The app-shell contract executes the installed readiness
+effect in preexisting, page-first, and Patterns-first orders, rejects a detached
+non-invoked readiness function, requires the shell to start disabled, proves
+each consumer writes its readiness flag before dispatching its ready event, and
+binds each button to its click handler. One
+pointer, Enter, or Space activation dispatches one
+matching command; there is no one-item submenu, popup, custom typeahead, or
+second state owner. Patterns keeps the Radix ArrangeDialog and its page-owned
+list, with the page coordinating a distinct ready event. Effects is permanently
+mounted in a centered native workbench. At 1200px and wider Tone and Reverb
+occupy two bays; intermediate and phone widths stack them Tone-first. The native
+dialog clips overflow while `#filterFxPanel` is the sole vertical scroller with
+contained scroll chaining, so its sticky header and close control remain visible.
+Native close restores its opener, while Pattern close uses one
+prevented Radix autofocus owner. Pattern takeover cancels stale Effects frames,
+settles the Effects controller and command ARIA synchronously, and an Effects
+request closes Patterns before the next-frame workbench open. Immediately before
+`showModal()`, Effects re-establishes its direct button as the native opener, so
+closing after a Patterns takeover returns to Effects rather than the retired
+Patterns trigger. Native dialog and ARIA state are the disclosure authorities;
+there is no separate `filterPanelExpanded` mirror. The fake runtime queues that
+same production frame rather than using a test-only scheduling path.
+Reduced motion covers the native workbench and Radix-portaled Pattern content.
 
 The VM coverage also snapshots music, Filter state, codec output, URL, graph,
 and transport before and after disclosure changes. Preset selection, Custom,
@@ -165,9 +204,12 @@ Density checks bind the real 14-row inventory, exact 44 px desktop lane cadence,
 4 px top/bottom sequencer padding, an internal absolute divider that adds no
 height, and real 44 px targets. Pre-grid fit and how many complete lanes remain
 visible at each viewport are computed-browser evidence. The persistent shell
-keeps transport and Step Scope visible; Patterns is a Base UI Menubar command
+keeps transport and Step Scope visible; Patterns is a direct button
 opening the existing portaled ArrangeDialog, while Effects is a permanently
-mounted native drawer. The 320 px transport must not overflow.
+mounted native workbench opened by a direct button. The 320 px transport must
+not overflow. At 320 px the Effects card basis is 112.5 px after the dialog,
+border, nested padding, gap, and classic 17 px scrollbar deductions, preserving
+two columns while staying inside the 88-116 px contract.
 
 These tests do not establish real-browser AudioParam semantics, audible
 smoothing, level stability, resonance safety, clipping behavior, or device
