@@ -1,21 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
-  --color-page: #111;
-  --color-panel: #333333;
-  --color-text: #f2f2f2;
+  color-scheme: light;
+  --color-page: #eceae4;
+  --color-panel: #ffffff;
+  --color-text: #171a1f;
+  --color-muted: #596068;
+  --color-accent-ink: #171a1f;
   --color-blue: #2f80ed;
+  --color-blue-ink: #1c5fa8;
   --color-green: #27ae60;
+  --color-green-ink: #176b3a;
   --color-orange: #f2994a;
+  --color-orange-ink: #9a4e00;
   --color-orange-strong: #f57c00;
-  --color-border: rgba(242, 242, 242, 0.38);
-  --color-disabled: rgba(242, 242, 242, 0.68);
+  --color-orange-strong-ink: #a33d00;
+  --color-border: #82878d;
+  --color-disabled: #6d737a;
   --background: var(--color-page);
   --foreground: var(--color-text);
   --card: var(--color-panel);
   --card-foreground: var(--color-text);
-  --muted-foreground: var(--color-text);
+  --muted-foreground: var(--color-muted);
   --border: var(--color-border);
   --playback: var(--color-blue);
   --selection: var(--color-blue);

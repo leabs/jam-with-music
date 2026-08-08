@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FiLayers, FiSliders } from "react-icons/fi";
 
 const commandButtonClasses =
-  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-panel)] px-3 text-sm font-semibold text-[var(--color-text)] transition-colors hover:border-[var(--color-blue)] hover:bg-[var(--color-blue)] hover:text-[var(--color-page)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue)] disabled:pointer-events-none disabled:border-[var(--color-border)] disabled:bg-[var(--color-panel)] disabled:text-[var(--color-disabled)]";
+  "inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-panel)] px-3 text-sm font-semibold text-[var(--color-text)] shadow-[0_1px_2px_rgba(23,26,31,0.10)] transition-colors hover:border-[var(--color-blue)] hover:bg-[var(--color-blue)] hover:text-[var(--color-accent-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue)] disabled:pointer-events-none disabled:border-[var(--color-border)] disabled:bg-[var(--color-panel)] disabled:text-[var(--color-disabled)] disabled:shadow-none";
 
 function ShellButton({ label, icon, id, action, controls, disabled }) {
   function handleClick() {

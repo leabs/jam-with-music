@@ -349,7 +349,7 @@ function getCssRuleBody(source, selectorPattern) {
 }
 
 function getHardwareSource(source = pageSource) {
-  const marker = "/* Dark hardware system: palette color is reserved for state and bay identity. */";
+  const marker = "/* Light hardware system: palette color is reserved for state and bay identity. */";
   const markerIndex = source.indexOf(marker);
   assert.notEqual(markerIndex, -1, "hardware system marker must exist");
   const styleEnd = source.indexOf("</style>", markerIndex);
@@ -840,6 +840,43 @@ function assertEffectiveEffectsWorkbenchCss(source) {
   }
 }
 
+function assertEffectivePhoneTransportCss(source) {
+  const style = getPageStyleSource(source);
+  const target = { tokens: [".bpm-control"], classes: ["bpm-control"] };
+  for (const width of [420, 400, 390, 320]) {
+    assert.equal(
+      getEffectiveCssDeclaration(style, width, target, "display"),
+      "grid",
+      `phone transport must remain a grid at ${width}px`,
+    );
+    assert.equal(
+      getEffectiveCssDeclaration(style, width, target, "grid-template-columns"),
+      "54px repeat(5, 44px)",
+      `phone transport must retain BPM plus five 44px actions at ${width}px`,
+    );
+    assert.equal(
+      getEffectiveCssDeclaration(style, width, target, "grid-column"),
+      "1 / -1",
+      `phone transport must span the full header row at ${width}px`,
+    );
+    assert.equal(
+      getEffectiveCssDeclaration(style, width, target, "width"),
+      "100%",
+      `phone transport must use its assigned row width at ${width}px`,
+    );
+    assert.equal(
+      getEffectiveCssDeclaration(style, width, target, "max-width"),
+      "284px",
+      `phone transport must retain its exact six-cell width at ${width}px`,
+    );
+    assert.equal(
+      getEffectiveCssDeclaration(style, width, target, "overflow"),
+      "visible",
+      `phone transport must not clip direct actions at ${width}px`,
+    );
+  }
+}
+
 function assertEffectivePhonePresetGeometry(source) {
   const pageStyle = source.includes("<style>") ? getPageStyleSource(source) : source;
   const expectedBasis =
@@ -887,7 +924,7 @@ function assertEffectivePlayingStepFocus(source) {
   for (const width of [1440, 1280, 1200, 900, 600, 390, 320]) {
     assert.equal(
       getEffectiveCssDeclaration(pageStyle, width, target, "outline"),
-      "3px solid var(--hardware-ink, #f2f2f2)",
+      "3px solid var(--hardware-ink, #171a1f)",
       `focused playing step outline must remain visible at ${width}px`,
     );
     assert.equal(
@@ -943,20 +980,29 @@ function assertSoleEffectsVerticalScroller(source) {
 
 function assertAllowedPaletteLiterals(source, label) {
   const allowedHex = new Set([
-    "#111",
-    "#111111",
+    "#171a1f",
+    "#176b3a",
+    "#1c5fa8",
     "#2f80ed",
     "#27ae60",
-    "#333333",
+    "#596068",
+    "#6d737a",
+    "#82878d",
+    "#9a4e00",
+    "#a33d00",
+    "#e8f1fb",
+    "#eceae4",
+    "#edf8f0",
     "#f2994a",
-    "#f2f2f2",
     "#f57c00",
+    "#f8f7f3",
+    "#fff4e8",
+    "#ffffff",
   ]);
   const allowedRgb = new Set([
-    "17,17,17",
+    "23,26,31",
     "39,174,96",
     "47,128,237",
-    "242,242,242",
   ]);
   const hexColors = Array.from(source.matchAll(/#[0-9a-f]{3,8}\b/gi), (match) =>
     match[0].toLowerCase()
@@ -973,9 +1019,97 @@ function assertAllowedPaletteLiterals(source, label) {
   }
 }
 
+function assertLightStateMarkerContrast(source) {
+  const hardware = getHardwareSource(source);
+  const root = getBalancedBlock(hardware, ":root");
+  const markers = [
+    {
+      selector: '.instrument-screen[data-filter-active="true"] .instrument-screen-trace',
+      property: "background",
+      token: "signal-effect-ink",
+      backdrops: ["hardware-screen"],
+      target: {
+        tokens: [".instrument-screen-trace"],
+        classes: ["instrument-screen-trace"],
+        attributes: { "data-filter-active": "true" },
+      },
+    },
+    {
+      selector: '.filter-fx-panel[data-enabled="true"] .filter-fx-status-dot',
+      property: "background",
+      token: "signal-effect-ink",
+      backdrops: ["hardware-surface", "hardware-canvas"],
+      target: {
+        tokens: [".filter-fx-status-dot"],
+        classes: ["filter-fx-status-dot"],
+        attributes: { "data-enabled": "true" },
+      },
+    },
+    {
+      selector: ".filter-fx-shared-controls .filter-fx-knob-indicator",
+      property: "background",
+      token: "signal-effect-ink",
+      backdrops: ["hardware-canvas"],
+      target: {
+        tokens: [".filter-fx-knob-indicator"],
+        classes: ["filter-fx-knob-indicator"],
+      },
+    },
+    {
+      selector: '.filter-fx-shared-controls .filter-fx-macro input[type="range"]',
+      property: "accent-color",
+      token: "signal-effect-ink",
+      backdrops: ["hardware-canvas", "hardware-surface"],
+      target: {
+        tokens: ['input[type="range"]'],
+        attributes: { type: "range" },
+      },
+    },
+    {
+      selector: '.sequence-row[data-sample-state="failed"] .instrument-panel',
+      property: "outline-color",
+      token: "signal-alert-ink",
+      backdrops: ["hardware-canvas", "hardware-surface"],
+      target: {
+        tokens: [".instrument-panel"],
+        classes: ["instrument-panel"],
+        attributes: { "data-sample-state": "failed" },
+      },
+    },
+    {
+      selector: ".space-fx-macro input",
+      property: "accent-color",
+      token: "signal-space-ink",
+      backdrops: ["space-wash", "hardware-surface"],
+      target: { tokens: ["input"] },
+    },
+  ];
+
+  for (const marker of markers) {
+    for (const width of [1440, 420, 390, 320]) {
+      const value = marker.property === "background"
+        ? getEffectiveBackgroundColor(hardware, width, marker.target)
+        : getLastCssDeclaration(hardware, marker.selector, marker.property);
+      assert.equal(
+        value,
+        `var(--${marker.token})`,
+        `${marker.selector} must use ${marker.token} at ${width}px`,
+      );
+    }
+    const foreground = getCustomProperty(root, marker.token);
+    for (const backdrop of marker.backdrops) {
+      const ratio = contrastRatio(foreground, getCustomProperty(root, backdrop));
+      assert.ok(
+        ratio >= 3,
+        `${marker.selector} ${marker.property} contrast ${ratio} on ${backdrop} must be at least 3`,
+      );
+    }
+  }
+}
+
 function assertEffectiveLegacyStatePalette(source) {
   const hardwareMarker = source.indexOf(
-    "/* Dark hardware system: palette color is reserved for state and bay identity. */"
+    "/* Light hardware system: palette color is reserved for state and bay identity. */"
   );
   assert.ok(hardwareMarker > 0, "hardware marker must follow legacy state selectors");
   const legacy = source.slice(0, hardwareMarker);
@@ -1040,7 +1174,7 @@ function assertMicroScreenLabelContrast(source) {
     assert.ok(token, "micro-screen label color must use a semantic token");
     const ratio = compositeContrast(
       getCustomPropertyValue(root, token),
-      getCustomProperty(root, "hardware-page")
+      getCustomProperty(root, "hardware-screen")
     );
     assert.ok(ratio >= 4.5, `micro-screen label contrast ${ratio} must be at least 4.5`);
   }
@@ -1193,7 +1327,7 @@ function desktopMacroHeadingWidth(source) {
   const alignedRule = getBalancedBlock(hardware, "@media (min-width: 1200px)");
   const alignedMarker = source.indexOf(
     "@media (min-width: 1200px)",
-    source.indexOf("/* Dark hardware system:")
+    source.indexOf("/* Light hardware system:")
   );
   const alignedBase = source.slice(0, alignedMarker);
   const outerColumns = getCssDeclaration(
@@ -1673,35 +1807,69 @@ test("320px Effects preset cards fit two columns with a classic scrollbar", () =
   );
 });
 
-test("the authoritative dark shell uses only the accepted semantic palette", () => {
+test("320px through the 420px boundary keep every transport action in the effective cascade", () => {
+  assertEffectivePhoneTransportCss(pageSource);
+  for (const mutation of [
+    '@media (max-width: 420px) { .header-grid > .bpm-control { grid-column: auto; overflow: hidden; } }',
+    '@media (max-width: 420px) { .op1-drum-machine .header-grid > .bpm-control { max-width: 100px; } }',
+    '@media (min-width: 400px) and (max-width: 420px) { .header-grid > .bpm-control { grid-column: auto; overflow: hidden; } }',
+  ]) {
+    const regressed = pageSource.replace("</style>", `${mutation}\n</style>`);
+    assert.throws(
+      () => assertEffectivePhoneTransportCss(regressed),
+      /full header row|six-cell width|clip direct actions/,
+    );
+  }
+});
+
+test("the authoritative light shell uses only the accepted semantic palette", () => {
   const hardware = getHardwareSource();
   const root = getBalancedBlock(hardware, ":root");
   const expected = {
-    "hardware-page": "#111111",
-    "hardware-canvas": "#333333",
-    "hardware-surface": "#111111",
-    "hardware-ink": "#f2f2f2",
-    "hardware-muted": "#f2f2f2",
+    "hardware-page": "#eceae4",
+    "hardware-canvas": "#f8f7f3",
+    "hardware-surface": "#ffffff",
+    "hardware-screen": "#e8f1fb",
+    "hardware-ink": "#171a1f",
+    "hardware-muted": "#596068",
+    "hardware-hairline": "#82878d",
+    "hardware-disabled": "#6d737a",
+    "hardware-on-accent": "#171a1f",
+    "effect-wash": "#edf8f0",
+    "space-wash": "#fff4e8",
     "signal-playback": "#2f80ed",
     "signal-selection": "#2f80ed",
     "signal-effect": "#27ae60",
     "signal-space": "#f2994a",
     "signal-space-strong": "#f57c00",
     "signal-alert": "#f57c00",
+    "signal-playback-ink": "#1c5fa8",
+    "signal-selection-ink": "#1c5fa8",
+    "signal-effect-ink": "#176b3a",
+    "signal-space-ink": "#9a4e00",
+    "signal-alert-ink": "#a33d00",
   };
   for (const [name, value] of Object.entries(expected)) {
     assertCanonicalCustomProperty(pageSource, root, name);
     assert.equal(getCustomProperty(root, name), value);
   }
-  assert.match(root, /--hardware-hairline:\s*rgba\(242, 242, 242, 0\.38\)/);
-  assert.match(root, /--hardware-disabled:\s*rgba\(242, 242, 242, 0\.68\)/);
-  assert.match(globalStyleSource, /--color-page:\s*#111;/i);
-  assert.match(globalStyleSource, /--color-panel:\s*#333333;/i);
-  assert.match(globalStyleSource, /--color-text:\s*#f2f2f2;/i);
+  assert.match(root, /color-scheme:\s*light/);
+  assert.match(globalStyleSource, /color-scheme:\s*light/i);
+  assert.match(globalStyleSource, /--color-page:\s*#eceae4;/i);
+  assert.match(globalStyleSource, /--color-panel:\s*#ffffff;/i);
+  assert.match(globalStyleSource, /--color-text:\s*#171a1f;/i);
+  assert.match(globalStyleSource, /--color-muted:\s*#596068;/i);
+  assert.match(globalStyleSource, /--color-accent-ink:\s*#171a1f;/i);
+  assert.match(globalStyleSource, /--color-border:\s*#82878d;/i);
+  assert.match(globalStyleSource, /--color-disabled:\s*#6d737a;/i);
   assert.match(globalStyleSource, /--color-blue:\s*#2f80ed;/i);
+  assert.match(globalStyleSource, /--color-blue-ink:\s*#1c5fa8;/i);
   assert.match(globalStyleSource, /--color-green:\s*#27ae60;/i);
+  assert.match(globalStyleSource, /--color-green-ink:\s*#176b3a;/i);
   assert.match(globalStyleSource, /--color-orange:\s*#f2994a;/i);
+  assert.match(globalStyleSource, /--color-orange-ink:\s*#9a4e00;/i);
   assert.match(globalStyleSource, /--color-orange-strong:\s*#f57c00;/i);
+  assert.match(globalStyleSource, /--color-orange-strong-ink:\s*#a33d00;/i);
 
   for (const [source, label] of [
     [hardware, "hardware layer"],
@@ -1714,22 +1882,38 @@ test("the authoritative dark shell uses only the accepted semantic palette", () 
     assertAllowedPaletteLiterals(source, label);
   }
 
-  for (const background of [expected["hardware-page"], expected["hardware-canvas"]]) {
+  for (const background of [
+    expected["hardware-page"],
+    expected["hardware-canvas"],
+    expected["hardware-surface"],
+    expected["hardware-screen"],
+  ]) {
     assert.ok(contrastRatio(expected["hardware-ink"], background) >= 4.5);
+    assert.ok(contrastRatio(expected["hardware-muted"], background) >= 4.5);
   }
-  for (const signal of [
+  for (const background of [expected["hardware-page"], expected["hardware-canvas"]]) {
+    assert.ok(contrastRatio(expected["hardware-hairline"], background) >= 3);
+  }
+  for (const fill of [
     expected["signal-selection"],
     expected["signal-effect"],
     expected["signal-space"],
     expected["signal-space-strong"],
   ]) {
-    assert.ok(contrastRatio(signal, expected["hardware-page"]) >= 4.5);
-    assert.ok(contrastRatio(signal, expected["hardware-canvas"]) >= 3);
-    assert.ok(contrastRatio(expected["hardware-page"], signal) >= 4.5);
+    assert.ok(contrastRatio(expected["hardware-on-accent"], fill) >= 4.5);
+  }
+  for (const signalInk of [
+    expected["signal-selection-ink"],
+    expected["signal-effect-ink"],
+    expected["signal-space-ink"],
+    expected["signal-alert-ink"],
+  ]) {
+    assert.ok(contrastRatio(signalInk, expected["hardware-page"]) >= 4.5);
+    assert.ok(contrastRatio(signalInk, expected["hardware-canvas"]) >= 4.5);
   }
   assertActivePresetLabelContrast(pageSource);
   const lowContrastActiveLabel = pageSource.replace(
-    '.filter-preset-pedal[data-filter-active="true"] .filter-creature-state::before {\n    content: "On";\n    color: var(--hardware-ink, #f2f2f2);',
+    '.filter-preset-pedal[data-filter-active="true"] .filter-creature-state::before {\n    content: "On";\n    color: var(--hardware-ink, #171a1f);',
     '.filter-preset-pedal[data-filter-active="true"] .filter-creature-state::before {\n    content: "On";\n    color: var(--signal-effect, #27ae60);',
   );
   assert.notEqual(lowContrastActiveLabel, pageSource, "active label mutation must apply");
@@ -1739,7 +1923,7 @@ test("the authoritative dark shell uses only the accepted semantic palette", () 
   );
   const lowContrastActiveTile = pageSource.replace(
     "</style>",
-    '.filter-preset-pedal[data-filter-active="true"] .filter-creature-tile { background: var(--signal-effect); }\n</style>',
+    '.filter-preset-pedal[data-filter-active="true"] .filter-creature-tile { background: var(--hardware-ink); }\n</style>',
   );
   assert.throws(
     () => assertActivePresetLabelContrast(lowContrastActiveTile),
@@ -1747,7 +1931,7 @@ test("the authoritative dark shell uses only the accepted semantic palette", () 
   );
   const lowContrastActiveTileColor = pageSource.replace(
     "</style>",
-    '.filter-preset-pedal[data-filter-active="true"] .filter-creature-tile { background-color: var(--signal-effect); }\n</style>',
+    '.filter-preset-pedal[data-filter-active="true"] .filter-creature-tile { background-color: var(--hardware-ink); }\n</style>',
   );
   assert.throws(
     () => assertActivePresetLabelContrast(lowContrastActiveTileColor),
@@ -1761,6 +1945,25 @@ test("the authoritative dark shell uses only the accepted semantic palette", () 
     () => assertActivePresetLabelContrast(obscuredActiveTile),
     /background image must remain none/,
   );
+});
+
+test("light-theme traces indicators ranges and failure outlines retain non-text contrast", () => {
+  assertLightStateMarkerContrast(pageSource);
+  for (const mutation of [
+    '.instrument-screen[data-filter-active="true"] .instrument-screen-trace { background: var(--signal-effect); }',
+    '.filter-fx-panel[data-enabled="true"] .filter-fx-status-dot { background: var(--signal-effect); }',
+    '.filter-fx-panel[data-enabled="true"] .filter-fx-status-dot { background-color: var(--signal-effect); }',
+    '.filter-fx-shared-controls .filter-fx-knob-indicator { background: var(--signal-effect); }',
+    '.filter-fx-shared-controls .filter-fx-macro input[type="range"] { accent-color: var(--signal-effect); }',
+    '.sequence-row[data-sample-state="failed"] .instrument-panel { outline-color: var(--signal-alert); }',
+    '.space-fx-macro input { accent-color: var(--signal-space); }',
+  ]) {
+    const regressed = pageSource.replace("</style>", `${mutation}\n</style>`);
+    assert.throws(
+      () => assertLightStateMarkerContrast(regressed),
+      /must use|contrast/,
+    );
+  }
 });
 
 test("effective legacy Filter state selectors use the semantic hardware palette", () => {
@@ -1802,7 +2005,7 @@ test("transport, selection, bay, bypass, disabled, unavailable, and destructive 
   const hardware = getHardwareSource();
   assert.match(
     getBalancedBlock(hardware, '#playBtn[data-mode="play"]'),
-    /color:\s*var\(--hardware-page\);[\s\S]*?border-color:\s*var\(--signal-playback\);[\s\S]*?background:\s*var\(--signal-playback\)/
+    /color:\s*var\(--hardware-on-accent\);[\s\S]*?border-color:\s*var\(--signal-playback\);[\s\S]*?background:\s*var\(--signal-playback\)/
   );
   assert.match(
     getBalancedBlock(hardware, '.filter-preset-pedal[data-filter-selected="true"]'),
@@ -1810,19 +2013,19 @@ test("transport, selection, bay, bypass, disabled, unavailable, and destructive 
   );
   assert.equal(
     getLastCssDeclaration(hardware, ".tone-fx-panel", "border-color"),
-    "var(--signal-effect)"
+    "var(--signal-effect-ink)"
   );
   assert.equal(
     getLastCssDeclaration(hardware, ".space-fx-panel", "border-color"),
-    "var(--signal-space)"
+    "var(--signal-space-ink)"
   );
   assert.match(
     getBalancedBlock(hardware, '.filter-fx-shared-controls .filter-fx-footswitch[aria-pressed="true"]'),
-    /color:\s*var\(--hardware-page\);[\s\S]*?background:\s*var\(--signal-effect\)/
+    /color:\s*var\(--hardware-on-accent\);[\s\S]*?background:\s*var\(--signal-effect\)/
   );
   assert.match(
     getBalancedBlock(hardware, '.space-fx-bypass[aria-pressed="true"]'),
-    /color:\s*var\(--hardware-page\);[\s\S]*?background:\s*var\(--signal-space\)/
+    /color:\s*var\(--hardware-on-accent\);[\s\S]*?background:\s*var\(--signal-space\)/
   );
   assert.match(
     getBalancedBlock(hardware, '.space-fx-presets button[data-space-selected="true"]'),
@@ -1838,7 +2041,7 @@ test("transport, selection, bay, bypass, disabled, unavailable, and destructive 
   );
   assert.match(
     getCssRuleBody(hardware, "#clearProjectBtn,\\s*#clearProjectBtn:hover"),
-    /(?:^|\s)color:\s*var\(--hardware-page\);[\s\S]*?background:\s*var\(--signal-space-strong\)/
+    /(?:^|\s)color:\s*var\(--hardware-on-accent\);[\s\S]*?background:\s*var\(--signal-space-strong\)/
   );
 });
 
@@ -2071,7 +2274,7 @@ test("real shell, disclosure, shared Filter, and lane controls keep a 44px floor
     const focusRule = getCssRuleBody(hardwareSource, selector);
     assert.match(
       focusRule,
-      /\boutline:\s*3px solid var\([^,]+,\s*#f2f2f2\)\s*;/i,
+      /\boutline:\s*3px solid var\([^,]+,\s*#171a1f\)\s*;/i,
       `${selector} must retain a literal high-contrast ink edge`,
     );
     assert.match(
@@ -2082,7 +2285,7 @@ test("real shell, disclosure, shared Filter, and lane controls keep a 44px floor
   }
   assertEffectivePlayingStepFocus(pageSource);
   const missingPlayingFocus = pageSource.replace(
-    /\n  \.step\.active\.playing:focus-visible \{\n    outline: 3px solid var\(--hardware-ink, #f2f2f2\);\n    outline-offset: 2px;\n    box-shadow: 0 0 0 6px var\(--signal-selection, #2f80ed\);\n  \}\n/,
+    /\n  \.step\.active\.playing:focus-visible \{\n    outline: 3px solid var\(--hardware-ink, #171a1f\);\n    outline-offset: 2px;\n    box-shadow: 0 0 0 6px var\(--signal-selection, #2f80ed\);\n  \}\n/,
     "\n",
   );
   assert.notEqual(missingPlayingFocus, pageSource, "playing focus mutation must apply");
@@ -2234,10 +2437,10 @@ test("Space hardware layer binds targets, focus, responsive stacking, and finite
     assert.match(hardware, new RegExp(`data-enabled="true"\\]\\[data-available="true"\\][\\s\\S]*?button:is\\(\\[data-space-selected="true"\\]\\)[\\s\\S]*?\\.${gesture}[\\s\\S]*?animation:\\s*${gesture} ${duration}ms ease-out 1 both`));
     assert.match(hardware, new RegExp(`@keyframes ${gesture}\\s*\\{`));
   }
-  assert.match(hardware, /\.space-mole-dust\s*\{\s*stroke:\s*var\(--signal-space-strong\)/);
-  assert.match(hardware, /\.space-whale-sonar\s*\{\s*stroke:\s*var\(--signal-space\)/);
-  assert.match(hardware, /\.space-jellyfish-ripple\s*\{\s*fill:\s*var\(--signal-space-strong\);\s*stroke:\s*var\(--signal-space\)/);
-  assert.match(hardware, /\.space-snail-crescent\s*\{\s*fill:\s*none;\s*stroke:\s*var\(--signal-space\)/);
+  assert.match(hardware, /\.space-mole-dust\s*\{\s*stroke:\s*var\(--signal-alert-ink\)/);
+  assert.match(hardware, /\.space-whale-sonar\s*\{\s*stroke:\s*var\(--signal-space-ink\)/);
+  assert.match(hardware, /\.space-jellyfish-ripple\s*\{\s*fill:\s*var\(--signal-space\);\s*stroke:\s*var\(--signal-space-ink\)/);
+  assert.match(hardware, /\.space-snail-crescent\s*\{\s*fill:\s*none;\s*stroke:\s*var\(--signal-space-ink\)/);
   for (const gesture of ["space-mole-dust", "space-whale-sonar", "space-jellyfish-ripple"]) {
     const keyframes = getBalancedBlock(hardware, `@keyframes ${gesture}`);
     assert.match(keyframes, /0%\s*\{[^}]*visibility:\s*visible;[^}]*opacity:\s*0;[^}]*transform:\s*[^;}]+;?[^}]*\}/);
@@ -2350,24 +2553,41 @@ test("Space selected and unavailable states preserve literal contrast", () => {
   assert.match(pageSource.slice(pageSource.indexOf("</style>")), /<script\b/);
   const root = getBalancedBlock(hardware, ":root");
   const variables = Object.fromEntries(
-    ["hardware-ink", "hardware-muted", "hardware-surface", "hardware-canvas"].map((name) => [
+    [
+      "hardware-ink",
+      "hardware-muted",
+      "hardware-on-accent",
+      "hardware-surface",
+      "hardware-canvas",
+      "signal-selection",
+    ].map((name) => [
       name,
       getCustomProperty(root, name),
     ])
   );
-  for (const name of ["hardware-ink", "hardware-muted", "hardware-surface", "hardware-canvas"]) {
+  for (const name of [
+    "hardware-ink",
+    "hardware-muted",
+    "hardware-on-accent",
+    "hardware-surface",
+    "hardware-canvas",
+    "signal-selection",
+  ]) {
     assertCanonicalCustomProperty(pageSource, root, name);
   }
   const selectedRule = getBalancedBlock(
     hardware,
     '.space-fx-presets button[data-space-selected="true"]'
   );
-  assert.match(selectedRule, /color:\s*var\(--hardware-page\)/);
+  assert.match(selectedRule, /color:\s*var\(--hardware-on-accent\)/);
   assert.match(selectedRule, /border-color:\s*var\(--signal-selection\)/);
   assert.match(selectedRule, /background:\s*var\(--signal-selection\)/);
   assert.match(selectedRule, /inset 0 -4px 0 var\(--signal-space-strong\)/);
   assert.ok(contrastRatio(variables["hardware-ink"], variables["hardware-surface"]) >= 3);
   assert.ok(contrastRatio(variables["hardware-ink"], variables["hardware-canvas"]) >= 3);
+  assert.ok(
+    contrastRatio(variables["hardware-on-accent"], variables["signal-selection"]) >= 4.5,
+  );
 
   const informativeRule = getBalancedBlock(hardware, ".space-fx-kicker,");
   assert.match(hardware, /\.space-fx-kicker,\s*\.space-fx-status,\s*\.space-fx-summary,\s*\.space-fx-macro span\s*\{/);

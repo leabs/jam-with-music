@@ -68,8 +68,9 @@ desktop cadence, internal non-interactive lane divider, and 44 px targets. Its
 624 px lane-stack reference is derived from the 14 rendered instrument rows,
 production lane height, and top/bottom sequencer padding; the absolutely
 positioned divider adds no layout height. Pre-grid fit remains computed-browser
-evidence. The contract additionally proves the semantic dark palette and its
-literal contrast, blue transport/selection, green Tone, orange Space, distinct
+evidence. The contract additionally proves the semantic light hardware palette
+and its literal contrast: warm page and chassis surfaces, white controls, a pale
+blue instrument screen, blue transport/selection, green Tone, orange Space, and distinct
 disabled/bypass/unavailable/destructive states, the sole `#filterFxPanel`
 vertical scroller, exact two-card 320 px arithmetic with a classic 17 px
 scrollbar, the winning custom card basis plus effective flex/basis/width bounds
@@ -79,7 +80,7 @@ exact desktop bay tracks at 1200/1280/1440 px, and the live
 8 px desktop macro gap. The active preset pseudo-label retains normal-text
 contrast on its rendered creature tile after resolving both `background` and
 `background-color`; its effective `background-image` must remain `none` so an
-opaque image layer cannot invalidate that contrast. An active playing step keeps its off-white focus
+opaque image layer cannot invalidate that contrast. An active playing step keeps its ink focus
 edge and blue halo after the later playing-state rule. Mutation sentries reject nested,
 tag-qualified, logical-overflow, or dialog-rooted scrollers under either
 `.effects-dialog` or `#effectsDialog`, a scrollable outer dialog, any stale or
@@ -92,8 +93,13 @@ ID-specific desktop two-bay collapse, and late non-sticky or non-elevated
 header overrides including at the 1200 px boundary.
 Effective later and more-specific declarations are
 resolved at the acceptance viewports before the unavailable Filter border or
-micro-screen label palette is accepted. Focus uses an off-white edge with a
+micro-screen label palette is accepted. Focus uses a near-black ink edge with a
 state-appropriate blue, green, or orange halo.
+Light-theme non-text sentries require the active Filter trace, status dot, knob
+indicator, Filter and Space range accents, and failed-sample outline to use the
+darker owner-ink variants at least 3:1 against their adjacent light surfaces;
+late bright-accent mutations are rejected for each marker, including an
+equivalent `background-color` override on the status dot.
 
 `test/pattern-modal-contract.test.js` covers the single 44 px Patterns trigger,
 one portaled modal-owned list, preserved IDs/actions, Radix focus and close
@@ -101,36 +107,55 @@ structure, destructive confirmation, portal-root token inheritance, literal
 two-color focus fallback, 44 px Move up/down controls and disabled boundaries,
 canonical reorder delegation, and the 72 px border-box repeat track. Its 320 px
 source arithmetic proves the fixed tracks and wrapped action block fit the
-available row width. Its green row-action and orange New hover states require
-dark chassis text and literal normal-text contrast, with later-specific
+available row width. At that minimum width, the name button owns a complete
+line above the wrapped row actions, so `Pattern 1`, `Pattern 2`, and later
+numeric identities remain fully visible and distinct without reducing the
+72 px repeat field or any 44 px target. Its green row-action and orange New hover states require
+dedicated dark on-accent text and literal normal-text contrast, with later-specific
 mutation sentries for each selector. A disabled Delete stays disabled-looking
 on hover because destructive hover only applies to enabled controls; computed
-layout remains a browser check.
+layout remains a browser check. The 320 px identity sentry resolves the complete
+Arrange style by OR-separated media branches with AND conditions inside each,
+then preserves per-declaration `!important`, specificity, and source order
+against the actual dialog, list, row, card, and leaf-element chain. The button
+class set is extracted from the installed `patternBtn.className` assignment;
+the sentry requires production `flex-1` and `truncate` and rejects fabricated
+`flex`. The row, card, and action class sets are likewise sourced from their
+literal renderer assignments. Flex shorthands and
+longhands, `flex-flow`, and shorthand, logical, or physical inline padding are
+resolved into the layout values the identity needs, with conflicting equivalent
+declarations rejected conservatively. Exact late nowrap, collapsed flex and
+padding, real `.truncate`, comma-media, important-before-normal, `flex-flow`,
+flex-longhand, and padding-variant mutations fail. A grouped ID-qualified child
+selector must match, and changing the installed button from `flex-1 truncate`
+to `flex-1 flex` fails for the installed-class reason. Impossible
+`.arrange-pattern-button.flex`, impossible `#patternsDialog.arrange-pattern-card`,
+and max-319 controls remain inapplicable.
 
 ## UI overhaul seam
 
 The authoritative static/VM/build artifact is page
-`c2862f61995b28032db9f55815c2e92b85727d8323ad0c6e89db3408a903fe29`
+`2cef4b1d231d837096398ab52a975cfe67e12cc28c64da2b60fa2b118f8c8fd3`
 with ArrangeDialog
-`3414894761967784dedf0d359453e51220580428d93462533a83bfba318f8293`,
+`4ac5e1b4bab652f293621c5305b52add9ae485537f1828df89e1dd0ae4b14551`,
 ClearProjectDialog
-`a4f79d6570c5169ce2119f7f7004710970c991ff9adf573e8d074eb70ac37665`,
+`a6100cc071a1d1f32180fbec1cbb0bcbca23fb18432d26109efaba74bb8cbcac`,
 shared Dialog
-`07c3885b2e1770b5880f7f18fe5843762f6c9d2a0bd49e10c531ea612acbee77`,
+`832351fa6fed23498c3598b925d000cf88aebaf3f2a76aa315b2ac8eafe59a66`,
 Filter page contract
-`16c2c493dabd2194c697841874533c7ebfda2da779958f9fb4900bc580103eb8`,
+`87ce47a32c2d2b009d62c2b2551d008f669e1f124cf13cc02c3015865b0f60d8`,
 Filter inline
 `32dbe9734e3bb2bef1ba8d1719018bbea4410ab188fda1a7d9b933f005c7b7c7`,
 harness
 `396e95e109b90e723041c773dd25698375b70840421c0d685b9fedb240eff64d`,
 and app-shell contract
-`1785eff933d49b48df19c99643a5f4a5e8378ada8cb07c0acc78c1d4140b9ba4`,
+`2ca1863ae1b8d988436043a5f5144a9486364e3e61df05bb649184a0e67427ce`,
 AppMenu
-`3adc120bdc5c48120eeaf2c7f3aa9a4c29e830a8d6ad22fcdd7675fb7a3e5e84`,
+`3d6473c120659492ef6bc56f2b3cc123795c4b2dcc77b85befac298c562d81f9`,
 global styles
-`6e7f8463fb34b267ca23b686951689553b73ba55f3ed5f2e0283ed049e6e37af`,
+`f4c98ef1e9831dc9cc2614f778b0aace0e9c2b125519ccff5547811d8e579175`,
 Pattern contract
-`af74780d1938c8e98129ecb694230c6d46e61ab53b019b7082d39831a9d0d92f`,
+`99348a1a339032af5a8ef86f0c164b29a182b03b0c4dd8bd8ff5a50f0e34f79b`,
 package
 `97c89235869bed7909bfadcad4d1c4c783c051a74b897184d37ae9ea91ba0ad3`,
 package lock
@@ -141,10 +166,9 @@ tsconfig
 `6551e8fc79128cbc8b6a69d0babad0b354a3985a07598c5ff458e070acfa1457`, and
 Space graph contract
 `a3ab0d45d6b9d5914176966900be752e5496313824a316addac41ab243aebac4`.
-Its focused app-shell/Filter/Pattern gate is 90/90 pass. Its full package gate
-is 228 total, 226 pass, 0 fail, and the same 2 Phase 0B
-TODOs described above. Browser/device/assistive-technology/native-audio,
-interruption, and listening evidence remain separate and pending.
+Its focused app-shell/Filter/Pattern gate is 94/94 pass. Its full package gate
+is 232 total, 230 pass, 0 fail, and the same 2 Phase 0B
+TODOs described above.
 
 The app-shell overhaul supersedes the prior standalone Patterns rail and
 Effects disclosure expectations above. The persistent shell keeps BPM,
@@ -206,14 +230,39 @@ height, and real 44 px targets. Pre-grid fit and how many complete lanes remain
 visible at each viewport are computed-browser evidence. The persistent shell
 keeps transport and Step Scope visible; Patterns is a direct button
 opening the existing portaled ArrangeDialog, while Effects is a permanently
-mounted native workbench opened by a direct button. The 320 px transport must
-not overflow. At 320 px the Effects card basis is 112.5 px after the dialog,
+mounted native workbench opened by a direct button. At 420 px and below, the
+transport explicitly spans the full named header row instead of inheriting the
+compact grids one-column override; BPM, Play, Loop, Share, Clear, and Help all
+remain visible 44 px controls without page overflow. At 320 px the Effects card basis is 112.5 px after the dialog,
 border, nested padding, gap, and classic 17 px scrollbar deductions, preserving
 two columns while staying inside the 88-116 px contract.
+The effective 320/390/400/420 px cascade also binds the six transport columns,
+full-row span, 284 px cap, and visible overflow, rejecting later same- or
+higher-specificity clipping mutations, including an override scoped only to
+the upper 400-420 px edge of the phone breakpoint.
+
+The checksum-bound production build was also rendered through a changed-angle
+local Playwright/Chrome path in Chrome for Testing 149.0.7827.55 at 1440x1000,
+390x844, and 320x720. That run produced no page or console errors, kept document
+width equal to viewport width, showed all six phone transport cells at 44 px,
+kept two Effects preset cards on the first phone row, and observed the outer
+dialog clipped, `#filterFxPanel` vertically scrollable, and its Close bar sticky
+at `top: 0` with `z-index: 2`. The same run opened the white Pattern and Clear
+Project dialogs at all three widths; each stayed inside the viewport and kept
+its dark-on-blue or dark-on-orange action treatment. The supported in-app Browser path remained
+blocked before tab creation by `Cannot redefine property: process`, so this is
+local Chromium evidence rather than a supported-browser, device, or AT result.
+The corrected minimum-width Pattern render then opened three rows at 320x720:
+`Pattern 1`, `Pattern 2`, and `Pattern 3` each measured 152 px wide with no text
+clipping, retained a 44 px name target plus four 44 px row actions and a 72 px
+repeat field, and kept document width equal to the 320 px viewport with no
+console or page errors.
 
 These tests do not establish real-browser AudioParam semantics, audible
 smoothing, level stability, resonance safety, clipping behavior, or device
-compatibility. They also do not prove actual responsive layout, touch target
-geometry, keyboard focus movement, screen-reader announcements, or that the
-decorative response curves render unclipped in a browser. Browser, touch,
-screen-reader, device, and listening checks remain manual.
+compatibility. Static tests alone do not prove actual responsive layout, touch
+target geometry, keyboard focus movement, screen-reader announcements, or that
+decorative response curves render unclipped. The changed-angle Chromium run
+covers only the rendered geometry stated above; touch, screen-reader,
+cross-browser, physical-device, native-audio, interruption, and listening checks
+remain manual.

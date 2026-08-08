@@ -10,10 +10,10 @@ import {
 } from "./ui/dialog";
 
 const cancelBtn =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-2 text-sm font-semibold tracking-wide text-[var(--color-text)] transition-colors hover:border-[var(--color-blue)] hover:bg-[var(--color-blue)] hover:text-[var(--color-page)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue)]";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-panel)] px-3 py-2 text-sm font-semibold tracking-wide text-[var(--color-text)] shadow-[0_1px_2px_rgba(23,26,31,0.10)] transition-colors hover:border-[var(--color-blue)] hover:bg-[var(--color-blue)] hover:text-[var(--color-accent-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue)]";
 
 const clearBtn =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--color-orange-strong)] bg-[var(--color-orange-strong)] px-3 py-2 text-sm font-semibold tracking-wide text-[var(--color-page)] shadow-[0_2px_0_rgba(17,17,17,0.5)] transition-colors hover:border-[var(--color-orange)] hover:bg-[var(--color-orange)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-orange-strong)]";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-md border border-[var(--color-orange-strong-ink)] bg-[var(--color-orange-strong)] px-3 py-2 text-sm font-semibold tracking-wide text-[var(--color-accent-ink)] shadow-[0_2px_4px_rgba(23,26,31,0.16)] transition-colors hover:border-[var(--color-orange-ink)] hover:bg-[var(--color-orange)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-orange-strong)]";
 
 export default function ClearProjectDialog() {
   const [open, setOpen] = useState(false);
@@ -39,7 +39,7 @@ export default function ClearProjectDialog() {
       <DialogContent className="max-w-md border-[var(--color-border)] bg-[var(--color-panel)] p-5 text-[var(--color-text)]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FiAlertTriangle className="h-5 w-5 text-[var(--color-orange-strong)]" aria-hidden="true" />
+            <FiAlertTriangle className="h-5 w-5 text-[var(--color-orange-strong-ink)]" aria-hidden="true" />
             <span>Clear Project?</span>
           </DialogTitle>
           <DialogDescription>

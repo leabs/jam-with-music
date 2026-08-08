@@ -95,6 +95,18 @@ function assertColdShellReadiness(source) {
   );
 }
 
+function assertPhoneTransportSpansHeader(source) {
+  const finalShellMarker = "/* Final shell contract:";
+  const finalShellStart = source.indexOf(finalShellMarker);
+  assert.notEqual(finalShellStart, -1, "final shell contract must exist");
+  const finalShell = source.slice(finalShellStart, source.indexOf("</style>", finalShellStart));
+  const phoneBlock = getNamedFunctionBody(finalShell, "@media (max-width: 420px)");
+  const transportRule = getNamedFunctionBody(phoneBlock, ".header-grid > .bpm-control");
+  assert.match(transportRule, /\bgrid-column:\s*1\s*\/\s*-1\s*;/);
+  assert.match(transportRule, /\bwidth:\s*100%\s*;/);
+  assert.match(transportRule, /\boverflow:\s*visible\s*;/);
+}
+
 test("authoritative TESTING hashes are complete lowercase SHA-256 tokens", () => {
   const manifest = testing.slice(
     testing.indexOf("The authoritative static/VM/build artifact"),
@@ -253,6 +265,19 @@ test("app shell keeps transport and scope outside command surfaces", () => {
   assert.equal(packageJson.dependencies["tw-animate-css"], undefined);
   assert.equal(componentsJson.style, "radix-nova");
   assert.doesNotMatch(componentsJson.style, /^base-/);
+});
+
+test("phone transport spans the full header row without clipping direct controls", () => {
+  assertPhoneTransportSpansHeader(page);
+  const clippedPhoneTransport = page.replace(
+    "grid-column: 1 / -1;\n      justify-content: flex-start;\n      overflow: visible;\n      width: 100%;",
+    "grid-column: auto;\n      justify-content: flex-start;\n      overflow: hidden;\n      width: 100%;",
+  );
+  assert.notEqual(clippedPhoneTransport, page, "phone transport mutation must apply");
+  assert.throws(
+    () => assertPhoneTransportSpansHeader(clippedPhoneTransport),
+    /grid-column|overflow/,
+  );
 });
 
 test("Effects is a centered responsive two-bay workbench", () => {

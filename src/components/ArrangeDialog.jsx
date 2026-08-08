@@ -138,10 +138,11 @@ export default function ArrangeDialog() {
 
       <style>{`
         .pattern-manager {
-          --pattern-chassis: var(--color-page, #111);
-          --pattern-surface: var(--color-panel, #333333);
-          --pattern-ink: var(--color-text, #f2f2f2);
-          --pattern-gray: var(--color-border, rgba(242, 242, 242, 0.38));
+          --pattern-chassis: var(--color-page, #eceae4);
+          --pattern-surface: var(--color-panel, #ffffff);
+          --pattern-ink: var(--color-text, #171a1f);
+          --pattern-gray: var(--color-border, #82878d);
+          --pattern-on-accent: var(--color-accent-ink, #171a1f);
           --pattern-green: var(--color-green, #27ae60);
           --pattern-blue: var(--color-blue, #2f80ed);
           --pattern-orange: var(--color-orange, #f2994a);
@@ -154,7 +155,7 @@ export default function ArrangeDialog() {
         .arrange-pattern-button:focus-visible,
         .arrange-row-action:focus-visible,
         .arrange-repeat-input:focus-visible {
-          outline: 3px solid var(--pattern-ink, #f2f2f2);
+          outline: 3px solid var(--pattern-ink, #171a1f);
           outline-offset: 2px;
           box-shadow: 0 0 0 6px var(--pattern-blue, #2f80ed);
         }
@@ -166,10 +167,11 @@ export default function ArrangeDialog() {
         }
 
         .pattern-manager-dialog {
-          --pattern-chassis: var(--color-page, #111);
-          --pattern-surface: var(--color-panel, #333333);
-          --pattern-ink: var(--color-text, #f2f2f2);
-          --pattern-gray: var(--color-border, rgba(242, 242, 242, 0.38));
+          --pattern-chassis: var(--color-page, #eceae4);
+          --pattern-surface: var(--color-panel, #ffffff);
+          --pattern-ink: var(--color-text, #171a1f);
+          --pattern-gray: var(--color-border, #82878d);
+          --pattern-on-accent: var(--color-accent-ink, #171a1f);
           --pattern-green: var(--color-green, #27ae60);
           --pattern-blue: var(--color-blue, #2f80ed);
           --pattern-orange: var(--color-orange, #f2994a);
@@ -230,7 +232,7 @@ export default function ArrangeDialog() {
 
         .pattern-manager-list .arrange-pattern-card.is-selected,
         .pattern-manager-list .arrange-pattern-card.is-selected .arrange-pattern-button {
-          color: var(--pattern-chassis);
+          color: var(--pattern-on-accent);
         }
 
         .pattern-manager-list .arrange-pattern-button,
@@ -256,7 +258,7 @@ export default function ArrangeDialog() {
         }
 
         .pattern-manager-list .arrange-row-action:hover {
-          color: var(--pattern-chassis);
+          color: var(--pattern-on-accent);
           background: var(--pattern-green);
         }
 
@@ -264,12 +266,12 @@ export default function ArrangeDialog() {
         .pattern-manager-list .arrange-row-action.is-delete:focus-visible,
         .pattern-manager-action.is-destructive:hover:not(:disabled),
         .pattern-manager-action.is-destructive:focus-visible {
-          color: var(--pattern-chassis);
+          color: var(--pattern-on-accent);
           background: var(--pattern-destructive);
         }
 
         .pattern-manager-list .arrange-row-action:disabled {
-          color: var(--color-disabled, rgba(242, 242, 242, 0.68));
+          color: var(--color-disabled, #6d737a);
           background: transparent;
           cursor: not-allowed;
         }
@@ -309,7 +311,7 @@ export default function ArrangeDialog() {
         }
 
         #newPatternBtn:hover {
-          color: var(--pattern-chassis);
+          color: var(--pattern-on-accent);
           background: var(--pattern-orange);
         }
 
@@ -323,12 +325,22 @@ export default function ArrangeDialog() {
             gap: 4px;
           }
 
+          .pattern-manager-list .arrange-pattern-card {
+            flex-wrap: wrap;
+          }
+
+          .pattern-manager-list .arrange-pattern-button {
+            flex: 1 0 100%;
+            padding: 0 6px;
+          }
+
           .pattern-manager-list .arrange-row-actions {
             flex: 0 0 90px;
             flex-wrap: wrap;
             gap: 2px;
             grid-column: 2 / 4;
             justify-content: flex-end;
+            margin-left: auto;
           }
 
           .pattern-manager-list .arrange-repeat-input {
